@@ -1,1 +1,20 @@
+// routes/tripRoutes.js
 
+import express from 'express';
+const router = express.Router();
+
+// This is a placeholder model import - you'll need to create the model
+// import Trip from '../models/Trip.js'; 
+
+// GET /api/trips - Fetch all trips
+router.get('/', (req, res) => {
+    res.status(200).json({ message: "Endpoint for fetching all trips" });
+});
+
+// POST /api/trips - Create a new trip
+router.post('/', (req, res) => {
+    // Logic to save a new trip to the database
+    res.status(201).json({ message: "Trip created successfully", data: req.body });
+});
+
+export default router;
