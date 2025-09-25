@@ -1,5 +1,5 @@
 {
-  "name": "tripease-backend",
+  "name": "Tripease",
   "version": "1.0.0",
   "description": "Backend server for Tripease travel booking project",
   "main": "server.js",
@@ -23,4 +23,3 @@
   },
   "type": "module"
 }
-
