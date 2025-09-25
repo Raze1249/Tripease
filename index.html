@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tripease - Travel & Booking</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f4f9ff;
+      color: #333;
+    }
+
+    /* Header */
+    header {
+      background: #006d77;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    nav a {
+      margin: 0 12px;
+      text-decoration: none;
+      color: #ffd166;
+      font-weight: bold;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e") no-repeat center/cover;
+      color: white;
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 20px;
+    }
+
+    /* Booking Form */
+    .container {
+      max-width: 750px;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0px 6px 15px rgba(0,0,0,0.1);
+    }
+    .container h2 {
+      text-align: center;
+      color: #006d77;
+    }
+    form {
+      display: grid;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    input, select, button {
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #118ab2;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #073b4c;
+    }
+
+    /* Features */
+    .features {
+      display: flex;
+      justify-content: space-around;
+      margin: 40px auto;
+      max-width: 900px;
+    }
+    .feature-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 250px;
+      text-align: center;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    }
+    .feature-box h3 {
+      color: #118ab2;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      background: #006d77;
+      color: white;
+      padding: 15px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>🌍 Tripease</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Book Trip</a>
+      <a href="#">Destinations</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>“Turning every journey into a smart experience”</h1>
+    <p>Your one-step journey planner & booking hub</p>
+  </div>
+
+  <!-- Booking Form -->
+  <div class="container">
+    <h2>✈️ Book Your Journey</h2>
+    <form>
+      <input type="text" placeholder="Your Full Name" required>
+      <input type="text" placeholder="From (City)" required>
+      <input type="text" placeholder="To (City)" required>
+      <input type="date" required>
+      <select required>
+        <option value="">Select Number of Seats</option>
+        <option>1 Seat</option>
+        <option>2 Seats</option>
+        <option>3 Seats</option>
+        <option>4 Seats</option>
+      </select>
+      <button type="submit">Confirm Booking</button>
+    </form>
+  </div>
+
+  <!-- Features Section -->
+  <div class="features">
+    <div class="feature-box">
+      <h3>🌟 Easy to Use</h3>
+      <p>Simple booking form for hassle-free travel planning.</p>
+    </div>
+    <div class="feature-box">
+      <h3>💰 Budget Friendly</h3>
+      <p>Get cost estimates for your journey before booking.</p>
+    </div>
+    <div class="feature-box">
+      <h3>🗺️ Explore More</h3>
+      <p>Discover new destinations and smart travel routes.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Tripease| Exploratory Project 🚀</p>
+  </footer>
+</body>
+</html>
