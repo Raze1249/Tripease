@@ -1,65 +1,77 @@
 // server.js
 
-// 1. Core Imports (ESM Syntax)
-import express from 'express';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import cors from 'cors';
+// ----------------------
+// 1. Imports
+// ----------------------
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors'); // <--- NEW: Import CORS
+require('dotenv').config();
 
-// 2. Import Route Files (You will create these later)
-// import tripRoutes from './routes/tripRoutes.js';
-// import userRoutes from './routes/userRoutes.js';
+// Import your routes
+const tripRoutes = require('./routes/tripRoutes');
+// const userRoutes = require('./routes/userRoutes'); // Uncomment when you add user routes
 
-// Load environment variables from .env file
-dotenv.config();
-
-// 3. Setup Constants
+// ----------------------
+// 2. Configuration
+// ----------------------
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
-// 4. Middleware
-// Enable CORS for all routes
-app.use(cors()); 
+// ----------------------
+// 3. CORS and Middleware
+// ----------------------
+// Define allowed origins for security
+const allowedOrigins = [
+  'http://localhost:3000', // Your local React development server
+  'https://your-frontend-domain.com' // Replace this with your actual deployed frontend URL (e.g., Netlify/Vercel)
+];
 
-// Body parser for JSON data
-app.use(express.json()); 
+// Apply CORS middleware
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true); 
+    // Allow the specified origins
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'), false);
+    }
+  }
+}));
 
-// 5. Database Connection
+// Built-in middleware for handling JSON data
+app.use(express.json());
+
+
+// ----------------------
+// 4. Routes
+// ----------------------
+// Base route
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to the Tripease API!', status: 'Server is running' });
+});
+
+// API Routes
+app.use('/api/trips', tripRoutes);
+// app.use('/api/users', userRoutes); // Uncomment when ready
+
+// ----------------------
+// 5. Database Connection and Server Start
+// ----------------------
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected successfully');
+    
+    // Start server ONLY after successful DB connection
+    app.listen(PORT, () => {
+      console.log(`🚀 Server listening on port http://localhost:${PORT}`);
+      console.log(`Render URL: ${process.env.RENDER_EXTERNAL_URL || 'N/A'}`);
+    });
   })
-  .catch((error) => {
-    console.error('❌ MongoDB connection error:', error.message);
-    // Exit process with failure code if DB connection fails
-    process.exit(1); 
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err.message);
+    process.exit(1); // Exit process if database connection fails
   });
-
-// 6. Basic Route (Health Check)
-app.get('/', (req, res) => {
-  res.status(200).json({ 
-    message: 'Welcome to the Tripease API!', 
-    status: 'Server is running' 
-  });
-});
-
-// 7. Route Handlers (Uncomment and implement when ready)
-// app.use('/api/trips', tripRoutes);
-// app.use('/api/users', userRoutes);
-
-// 8. Global Error Handler Middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Something broke!',
-    error: err.message
-  });
-});
-
-
-// 9. Start the Server
-app.listen(PORT, () => {
-  console.log(`🚀 Server listening on port ${PORT}`);
-});
