@@ -1,25 +1,26 @@
 {
-  "name": "Tripease",
+  "name": "tripease",
   "version": "1.0.0",
-  "description": "Backend server for Tripease travel booking project",
-  "main": "server.js",
+  "description": "Smart Trip Planner API",
+  "main": "server.cjs",  
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.cjs", 
+    "dev": "nodemon server.cjs"  
   },
   "keywords": [
+    "mongodb",
     "express",
-    "travel",
-    "booking",
-    "backend"
+    "node"
   ],
-  "author": "Your Name",
-  "license": "MIT",
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "mongoose": "^7.5.0"
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.1"
   },
-  "type": "module"
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
 }
