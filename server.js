@@ -1,16 +1,17 @@
-// server.js
+// server.cjs
 
 // ----------------------
 // 1. Imports
 // ----------------------
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors'); // Required for frontend connection
+const cors = require('cors'); 
 require('dotenv').config();
 
-// Import your routes
-const tripRoutes = require('./routes/tripRoutes');
-// const userRoutes = require('./routes/userRoutes'); // Uncomment when you create this file
+// Since all your route files are likely .js, we must keep the extension in the require()
+// IMPORTANT: If you renamed your route file to .cjs, use .cjs here!
+const tripRoutes = require('./routes/tripRoutes.js'); 
+// const userRoutes = require('./routes/userRoutes.js'); // Uncomment when you create this file
 
 // ----------------------
 // 2. Configuration
@@ -31,7 +32,7 @@ const allowedOrigins = [
 // Apply CORS middleware
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, postman, or curl)
+    // Allow requests with no origin (Postman, mobile apps)
     if (!origin) return callback(null, true); 
     
     // Check if the origin is in the allowed list
@@ -44,7 +45,7 @@ app.use(cors({
   }
 }));
 
-// Middleware to parse incoming JSON request bodies (must be before routes)
+// Middleware to parse incoming JSON request bodies
 app.use(express.json());
 
 
@@ -58,7 +59,7 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use('/api/trips', tripRoutes);
-// app.use('/api/users', userRoutes); // Uncomment when ready
+// app.use('/api/users', userRoutes); 
 
 
 // ----------------------
