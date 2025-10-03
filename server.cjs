@@ -8,10 +8,9 @@ const mongoose = require('mongoose');
 const cors = require('cors'); 
 require('dotenv').config();
 
-// Since all your route files are likely .js, we must keep the extension in the require()
-// IMPORTANT: If you renamed your route file to .cjs, use .cjs here!
-const tripRoutes = require('./routes/tripRoutes.js'); 
-// const userRoutes = require('./routes/userRoutes.js'); // Uncomment when you create this file
+// CORRECTED PATH: Assumes 'tripRoutes.js' is in the root directory.
+const tripRoutes = require('./tripRoutes.js'); 
+// const userRoutes = require('./userRoutes.js'); // Uncomment when you create this file
 
 // ----------------------
 // 2. Configuration
@@ -26,20 +25,16 @@ const MONGODB_URI = process.env.MONGODB_URI;
 // Define allowed origins for security
 const allowedOrigins = [
   'http://localhost:3000', // Your local React development server
-  // When you deploy your frontend, add its URL here (e.g., 'https://tripease-frontend-xyz.vercel.app')
+  // Add your deployed frontend URL here later
 ];
 
 // Apply CORS middleware
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (Postman, mobile apps)
     if (!origin) return callback(null, true); 
-    
-    // Check if the origin is in the allowed list
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      // Reject any other origins
       callback(new Error('Not allowed by CORS'), false);
     }
   }
