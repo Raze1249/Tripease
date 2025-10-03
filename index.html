@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tripease - Travel & Booking</title>
   <style>
+    /* ---------------------- */
+    /* Base Styles */
+    /* ---------------------- */
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, sans-serif;
@@ -76,6 +79,54 @@
     button:hover {
       background: #073b4c;
     }
+    
+    /* Notification styling */
+    #notification {
+        padding: 10px;
+        margin-top: 15px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+        display: none; /* Hidden by default */
+    }
+    .success {
+        background: #e6ffed;
+        color: #2d8544;
+        border: 1px solid #b3e0c0;
+    }
+    .error {
+        background: #ffe6e6;
+        color: #d13a3a;
+        border: 1px solid #f0b3b3;
+    }
+    .loading {
+        background: #fff8e1;
+        color: #a77c00;
+        border: 1px solid #ffd450;
+    }
+
+    /* Trip List Section */
+    #trips-list {
+        margin-top: 25px;
+        border-top: 1px solid #e0e0e0;
+        padding-top: 20px;
+    }
+    .trip-item {
+        background: #f7f7f7;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 5px solid #006d77;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .trip-item strong {
+        color: #006d77;
+        margin-right: 5px;
+    }
+    .trip-item span {
+        font-size: 0.9em;
+        color: #666;
+    }
 
     /* Features */
     .features {
@@ -124,23 +175,35 @@
     <p>Your one-step journey planner & booking hub</p>
   </div>
 
-  <!-- Booking Form -->
+  <!-- Booking Form Container -->
   <div class="container">
     <h2>✈️ Book Your Journey</h2>
-    <form>
-      <input type="text" placeholder="Your Full Name" required>
-      <input type="text" placeholder="From (City)" required>
-      <input type="text" placeholder="To (City)" required>
-      <input type="date" required>
-      <select required>
+    
+    <!-- Notification Area -->
+    <div id="notification" class="hidden"></div>
+    
+    <form id="booking-form">
+      <input type="text" id="full-name" placeholder="Your Full Name" required>
+      <input type="text" id="from-city" placeholder="From (City)" required>
+      <input type="text" id="to-city" placeholder="To (City)" required>
+      <input type="date" id="departure-date" required>
+      <select id="seats" required>
         <option value="">Select Number of Seats</option>
-        <option>1 Seat</option>
-        <option>2 Seats</option>
-        <option>3 Seats</option>
-        <option>4 Seats</option>
+        <option value="1">1 Seat</option>
+        <option value="2">2 Seats</option>
+        <option value="3">3 Seats</option>
+        <option value="4">4 Seats</option>
       </select>
-      <button type="submit">Confirm Booking</button>
+      <button type="submit" id="submit-button">Confirm Booking</button>
     </form>
+    
+    <!-- Trip List Section -->
+    <div id="trips-list">
+        <h3>Recent Booked Trips</h3>
+        <div id="trip-items-container">
+            <p>Loading trips...</p>
+        </div>
+    </div>
   </div>
 
   <!-- Features Section -->
@@ -163,5 +226,114 @@
   <footer>
     <p>© 2025 Tripease| Exploratory Project 🚀</p>
   </footer>
+
+  <script>
+    // --- Configuration ---
+    // CRITICAL: REPLACE this placeholder with your actual Render URL
+    const API_BASE_URL = 'https://YOUR-ACTUAL-RENDER-URL.onrender.com/api/trips'; 
+    // ---------------------
+
+    const form = document.getElementById('booking-form');
+    const submitButton = document.getElementById('submit-button');
+    const notification = document.getElementById('notification');
+    const tripItemsContainer = document.getElementById('trip-items-container');
+
+    // Helper to show notifications
+    function showNotification(message, type) {
+        notification.textContent = message;
+        notification.className = type;
+        notification.style.display = 'block';
+        
+        // Hide after 5 seconds
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 5000);
+    }
+    
+    // --- POST Request Logic (Submitting Form) ---
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Disable button and show loading
+        submitButton.disabled = true;
+        submitButton.textContent = 'Booking...';
+        showNotification('Processing booking...', 'loading');
+
+        const tripData = {
+            // Note: The Mongoose model expects 'name', 'source', 'destination', 'date', 'seats'
+            name: document.getElementById('full-name').value,
+            source: document.getElementById('from-city').value,
+            destination: document.getElementById('to-city').value,
+            date: document.getElementById('departure-date').value,
+            seats: parseInt(document.getElementById('seats').value, 10),
+        };
+
+        try {
+            const response = await fetch(API_BASE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(tripData),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Booking failed. Status: ${response.status}. Details: ${errorText.substring(0, 100)}`);
+            }
+
+            const result = await response.json();
+            showNotification(`✅ Booking Confirmed! Trip ID: ${result._id}`, 'success');
+            form.reset(); // Clear the form
+            fetchTrips(); // Refresh the trip list
+
+        } catch (error) {
+            console.error('Error submitting trip:', error);
+            showNotification(`❌ Error: ${error.message}. Please check console and API URL.`, 'error');
+
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Confirm Booking';
+        }
+    });
+
+    // --- GET Request Logic (Fetching Trips) ---
+    async function fetchTrips() {
+        tripItemsContainer.innerHTML = '<p class="loading">Loading trips...</p>';
+        try {
+            const response = await fetch(API_BASE_URL);
+            
+            if (!response.ok) {
+                throw new Error(`Could not fetch trips. Status: ${response.status}`);
+            }
+
+            const trips = await response.json();
+            
+            if (trips.length === 0) {
+                tripItemsContainer.innerHTML = '<p style="color:#666;">No trips booked yet.</p>';
+                return;
+            }
+
+            // Render the trips
+            const listHtml = trips.map(trip => `
+                <div class="trip-item">
+                    <strong>${trip.name}</strong> 
+                    <span>| From ${trip.source} to ${trip.destination}</span>
+                    <br>
+                    <span>Seats: ${trip.seats}, Date: ${new Date(trip.date).toLocaleDateString()}</span>
+                </div>
+            `).join('');
+
+            tripItemsContainer.innerHTML = listHtml;
+
+        } catch (error) {
+            console.error('Error fetching trips:', error);
+            tripItemsContainer.innerHTML = `<p class="error">Failed to load trips: ${error.message}</p>`;
+        }
+    }
+    
+    // Initial fetch of trips when the page loads
+    window.onload = fetchTrips;
+  </script>
 </body>
 </html>
