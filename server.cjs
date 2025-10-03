@@ -9,6 +9,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 // CORRECTED PATH: Assumes 'tripRoutes.js' is in the root directory.
+// This is the line that needs to be updated to stop looking for the 'routes' folder.
 const tripRoutes = require('./tripRoutes.js'); 
 // const userRoutes = require('./userRoutes.js'); // Uncomment when you create this file
 
