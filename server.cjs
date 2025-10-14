@@ -10,20 +10,19 @@ const cors = require('cors'); // ESSENTIAL: Required for cross-origin communicat
 // -------------------------------------------------------------
 const app = express();
 
-// Set the port from environment variables (Render) or default to 3000
 const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// Use your MongoDB connection string (set as environment variable in Render for security)
-// The fallback below is for local testing, but Render uses the environment variable MONGODB_URI
-const MONGO_URI_FALLBACK = "mongodb+srv://tripease_user:eb6zKS7H0bpBBC6q@cluster0.faxvovy.mongodb.net/TripeaseDB?retryWrites=true&w=majority&appName=Cluster0";
-const MONGODB_URI = process.env.MONGODB_URI || MONGO_URI_FALLBACK;
+// Check if MONGODB_URI is available
+if (!MONGODB_URI) {
+    console.error("CRITICAL ERROR: MONGODB_URI environment variable is not set.");
+}
 
 // -------------------------------------------------------------
 // 3. MIDDLEWARE
 // -------------------------------------------------------------
 
-// CRITICAL CORS FIX: Allow requests from *any* origin (including your local file:// path)
-// This is the line that fixes the "Failed to fetch" error.
+// CRITICAL CORS FIX: Allow requests from *any* origin 
 app.use(cors({
     origin: '*' 
 }));
@@ -38,7 +37,6 @@ mongoose.connect(MONGODB_URI)
     .then(() => console.log('MongoDB connection successful!'))
     .catch(err => {
         console.error('MongoDB connection error:', err.message);
-        // If the connection fails, log the error but allow the API to start (for debugging purposes)
     });
 
 // -------------------------------------------------------------
@@ -84,7 +82,7 @@ app.get('/', (req, res) => {
     res.send('Tripease API is running!');
 });
 
-// GET /api/trips: Fetch all booked trips
+// GET /api/trips: Fetch all booked trips (unchanged)
 app.get('/api/trips', async (req, res) => {
     try {
         const trips = await Trip.find().sort({ createdAt: -1 });
@@ -95,7 +93,7 @@ app.get('/api/trips', async (req, res) => {
     }
 });
 
-// POST /api/trips: Create a new trip booking
+// POST /api/trips: Create a new trip booking (unchanged)
 app.post('/api/trips', async (req, res) => {
     try {
         const newTrip = new Trip(req.body);
@@ -111,6 +109,49 @@ app.post('/api/trips', async (req, res) => {
     }
 });
 
+// =================================================================
+// NEW ROUTE: REAL-TIME FLIGHT SEARCH (Skyscanner Integration Point)
+// =================================================================
+app.post('/api/search-flights', async (req, res) => {
+    // Extract parameters from the request body (sent by the frontend form)
+    const { source, destination, departureDate } = req.body;
+    
+    if (!source || !destination || !departureDate) {
+        return res.status(400).json({ message: 'Missing search parameters for flight search.' });
+    }
+    
+    // Simulate network delay for a real API call
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
+
+    /*
+    * ---------------------------------------------------------
+    * >> REAL SKYSCANNER INTEGRATION CODE GOES HERE <<
+    * ---------------------------------------------------------
+    * * 1. Retrieve the API key:
+    * const apiKey = process.env.SKYSCANNER_API_KEY; 
+    * * 2. Make an HTTP request to the Skyscanner API endpoint:
+    * const skyscannerResponse = await fetch('SKYSCANNER_SEARCH_URL', { ... });
+    * * 3. Process and return the real-time flight data.
+    */
+
+    // --- MOCK RESPONSE: Simulating real flights ---
+    const mockFlights = [
+        { id: 101, carrier: 'Global Air', price: 150, departure: '08:00', arrival: '11:30', duration: '3h 30m' },
+        { id: 102, carrier: 'Swift Travel', price: 210, departure: '12:30', arrival: '16:00', duration: '3h 30m' },
+        { id: 103, carrier: 'BudgetFly', price: 125, departure: '18:00', arrival: '21:30', duration: '3h 30m' },
+    ];
+    
+    // Add context and simulate random price fluctuations
+    const flightsWithContext = mockFlights.map(flight => ({
+        ...flight,
+        price: flight.price + Math.floor(Math.random() * 50) + 75, // randomize price
+        destination: destination,
+        source: source,
+        date: departureDate
+    }));
+    
+    res.status(200).json(flightsWithContext);
+});
 
 // -------------------------------------------------------------
 // 7. START SERVER
