@@ -148,17 +148,34 @@
     }
 
     /* Footer */
-    footer {
-      text-align: center;
-      background: #006d77;
-      color: white;
-      padding: 15px;
-      margin-top: 40px;
-    }
-  </style>
+    <footer>
+      <p>© 2025 Tripease| Exploratory Project 🚀</p>
+    </footer>
+    <script>
+      function launchLocalServer() {
+        const http = require('http');
+        const fs = require('fs');
+
+        const server = http.createServer((req, res) => {
+          fs.readFile('index.html', (err, data) => {
+            if (err) {
+              res.writeHead(500, {'Content-Type': 'text/plain'});
+              res.end('Error loading index.html');
+              return;
+            }
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.end(data);
+          });
+        });
+
+        server.listen(8080, '127.0.0.1', () => {
+          console.log('Local server running at http://127.0.0.1:8080/');
+          console.log('Open this URL in your browser to test the API connection.');
+        });
+      }
+    </script>
 </head>
 <body>
-  <!-- Header -->
   <header>
     <h1>🌍 Tripease</h1>
     <nav>
@@ -169,17 +186,14 @@
     </nav>
   </header>
 
-  <!-- Hero -->
   <div class="hero">
     <h1>“Turning every journey into a smart experience”</h1>
     <p>Your one-step journey planner & booking hub</p>
   </div>
 
-  <!-- Booking Form Container -->
   <div class="container">
     <h2>✈️ Book Your Journey</h2>
     
-    <!-- Notification Area -->
     <div id="notification" class="hidden"></div>
     
     <form id="booking-form">
@@ -197,7 +211,6 @@
       <button type="submit" id="submit-button">Confirm Booking</button>
     </form>
     
-    <!-- Trip List Section -->
     <div id="trips-list">
         <h3>Recent Booked Trips</h3>
         <div id="trip-items-container">
@@ -206,7 +219,6 @@
     </div>
   </div>
 
-  <!-- Features Section -->
   <div class="features">
     <div class="feature-box">
       <h3>🌟 Easy to Use</h3>
@@ -222,7 +234,6 @@
     </div>
   </div>
 
-  <!-- Footer -->
   <footer>
     <p>© 2025 Tripease| Exploratory Project 🚀</p>
   </footer>
@@ -347,9 +358,6 @@
         // Initial fetch of trips when the page loads
         fetchTrips();
     });
-    
-    // NOTE: Removed window.onload because we are now using DOMContentLoaded.
-    // window.onload = fetchTrips;
   </script>
 </body>
 </html>
