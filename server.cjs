@@ -1,29 +1,30 @@
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
-const fetch = require('node-fetch'); // We need this for making external API calls
+const fetch = require('node-fetch'); // This module MUST be installed via 'npm install node-fetch'
 const path = require('path'); // For serving static files
 
 const app = express();
 const PORT = 3000;
 
 // --- CONFIGURATION ---
+// MongoDB CONNECTION STRING (Provided by user)
 const MONGODB_URI = 'mongodb+srv://tripease_user:eb6zKS7H0bpBBC6q@cluster0.faxvovy.mongodb.net/TripeaseDB?retryWrites=true&w=majority&appName=Cluster0'; 
-const DB_NAME = 'tripeaseDB';
+const DB_NAME = 'TripeaseDB'; // Using the database name specified in the URI
 
 // --- AVIATIONSTACK CONFIG ---
-// IMPORTANT: This API Key has been updated using the key provided by the user.
-// Do NOT commit real API keys to public repositories.
+// API Key provided by the user (7079c63c7bef98efe1dd41d3ab55c101)
 const AVIATIONSTACK_API_KEY = '7079c63c7bef98efe1dd41d3ab55c101'; 
 const AVIATIONSTACK_BASE_URL = 'http://api.aviationstack.com/v1';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+// Serves static files (like your index.html) from the root directory
 app.use(express.static(path.join(__dirname, '')));
 
 let db;
-let airportCache = []; // Cache to store airport data
+let airportCache = []; // Cache to store airport data from Aviationstack
 
 // --- AIRPORT DATA FETCH & CACHING ---
 async function fetchAirports() {
@@ -79,18 +80,19 @@ async function fetchAirports() {
 
 // --- MOCK FLIGHT DATA GENERATION (Now using real IATA codes) ---
 function generateMockFlights(source, destination, date) {
-    // If we have cached airport data, we can try to use it for richer mocks
-    const airportList = airportCache.length > 0 ? airportCache : [
+    // Fallback list if Aviationstack data failed to load
+    const fallbackAirports = [
         { iata: 'JFK', name: 'JFK International', city: 'New York', country: 'United States' },
         { iata: 'LAX', name: 'Los Angeles International', city: 'Los Angeles', country: 'United States' },
         { iata: 'LHR', name: 'Heathrow', city: 'London', country: 'United Kingdom' },
         { iata: 'CDG', name: 'Charles de Gaulle', city: 'Paris', country: 'France' },
     ];
+    const airportList = airportCache.length > 0 ? airportCache : fallbackAirports;
 
     const numFlights = Math.floor(Math.random() * 5) + 3; // 3 to 7 flights
     const flights = [];
 
-    // Attempt to match input to real IATA codes, or use input as is
+    // Use the first three characters of the input as the IATA code for mock flights
     const sourceIATA = source.toUpperCase().substring(0, 3);
     const destIATA = destination.toUpperCase().substring(0, 3);
     
@@ -104,8 +106,8 @@ function generateMockFlights(source, destination, date) {
         flights.push({
             id: i + 1,
             carrier: carrier,
-            source: sourceIATA, // Use the IATA code for mock
-            destination: destIATA, // Use the IATA code for mock
+            source: sourceIATA, 
+            destination: destIATA,
             date: date,
             departure: `${String(Math.floor(Math.random() * 24)).padStart(2, '0')}:00`,
             duration: `${durationHours}h ${durationMinutes}m`,
@@ -123,13 +125,13 @@ async function connectToDatabase() {
         console.log(`Connected to MongoDB: ${DB_NAME}`);
     } catch (err) {
         console.error('Failed to connect to MongoDB', err);
-        // Exit process or handle gracefully if DB connection is critical
+        // If connection fails, db remains undefined, and API endpoints will return 503
     }
 }
 
 // --- API ROUTES ---
 
-// Endpoint 1: Search Flights (Uses Mock Data, now informed by real airport list)
+// Endpoint 1: Search Flights (Mock Data)
 app.post('/api/search-flights', (req, res) => {
     const { source, destination, departureDate } = req.body;
 
@@ -147,6 +149,9 @@ app.post('/api/search-flights', (req, res) => {
 
 // Endpoint 2: Book Trip (Saves to MongoDB)
 app.post('/api/trips', async (req, res) => {
+    // Check if DB is connected
+    if (!db) return res.status(503).json({ message: 'Database service unavailable. Check MongoDB connection.' });
+
     const trip = req.body;
 
     if (!trip.name || !trip.source || !trip.destination || !trip.startDate || !trip.seats) {
@@ -166,8 +171,12 @@ app.post('/api/trips', async (req, res) => {
 
 // Endpoint 3: Get All Booked Trips (Reads from MongoDB)
 app.get('/api/trips', async (req, res) => {
+    // Check if DB is connected
+    if (!db) return res.status(503).json({ message: 'Database service unavailable. Check MongoDB connection.' });
+    
     try {
-        const trips = await db.collection('bookings').find({}).toArray();
+        // Fetch all trips, sort by creation date descending to show newest first
+        const trips = await db.collection('bookings').find({}).sort({ _id: -1 }).toArray();
         res.status(200).json(trips);
     } catch (error) {
         console.error('Database fetch failed:', error);
@@ -175,7 +184,7 @@ app.get('/api/trips', async (req, res) => {
     }
 });
 
-// Endpoint 4: Get Real Airport List (New Endpoint)
+// Endpoint 4: Get Real Airport List (New Endpoint for Autocomplete)
 app.get('/api/airports', (req, res) => {
     // This serves the cached data fetched on startup
     res.status(200).json(airportCache);
@@ -184,9 +193,12 @@ app.get('/api/airports', (req, res) => {
 
 // --- INITIALIZATION ---
 async function startServer() {
+    // 1. Connect to the database
     await connectToDatabase();
-    await fetchAirports(); // Fetch airport data on startup
+    // 2. Fetch external data (Aviationstack)
+    await fetchAirports(); 
     
+    // 3. Start the Express server
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
     });
