@@ -4,10 +4,10 @@
 const express = require('express');
 const router = express.Router();
 // -----------------------------------------------------------------------
-// FIX: The model file is named 'bookings.js', not 'Trip.js'.
-// Path: Up one directory (../) to the project root, then down into models/bookings.js
+// FIX: Reverting to the confirmed Canvas model name, 'Trip.js'.
+// Path: Up one directory (../) to the project root, then down into models/Trip.js
 // -----------------------------------------------------------------------
-const Trip = require('../models/bookings.js'); // <<<--- FILENAME CORRECTED to bookings.js
+const Trip = require('../models/Trip.js'); // <<<--- FILENAME CORRECTED to Trip.js
 
 // -----------------------------------------------------------------------
 // ROUTE 1: GET /api/trips
