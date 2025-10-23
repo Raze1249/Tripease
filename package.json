@@ -2,10 +2,10 @@
   "name": "tripease",
   "version": "1.0.0",
   "description": "Smart Trip Planner API",
-  "main": "server.cjs",  
+  "main": "server.cjs",
   "scripts": {
-    "start": "node server.cjs", 
-    "dev": "nodemon server.cjs"  
+    "start": "node server.cjs",
+    "dev": "nodemon server.cjs"
   },
   "keywords": [
     "mongodb",
@@ -16,9 +16,9 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "mongoose": "^8.3.1"
+    "mongodb": "^6.3.0",
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
