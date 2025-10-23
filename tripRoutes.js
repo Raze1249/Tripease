@@ -4,11 +4,10 @@
 const express = require('express');
 const router = express.Router();
 // -----------------------------------------------------------------------
-// IMPORTANT: Adjust the path below if your model file is located elsewhere.
-// Since the file containing this code is now in the root directory (to match
-// your simpler structure), the path to the models folder is relative to the root.
+// FIX: The model file is named 'bookings.js', not 'Trip.js'.
+// Path: Up one directory (../) to the project root, then down into models/bookings.js
 // -----------------------------------------------------------------------
-const Trip = require('../models/Trip'); // <<<--- PATH CORRECTED TO '../models/Trip' 
+const Trip = require('../models/bookings.js'); // <<<--- FILENAME CORRECTED to bookings.js
 
 // -----------------------------------------------------------------------
 // ROUTE 1: GET /api/trips
@@ -29,7 +28,7 @@ router.get('/', async (req, res) => {
 
 // -----------------------------------------------------------------------
 // ROUTE 2: POST /api/trips
-// Create a new trip
+// Create a new trip (booking)
 // -----------------------------------------------------------------------
 router.post('/', async (req, res) => {
     // Extract data from the request body
@@ -62,7 +61,7 @@ router.post('/', async (req, res) => {
 
 // -----------------------------------------------------------------------
 // ROUTE 3: GET /api/trips/:id
-// Get a single trip by ID
+// Get a single trip (booking) by ID
 // -----------------------------------------------------------------------
 router.get('/:id', async (req, res) => {
     try {
@@ -82,7 +81,7 @@ router.get('/:id', async (req, res) => {
 
 // -----------------------------------------------------------------------
 // ROUTE 4: PUT /api/trips/:id
-// Update an existing trip by ID
+// Update an existing trip (booking) by ID
 // -----------------------------------------------------------------------
 router.put('/:id', async (req, res) => {
     try {
@@ -107,7 +106,7 @@ router.put('/:id', async (req, res) => {
 
 // -----------------------------------------------------------------------
 // ROUTE 5: DELETE /api/trips/:id
-// Delete a trip by ID
+// Delete a trip (booking) by ID
 // -----------------------------------------------------------------------
 router.delete('/:id', async (req, res) => {
     try {
