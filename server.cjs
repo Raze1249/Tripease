@@ -4,8 +4,13 @@ const cors = require('cors');
 const fetch = require('node-fetch'); // This module MUST be installed via 'npm install node-fetch'
 const path = require('path'); // For serving static files
 
-const app = express();
-const PORT = 3000;
+// In server.cjs
+// Use the port provided by the hosting environment (process.env.PORT) or default to 3000 for local development.
+const PORT = process.env.PORT || 3000; 
+// ... later in the file ...
+app.listen(PORT, () => {
+    console.log(`Server is running and listening on port ${PORT}`);
+});
 
 // --- CONFIGURATION ---
 // MongoDB CONNECTION STRING (Provided by user)
