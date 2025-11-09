@@ -1,458 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tripease: Flight Booking & Planner</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Configure Tailwind for a custom primary color (Indigo) and Inter font -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary': '#4f46e5', // Indigo-600
-                        'secondary': '#6366f1', // Indigo-500
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                },
-            }
-        }
-    </script>
-    <!-- Load Lucide Icons for aesthetic touch -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        /* Custom styles for smooth transitions and responsiveness */
-        .autocomplete-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .autocomplete-item:hover {
-            background-color: theme('colors.indigo.50');
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Explorer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* Navigation Bar */
+    header {
+      width: 90%;
+      margin: 20px auto;
+      padding: 15px 30px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .menu-icon {
+      font-size: 24px;
+      font-weight: bold;
+      color: #000;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: black;
+      margin: 0 15px;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: #00b3b3;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 25px;
+      padding: 5px 15px;
+    }
+
+    .search-box input {
+      border: none;
+      outline: none;
+      padding: 6px;
+      font-size: 14px;
+    }
+
+    .search-box button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      margin-top: 100px;
+    }
+
+    .hero h1 {
+      font-size: 45px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: #e0e0e0;
+      margin-top: 10px;
+    }
+
+    .popular-btn {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 25px;
+      border-radius: 25px;
+      border: 1px solid white;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .popular-btn:hover {
+      background: #00ffff;
+      color: black;
+    }
+
+    /* Cards Section */
+    .places {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 50px auto;
+      width: 90%;
+    }
+
+    .card {
+      width: 280px;
+      background: white;
+      color: black;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 15px;
+    }
+
+    .card-content h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .stars {
+      color: gold;
+      font-size: 18px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+  </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body>
 
-    <!-- Main Application Container -->
-    <div id="app" class="p-4 sm:p-8 max-w-7xl mx-auto">
-        
-        <!-- Header -->
-        <header class="text-center mb-10 pt-4">
-            <h1 class="text-5xl font-extrabold text-primary mb-2 tracking-tight">
-                Tripease <i data-lucide="plane" class="inline-block w-10 h-10"></i>
-            </h1>
-            <p class="text-xl text-gray-600">Your Smart, Full-Stack Travel Companion</p>
-        </header>
+  <!-- Navigation Bar -->
+  <header>
+    <div class="menu-icon">&#9776;</div>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">About Us</a>
+      <a href="#">Explore</a>
+      <a href="#">Activity</a>
+    </nav>
+    <div class="search-box">
+      <input type="text" placeholder="Search..">
+      <button>🔍</button>
+    </div>
+  </header>
 
-        <!-- Search Card -->
-        <div class="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Find Your Next Flight</h2>
-            <form id="search-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 items-end">
-                
-                <!-- From Field (Source) -->
-                <div class="relative">
-                    <label for="source" class="block text-sm font-medium text-gray-700 mb-1">From (City/Airport)</label>
-                    <div class="relative">
-                        <input type="text" id="source" name="source" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary transition duration-150" placeholder="e.g., London, LHR" required>
-                        <ul id="source-autocomplete-list" class="autocomplete-list absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 shadow-lg hidden"></ul>
-                    </div>
-                </div>
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Explore Beyond Boundaries,<br>Travel Beyond Expectations</h1>
+    <p>We don’t just plan trips, we craft unforgettable adventures.</p>
+    <div class="popular-btn">📍 Popular Place</div>
+  </section>
 
-                <!-- To Field (Destination) -->
-                <div class="relative">
-                    <label for="destination" class="block text-sm font-medium text-gray-700 mb-1">To (City/Airport)</label>
-                    <div class="relative">
-                        <input type="text" id="destination" name="destination" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary transition duration-150" placeholder="e.g., New York, JFK" required>
-                        <ul id="destination-autocomplete-list" class="autocomplete-list absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 shadow-lg hidden"></ul>
-                    </div>
-                </div>
-
-                <!-- Date Field -->
-                <div>
-                    <label for="departureDate" class="block text-sm font-medium text-gray-700 mb-1">Departure Date</label>
-                    <input type="date" id="departureDate" name="departureDate" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary transition duration-150" required>
-                </div>
-
-                <!-- Search Button -->
-                <button type="submit" class="w-full h-[46px] bg-primary text-white font-semibold py-2 px-4 rounded-xl hover:bg-secondary transition duration-300 shadow-md hover:shadow-lg flex items-center justify-center space-x-2">
-                    <i data-lucide="search" class="w-5 h-5"></i>
-                    <span id="search-button-text">Search Flights</span>
-                </button>
-            </form>
-            <div id="status-message" class="mt-4 text-center hidden p-2 rounded-xl text-sm font-medium"></div>
-        </div>
-
-        <!-- Flight Results Section -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Available Flights</h2>
-            <div id="flight-results" class="space-y-4">
-                <div class="bg-indigo-50 border border-indigo-200 text-indigo-700 p-4 rounded-xl shadow-inner">
-                    <p class="font-medium">Please search for a flight to see results here.</p>
-                </div>
-            </div>
-            <div id="results-loader" class="text-center mt-8 hidden">
-                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
-                <p class="text-primary mt-2">Searching for flights...</p>
-            </div>
-        </section>
-
-        <!-- Booked Trips Section -->
-        <section>
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Recent Booked Trips (MongoDB)</h2>
-            <div id="trips-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Trips will be rendered here -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                    <p class="text-gray-500 text-sm">Loading booked trips...</p>
-                </div>
-            </div>
-        </section>
-
+  <!-- Cards Section -->
+  <section class="places">
+    <div class="card">
+      <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80" alt="Beach">
+      <div class="card-content">
+        <h3>Beach</h3>
+        <p class="stars">★★★★★</p>
+      </div>
     </div>
 
-    <!-- Booking Modal (Hidden by Default) -->
-    <div id="booking-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full transform transition-transform duration-300 scale-95">
-            <div class="flex justify-between items-start mb-4">
-                <h3 class="text-2xl font-bold text-gray-800">Confirm Your Booking</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition">
-                    <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
-            </div>
-            
-            <div id="flight-summary" class="bg-gray-50 p-4 rounded-xl mb-4 border border-gray-200 text-gray-700">
-                <!-- Flight details populated here -->
-            </div>
-
-            <form id="booking-form" class="space-y-4">
-                <div>
-                    <label for="travelerName" class="block text-sm font-medium text-gray-700 mb-1">Traveler Name</label>
-                    <input type="text" id="travelerName" name="name" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary" required placeholder="Full Name">
-                </div>
-                <div>
-                    <label for="seats" class="block text-sm font-medium text-gray-700 mb-1">Number of Seats</label>
-                    <input type="number" id="seats" name="seats" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary" min="1" max="10" required value="1">
-                </div>
-
-                <button type="submit" id="book-confirm-button" class="w-full bg-green-500 text-white font-semibold py-3 px-4 rounded-xl hover:bg-green-600 transition duration-300 shadow-md">
-                    Complete Booking
-                </button>
-            </form>
-        </div>
+    <div class="card">
+      <!-- ✅ Fixed Mountain Image URL -->
+      <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80" alt="Mount">
+      <div class="card-content">
+        <h3>Mount</h3>
+        <p class="stars">★★★★★</p>
+      </div>
     </div>
 
-    <!-- Initialization Script -->
-    <script>
-        // Initialize Lucide icons
-        window.onload = () => {
-            lucide.createIcons();
-            loadBookedTrips();
-            fetchAirportData();
-        };
-        
-        const API_URL = 'http://localhost:3000/api';
-        let airportData = [];
-        let selectedFlight = null;
-        let dbTrips = []; // Cache for booked trips
+    <div class="card">
+      <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80" alt="Country">
+      <div class="card-content">
+        <h3>Country</h3>
+        <p class="stars">★★★★★</p>
+      </div>
+    </div>
+  </section>
 
-        // --- AUTOCLOMPLETE LOGIC ---
-        const fetchAirportData = async () => {
-            try {
-                const response = await fetch(`${API_URL}/airports`);
-                if (!response.ok) throw new Error('Failed to fetch airport data from backend.');
-                airportData = await response.json();
-                console.log(`Loaded ${airportData.length} airports for autocomplete.`);
-            } catch (error) {
-                console.error('Error fetching airport data:', error);
-                document.getElementById('status-message').className = 'mt-4 text-center p-2 rounded-xl text-red-700 bg-red-100 font-medium block';
-                document.getElementById('status-message').textContent = 'Warning: Could not load real airport data. Using mock airport data.';
-            }
-        };
+  <footer>
+    © 2025 Travel Explorer | Crafted for Adventure Lovers
+  </footer>
 
-        const setupAutocomplete = (inputElementId, listElementId) => {
-            const input = document.getElementById(inputElementId);
-            const list = document.getElementById(listElementId);
-
-            input.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                list.innerHTML = '';
-                list.classList.add('hidden');
-
-                if (query.length < 2) return;
-
-                const matches = airportData.filter(airport => 
-                    airport.name.toLowerCase().includes(query) ||
-                    airport.city.toLowerCase().includes(query) ||
-                    airport.iata.toLowerCase().startsWith(query)
-                ).slice(0, 8); // Limit to 8 suggestions
-
-                if (matches.length > 0) {
-                    matches.forEach(airport => {
-                        const item = document.createElement('li');
-                        item.className = 'autocomplete-item p-3 text-sm text-gray-800 border-b border-gray-100 last:border-b-0';
-                        item.textContent = `${airport.iata} | ${airport.city}, ${airport.name} (${airport.country})`;
-                        item.dataset.value = airport.iata; 
-                        
-                        item.addEventListener('click', () => {
-                            input.value = airport.iata; // Set input value to IATA code
-                            list.classList.add('hidden');
-                        });
-                        list.appendChild(item);
-                    });
-                    list.classList.remove('hidden');
-                }
-            });
-
-            // Hide list when focus is lost (with a slight delay to allow click on item)
-            input.addEventListener('blur', () => {
-                setTimeout(() => list.classList.add('hidden'), 200);
-            });
-            input.addEventListener('focus', () => {
-                // Trigger input event again on focus if text is present
-                if (input.value.length >= 2) {
-                    input.dispatchEvent(new Event('input'));
-                }
-            });
-        };
-
-        setupAutocomplete('source', 'source-autocomplete-list');
-        setupAutocomplete('destination', 'destination-autocomplete-list');
-
-        // --- UI & MODAL FUNCTIONS ---
-
-        const showMessage = (message, type = 'success') => {
-            const statusDiv = document.getElementById('status-message');
-            statusDiv.textContent = message;
-            statusDiv.classList.remove('hidden');
-            if (type === 'success') {
-                statusDiv.classList.replace('text-red-700', 'text-green-700');
-                statusDiv.classList.replace('bg-red-100', 'bg-green-100');
-            } else if (type === 'error') {
-                statusDiv.classList.replace('text-green-700', 'text-red-700');
-                statusDiv.classList.replace('bg-green-100', 'bg-red-100');
-            }
-            setTimeout(() => statusDiv.classList.add('hidden'), 5000);
-        };
-
-        const openModal = (flight) => {
-            selectedFlight = flight;
-            const modal = document.getElementById('booking-modal');
-            const summary = document.getElementById('flight-summary');
-
-            summary.innerHTML = `
-                <p class="font-bold text-lg">${flight.source} (${flight.departure}) &rarr; ${flight.destination}</p>
-                <p class="text-sm">Carrier: ${flight.carrier} | Price: $${flight.price}</p>
-                <p class="text-sm">Date: ${flight.date} | Duration: ${flight.duration}</p>
-            `;
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling background
-        };
-
-        const closeModal = () => {
-            document.getElementById('booking-modal').classList.add('hidden');
-            document.body.style.overflow = '';
-        };
-
-        // --- RENDER FUNCTIONS ---
-
-        const renderTrips = (trips) => {
-            const list = document.getElementById('trips-list');
-            list.innerHTML = '';
-            
-            if (trips.length === 0) {
-                list.innerHTML = `
-                    <div class="col-span-full bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                        <p class="text-gray-500 text-center">No trips booked yet. Start searching and book your first flight!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            trips.forEach(trip => {
-                const tripElement = document.createElement('div');
-                tripElement.className = 'bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 border-t-4 border-primary space-y-2';
-                tripElement.innerHTML = `
-                    <p class="text-xl font-bold text-gray-800 truncate">${trip.name}</p>
-                    <div class="text-sm text-gray-600">
-                        <p class="flex items-center space-x-2"><i data-lucide="map-pin" class="w-4 h-4 text-primary"></i> 
-                            <span>${trip.source} &rarr; ${trip.destination}</span>
-                        </p>
-                        <p class="flex items-center space-x-2"><i data-lucide="calendar" class="w-4 h-4 text-primary"></i> 
-                            <span>Date: ${trip.startDate}</span>
-                        </p>
-                        <p class="flex items-center space-x-2"><i data-lucide="users" class="w-4 h-4 text-primary"></i> 
-                            <span>Seats: ${trip.seats}</span>
-                        </p>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-2">Booked on: ${new Date(trip.createdAt || Date.now()).toLocaleDateString()}</p>
-                `;
-                list.appendChild(tripElement);
-                lucide.createIcons(); // Re-initialize icons for new elements
-            });
-        };
-
-        const renderFlights = (flights) => {
-            const resultsDiv = document.getElementById('flight-results');
-            resultsDiv.innerHTML = '';
-
-            if (flights.length === 0) {
-                resultsDiv.innerHTML = `
-                    <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-4 rounded-xl shadow-inner">
-                        <p class="font-medium">No flights found for your search criteria. Try a different date or route.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            flights.forEach(flight => {
-                const flightCard = document.createElement('div');
-                flightCard.className = 'bg-white p-5 rounded-2xl shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 hover:shadow-xl transition duration-300 border-l-4 border-primary';
-                flightCard.innerHTML = `
-                    <!-- Flight Details -->
-                    <div class="flex flex-col sm:flex-row sm:space-x-8 space-y-2 sm:space-y-0">
-                        <!-- Route & Times -->
-                        <div class="text-center sm:text-left">
-                            <p class="text-2xl font-bold text-gray-800">${flight.source} &rarr; ${flight.destination}</p>
-                            <p class="text-sm text-gray-500">Depart: ${flight.departure} | Duration: ${flight.duration}</p>
-                        </div>
-                        <!-- Carrier & Info -->
-                        <div class="border-t sm:border-t-0 sm:border-l border-gray-200 pt-2 sm:pt-0 sm:pl-8">
-                            <p class="text-lg font-semibold text-gray-700">${flight.carrier}</p>
-                            <p class="text-xs text-gray-500">Flight ID: ${flight.id}</p>
-                        </div>
-                    </div>
-
-                    <!-- Price & Action -->
-                    <div class="flex flex-col items-start sm:items-end space-y-2">
-                        <p class="text-3xl font-extrabold text-primary">$${flight.price}</p>
-                        <button class="book-button w-full sm:w-auto bg-green-500 text-white font-semibold py-2 px-6 rounded-xl hover:bg-green-600 transition duration-300 shadow-md" 
-                                data-flight='${JSON.stringify(flight)}'>
-                            Book Now
-                        </button>
-                    </div>
-                `;
-                resultsDiv.appendChild(flightCard);
-            });
-
-            // Attach event listeners to the new Book Now buttons
-            document.querySelectorAll('.book-button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const flightData = JSON.parse(e.target.getAttribute('data-flight'));
-                    openModal(flightData);
-                });
-            });
-        };
-
-        // --- FETCH & SUBMIT LOGIC ---
-
-        const loadBookedTrips = async () => {
-            try {
-                const response = await fetch(`${API_URL}/trips`);
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                dbTrips = await response.json();
-                renderTrips(dbTrips);
-            } catch (error) {
-                console.error('Failed to load trips:', error);
-                const list = document.getElementById('trips-list');
-                list.innerHTML = `
-                    <div class="col-span-full bg-red-100 border border-red-300 text-red-800 p-4 rounded-xl shadow-inner">
-                        <p class="font-bold">Database Connection Error</p>
-                        <p>Could not load booked trips. Ensure your Express server is running and connected to MongoDB.</p>
-                    </div>
-                `;
-            }
-        };
-
-        document.getElementById('search-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const data = {
-                source: form.source.value.trim(),
-                destination: form.destination.value.trim(),
-                departureDate: form.departureDate.value,
-            };
-
-            const resultsLoader = document.getElementById('results-loader');
-            resultsLoader.classList.remove('hidden');
-            document.getElementById('search-button-text').textContent = 'Searching...';
-            document.querySelector('#search-form button[type="submit"]').disabled = true;
-
-            try {
-                const response = await fetch(`${API_URL}/search-flights`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
-
-                if (!response.ok) throw new Error(`Search failed with status: ${response.status}`);
-                
-                const flights = await response.json();
-                renderFlights(flights);
-                showMessage(`Found ${flights.length} flights!`, 'success');
-
-            } catch (error) {
-                console.error('Flight Search Error:', error);
-                renderFlights([]); // Clear results
-                showMessage('An error occurred during search. Check server console.', 'error');
-            } finally {
-                resultsLoader.classList.add('hidden');
-                document.getElementById('search-button-text').textContent = 'Search Flights';
-                document.querySelector('#search-form button[type="submit"]').disabled = false;
-            }
-        });
-
-        document.getElementById('booking-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!selectedFlight) return;
-
-            const form = e.target;
-            const travelerName = form.travelerName.value.trim();
-            const seats = parseInt(form.seats.value, 10);
-            
-            const bookingData = {
-                name: travelerName,
-                source: selectedFlight.source,
-                destination: selectedFlight.destination,
-                startDate: selectedFlight.date,
-                seats: seats,
-                price: selectedFlight.price, // Store price for reference
-                carrier: selectedFlight.carrier,
-                createdAt: new Date().toISOString()
-            };
-
-            document.getElementById('book-confirm-button').textContent = 'Booking...';
-            document.getElementById('book-confirm-button').disabled = true;
-
-            try {
-                const response = await fetch(`${API_URL}/trips`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(bookingData),
-                });
-
-                if (!response.ok) throw new Error(`Booking failed with status: ${response.status}`);
-                
-                const newTrip = await response.json();
-                
-                closeModal();
-                showMessage(`Booking successful for ${newTrip.name}!`, 'success');
-                loadBookedTrips(); // Refresh the trips list
-
-            } catch (error) {
-                console.error('Booking Error:', error);
-                closeModal();
-                showMessage('Booking failed. Please check the server connection.', 'error');
-            } finally {
-                document.getElementById('book-confirm-button').textContent = 'Complete Booking';
-                document.getElementById('book-confirm-button').disabled = false;
-            }
-        });
-
-    </script>
 </body>
 </html>
