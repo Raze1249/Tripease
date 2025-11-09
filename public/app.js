@@ -2,19 +2,96 @@
 const API = {
   trips: '/api/trips',
   flights: '/api/search-flights',
-  bookings: '/api/bookings'
+  bookings: '/api/bookings',
+  auth: {
+    login: '/api/auth/login',
+    register: '/api/auth/register',
+    logout: '/api/auth/logout',
+    me: '/api/auth/me'
+  }
 };
 
 // ===== Shorthand helpers =====
-const $ = (id) => document.getElementById(id);
+const $ = id => document.getElementById(id);
 const get = (u, q={}) => fetch(u + (Object.keys(q).length ? `?${new URLSearchParams(q)}` : '')).then(r=>r.json());
-const post = (u, b) => fetch(u, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(b)}).then(r=>{if(!r.ok)throw new Error(`${r.status}`); return r.json();});
-const toastEl = $('toast'); const toast = (m,ms=1800)=>{toastEl.textContent=m; toastEl.style.display='block'; setTimeout(()=>toastEl.style.display='none',ms);};
+const post = (u, b, cred=false) =>
+  fetch(u, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(b), ...(cred?{credentials:'include'}:{}) })
+    .then(r=>{ if(!r.ok) throw new Error(`${r.status}`); return r.json(); });
+
+const toastEl = $('toast');
+const toast = (m, ms=1800) => { toastEl.textContent=m; toastEl.style.display='block'; setTimeout(()=>toastEl.style.display='none',ms); };
+
+// ===== Auth (minimal JWT cookie) =====
+const A = {
+  userEl: $('auth-user'),
+  btnLogin: $('btn-login'),
+  btnRegister: $('btn-register'),
+  btnLogout: $('btn-logout'),
+  mLogin: $('modal-login'),
+  mRegister: $('modal-register'),
+  loginEmail: $('login-email'),
+  loginPass: $('login-pass'),
+  loginSubmit: $('login-submit'),
+  loginCancel: $('login-cancel'),
+  regName: $('reg-name'),
+  regEmail: $('reg-email'),
+  regPass: $('reg-pass'),
+  regSubmit: $('reg-submit'),
+  regCancel: $('reg-cancel')
+};
+const open = el => el.style.display = 'block';
+const close = el => el.style.display = 'none';
+
+function setUser(user){
+  if (user){
+    A.userEl.style.display='inline';
+    A.userEl.textContent = `Hello, ${user.name}`;
+    A.btnLogin.style.display='none';
+    A.btnRegister.style.display='none';
+    A.btnLogout.style.display='inline-block';
+  } else {
+    A.userEl.style.display='none';
+    A.btnLogin.style.display='inline-block';
+    A.btnRegister.style.display='inline-block';
+    A.btnLogout.style.display='none';
+  }
+}
+async function me(){
+  try{
+    const r = await fetch(API.auth.me, { credentials:'include' });
+    const j = await r.json(); setUser(j.user);
+  }catch{ setUser(null); }
+}
+// auth events
+A.btnLogin?.addEventListener('click', ()=> open(A.mLogin));
+A.loginCancel?.addEventListener('click', ()=> close(A.mLogin));
+A.loginSubmit?.addEventListener('click', async ()=>{
+  const email = A.loginEmail.value.trim(), password = A.loginPass.value.trim();
+  if (!email || !password) return toast('Email & password required');
+  try{
+    await post(API.auth.login, { email, password }, true);
+    close(A.mLogin); toast('Logged in'); me();
+  }catch{ toast('Login failed'); }
+});
+A.btnRegister?.addEventListener('click', ()=> open(A.mRegister));
+A.regCancel?.addEventListener('click', ()=> close(A.mRegister));
+A.regSubmit?.addEventListener('click', async ()=>{
+  const name = A.regName.value.trim(), email = A.regEmail.value.trim(), password = A.regPass.value.trim();
+  if (!name || !email || !password) return toast('All fields required');
+  try{
+    await post(API.auth.register, { name, email, password }, true);
+    close(A.mRegister); toast('Account created'); me();
+  }catch{ toast('Registration failed'); }
+});
+A.btnLogout?.addEventListener('click', async ()=>{
+  await fetch(API.auth.logout, { method:'POST', credentials:'include' });
+  toast('Logged out'); setUser(null);
+});
 
 // ===== Trips =====
 const cards = $('cardsContainer'), qIn = $('searchInput'), qBtn = $('searchBtn'), cat = $('categorySelect'), reset = $('resetBtn'), popular = $('popularBtn');
 
-const tripCard = (t) => `
+const tripCard = t => `
   <div class="card">
     <img src="${t.imageUrl}" alt="${t.name}">
     <div class="card-content">
@@ -28,22 +105,15 @@ const tripCard = (t) => `
     </div>
   </div>
 `;
-
-const renderTrips = (raw) => {
+const renderTrips = raw => {
   const list = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
   cards.innerHTML = list.length ? list.map(tripCard).join('') : '<p>No trips found.</p>';
 };
-
 const loadTrips = (p={}) => get(API.trips, p).then(renderTrips).catch(()=>toast('Failed to load trips'));
-
-const runSearch = () => {
-  const p = {}; if (qIn.value.trim()) p.q = qIn.value.trim(); if (cat.value) p.category = cat.value;
-  loadTrips(p);
-};
+const runSearch = () => { const p={}; if(qIn.value.trim()) p.q=qIn.value.trim(); if(cat.value) p.category=cat.value; loadTrips(p); };
 
 // ===== Flights =====
 const ff = { src:$('ff-source'), dst:$('ff-destination'), date:$('ff-date'), btn:$('ff-search'), out:$('ff-results') };
-
 const renderFlights = (list=[]) => {
   ff.out.innerHTML = !list.length ? '<p>No flights found.</p>' : `
     <div style="display:grid;gap:12px;">
@@ -63,16 +133,15 @@ const renderFlights = (list=[]) => {
         </div>`).join('')}
     </div>`;
 };
-
 const searchFlights = async () => {
   const source = ff.src.value.trim(), destination = ff.dst.value.trim(), departureDate = ff.date.value;
   if (!source || !destination || !departureDate) return toast('Fill source, destination, date');
-  try {
-    ff.btn.disabled = true; ff.btn.textContent = 'Searching...';
+  try{
+    ff.btn.disabled = true; ff.btn.textContent='Searching...';
     const flights = await post(API.flights, { source, destination, departureDate });
     renderFlights(flights); toast('Flights loaded');
-  } catch { toast('Flight search failed'); }
-  finally { ff.btn.disabled = false; ff.btn.textContent = 'Search Flights'; }
+  }catch{ toast('Flight search failed'); }
+  finally{ ff.btn.disabled=false; ff.btn.textContent='Search Flights'; }
 };
 
 // ===== Booking panel =====
@@ -83,25 +152,27 @@ const bk = {
   c:$('bk-flight-carrier'), route:$('bk-flight-route'), d:$('bk-flight-date'), dep:$('bk-flight-departure'), dur:$('bk-flight-duration'), price:$('bk-flight-price'),
   cancel:$('bk-cancel')
 };
-const openBk = ()=>{ bk.panel.style.display='block'; window.scrollTo({top:bk.panel.offsetTop-80,behavior:'smooth'}) };
+const openBk = ()=>{ bk.panel.style.display='block'; window.scrollTo({top:bk.panel.offsetTop-80,behavior:'smooth'}); };
 const closeBk = ()=>{ bk.panel.style.display='none'; bk.form.reset(); bk.tripId.value=bk.c.value=bk.route.value=bk.d.value=bk.dep.value=bk.dur.value=bk.price.value=''; };
 
-cards.addEventListener('click', (e)=>{
+// open from trip card / flight result
+cards.addEventListener('click', e=>{
   const tBtn = e.target.closest('.book-trip-btn');
   const fBtn = e.target.closest('.flight-btn');
   if (tBtn){ closeBk(); bk.tripId.value = tBtn.dataset.id; openBk(); }
   if (fBtn){ ff.dst.value = fBtn.dataset.name || ''; window.scrollTo({top:ff.dst.getBoundingClientRect().top + scrollY - 100, behavior:'smooth'}); }
 });
-
-ff.out.addEventListener('click', (e)=>{
+ff.out.addEventListener('click', e=>{
   const b = e.target.closest('.book-flight-btn'); if (!b) return;
   closeBk();
-  bk.c.value = b.dataset.carrier; bk.route.value = `${b.dataset.source} → ${b.dataset.destination}`;
+  bk.c.value = b.dataset.carrier;
+  bk.route.value = `${b.dataset.source} → ${b.dataset.destination}`;
   bk.d.value = b.dataset.date; bk.dep.value = b.dataset.departure; bk.dur.value = b.dataset.duration; bk.price.value = b.dataset.price;
   openBk();
 });
 
-bk.form.addEventListener('submit', async (e)=>{
+// submit booking (requires name+email)
+bk.form.addEventListener('submit', async e=>{
   e.preventDefault();
   const payload = {
     name: bk.name.value.trim(), email: bk.email.value.trim(), phone: bk.phone.value.trim(),
@@ -113,17 +184,17 @@ bk.form.addEventListener('submit', async (e)=>{
     const [source,destination] = (bk.route.value||'').split('→').map(s=>(s||'').trim());
     payload.flight = { carrier:bk.c.value, source, destination, date:bk.d.value, departure:bk.dep.value, duration:bk.dur.value, price:Number(bk.price.value||0) };
   }
-  try { await post(API.bookings, payload); toast('✅ Booking submitted'); closeBk(); }
-  catch { toast('Booking failed'); }
+  try{ await post(API.bookings, payload); toast('✅ Booking submitted'); closeBk(); }
+  catch{ toast('Booking failed'); }
 });
-
 bk.cancel.addEventListener('click', closeBk);
 
 // ===== Wire & boot =====
+$('ff-search').addEventListener('click', searchFlights);
 qBtn.addEventListener('click', runSearch);
-cat.addEventListener('change', runSearch);
-popular.addEventListener('click', ()=>loadTrips({ q:'popular' }));
-reset.addEventListener('click', ()=>{ qIn.value=''; cat.value=''; loadTrips(); });
-ff.btn.addEventListener('click', searchFlights);
+$('categorySelect').addEventListener('change', runSearch);
+$('resetBtn').addEventListener('click', ()=>{ $('searchInput').value=''; $('categorySelect').value=''; loadTrips(); });
+$('popularBtn').addEventListener('click', ()=>loadTrips({ q:'popular' }));
 
-loadTrips();
+me();         // check auth
+loadTrips();  // load trips
