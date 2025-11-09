@@ -81,7 +81,40 @@
     </div>
     <div id="ff-results" style="margin-top:16px"></div>
   </section>
+  
+<!-- Booking Panel (hidden until opened) -->
+<section id="booking-panel" class="panel" style="display:none">
+  <h2>Complete Your Booking</h2>
+  <form id="booking-form" class="row" style="margin-top:10px;align-items:flex-start">
+    <div style="display:grid;gap:8px;min-width:260px">
+      <input id="bk-name" type="text" placeholder="Your name" required />
+      <input id="bk-email" type="email" placeholder="Your email" required />
+      <input id="bk-phone" type="text" placeholder="Phone (optional)" />
+      <input id="bk-travelers" type="number" min="1" value="1" />
+      <textarea id="bk-notes" placeholder="Notes (optional)" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.95);color:#000;height:80px"></textarea>
+    </div>
 
+    <div style="display:grid;gap:8px;flex:1;min-width:280px">
+      <!-- Trip or flight details (readonly) -->
+      <input id="bk-tripId" type="text" placeholder="Trip ID" readonly />
+      <input id="bk-flight-carrier" type="text" placeholder="Carrier" readonly />
+      <input id="bk-flight-route" type="text" placeholder="Route (From → To)" readonly />
+      <div style="display:flex;gap:8px">
+        <input id="bk-flight-date" type="text" placeholder="Date" readonly />
+        <input id="bk-flight-departure" type="text" placeholder="Departure" readonly />
+      </div>
+      <div style="display:flex;gap:8px">
+        <input id="bk-flight-duration" type="text" placeholder="Duration" readonly />
+        <input id="bk-flight-price" type="text" placeholder="Price" readonly />
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="submit" class="btn">Confirm Booking</button>
+        <button type="button" id="bk-cancel" class="btn" style="background:#666">Cancel</button>
+      </div>
+    </div>
+  </form>
+</section>
   <!-- Trips -->
   <section class="panel">
     <h2>Trips</h2>
