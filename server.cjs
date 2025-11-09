@@ -6,7 +6,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 
 // If using node-fetch v3 (ESM-only), use this shim.
-// (If you prefer: npm i node-fetch@2 and then: const fetch = require('node-fetch');)
+// If you prefer, install v2: `npm i node-fetch@2` and replace with: const fetch = require('node-fetch');
 const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
 
 // --- CONFIG (as you provided) ---
@@ -96,7 +96,7 @@ function generateMockFlights(source, destination, date) {
   return flights;
 }
 
-// --- API ---
+// --- Core API endpoints in this file ---
 app.get('/api/airports', (req, res) => {
   res.json(airportCache);
 });
@@ -110,10 +110,14 @@ app.post('/api/search-flights', (req, res) => {
   setTimeout(() => res.json(flights), 300);
 });
 
-// IMPORTANT: Do NOT require the model here; routes import it.
-// Make sure the filename matches your repo (tripRoutes.js vs tripRoute.js).
-const tripRouter = require('./routes/tripRoutes'); // adjust if your file is named differently
+// --- Mount external route modules ---
+// Trips (CRUD + search)
+const tripRouter = require('./routes/tripRoutes'); // ensure this file exists
 app.use('/api/trips', tripRouter);
+
+// Bookings (create/list)
+const bookingRouter = require('./routes/bookingRoutes'); // ensure this file exists
+app.use('/api/bookings', bookingRouter);
 
 // --- Static frontend (optional but handy) ---
 app.use(express.static(path.join(__dirname, 'public')));
