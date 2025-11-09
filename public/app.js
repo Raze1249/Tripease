@@ -24,6 +24,9 @@ const post = (u, b, cred=false) =>
 const toastEl = $('toast');
 const toast = (m, ms=1800) => { toastEl.textContent = m; toastEl.style.display = 'block'; setTimeout(()=>toastEl.style.display='none', ms); };
 
+// Universal fallback image so broken links never show blanks
+const FALLBACK_IMG = 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
+
 // ===================== AUTH (Login / Register / Logout) =====================
 const A = {
   userEl: $('auth-user'),
@@ -106,7 +109,7 @@ const POPULAR_PLACES = [
   },
   {
     name: 'Swiss Alps',
-    imageUrl: 'https://images.unsplash.com/photo-1508264165352-258859e62245?auto=format&fit=crop&w=1200&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1472689807769-993ee44a1bfc?auto=format&fit=crop&w=1200&q=80',
     blurb: 'Snowy peaks & alpine towns', rating: 5
   },
   {
@@ -136,7 +139,7 @@ const popularPanel = $('popular-panel');
 
 const popularCard = p => `
   <div class="card" style="width:260px">
-    <img src="${p.imageUrl}" alt="${p.name}">
+    <img src="${p.imageUrl}" alt="${p.name}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
     <div class="card-content">
       <h3>${p.name}</h3>
       <p class="stars">${'★'.repeat(Math.round(p.rating||5))}</p>
@@ -151,24 +154,39 @@ function renderPopular(){
   popularPanel.style.display = 'block';
   window.scrollTo({ top: popularPanel.offsetTop - 80, behavior: 'smooth' });
 }
-
 $('popularBtn')?.addEventListener('click', renderPopular);
 
 // ===================== SUGGESTED TRIPS (top-rated from API with fallback) =====================
 const suggestedWrap = $('suggestedContainer');
 
 const SUGGESTED_FALLBACK = [
-  { _id:'sg1', name:'Goa Beaches',
-    imageUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80', rating:5 },
-  { _id:'sg2', name:'Himalayan Trek',
-    imageUrl:'https://images.unsplash.com/photo-1508264165352-258859e62245?auto=format&fit=crop&w=1200&q=80', rating:5 },
-  { _id:'sg3', name:'Rajasthan Heritage',
-    imageUrl:'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80', rating:4 }
+  {
+    _id:'sg1',
+    name:'Goa Beaches',
+    imageUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    rating:5
+  },
+  {
+    _id:'sg2',
+    name:'Himalayan Trek',
+    imageUrl:'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?auto=format&fit=crop&w=1200&q=80',
+    rating:5,
+    description:'Breathtaking trails',
+    category:'Mount'
+  },
+  {
+    _id:'sg3',
+    name:'Rajasthan Heritage',
+    imageUrl:'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80',
+    rating:4,
+    description:'Palaces & desert safaris',
+    category:'Cultural'
+  }
 ];
 
 const miniTripCard = t => `
   <div class="card" style="width:240px">
-    <img src="${t.imageUrl}" alt="${t.name}">
+    <img src="${t.imageUrl}" alt="${t.name}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
     <div class="card-content">
       <h3>${t.name}</h3>
       <p class="stars">${'★'.repeat(Math.round(t.rating||5))}</p>
@@ -192,7 +210,7 @@ const cards = $('cardsContainer'), qIn = $('searchInput'), qBtn = $('searchBtn')
 
 const tripCard = t => `
   <div class="card">
-    <img src="${t.imageUrl}" alt="${t.name}">
+    <img src="${t.imageUrl}" alt="${t.name}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
     <div class="card-content">
       <h3>${t.name}</h3>
       <p class="stars">${'★'.repeat(Math.round(t.rating||5))}</p>
