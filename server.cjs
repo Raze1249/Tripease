@@ -135,7 +135,6 @@ app.post('/api/search-flights', (req, res) => {
 
 // 3. Trip Routes (Using Mongoose for MongoDB)
 // We require the Trip model here before the routes file
-const Trip = require('./models/Trip'); 
 const tripRoutes = require('./routes/tripRoutes.js');
 app.use('/api/trips', tripRoutes); // Use the dedicated router for trips
 
