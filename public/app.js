@@ -1,161 +1,53 @@
 // ===== Endpoints =====
-const ENDPOINTS = {
+const API = {
   trips: '/api/trips',
-  airports: '/api/airports',
   flights: '/api/search-flights',
   bookings: '/api/bookings'
 };
 
-// ===== Elements ===== (you likely already have most of these)
-const cardsContainer = document.getElementById('cardsContainer');
-const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-const categorySelect = document.getElementById('categorySelect');
-const resetBtn = document.getElementById('resetBtn');
-const popularBtn = document.getElementById('popularBtn');
+// ===== Shorthand helpers =====
+const $ = (id) => document.getElementById(id);
+const get = (u, q={}) => fetch(u + (Object.keys(q).length ? `?${new URLSearchParams(q)}` : '')).then(r=>r.json());
+const post = (u, b) => fetch(u, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(b)}).then(r=>{if(!r.ok)throw new Error(`${r.status}`); return r.json();});
+const toastEl = $('toast'); const toast = (m,ms=1800)=>{toastEl.textContent=m; toastEl.style.display='block'; setTimeout(()=>toastEl.style.display='none',ms);};
 
-// Flights UI
-const FF = {
-  source: document.getElementById('ff-source'),
-  dest: document.getElementById('ff-destination'),
-  date: document.getElementById('ff-date'),
-  btn: document.getElementById('ff-search'),
-  results: document.getElementById('ff-results')
-};
+// ===== Trips =====
+const cards = $('cardsContainer'), qIn = $('searchInput'), qBtn = $('searchBtn'), cat = $('categorySelect'), reset = $('resetBtn'), popular = $('popularBtn');
 
-// Toast
-const toastEl = document.getElementById('toast');
-function toast(msg, ms = 2000) {
-  toastEl.textContent = msg;
-  toastEl.style.display = 'block';
-  setTimeout(() => (toastEl.style.display = 'none'), ms);
-}
-
-// ===== Booking Panel Elements =====
-const BK = {
-  panel: document.getElementById('booking-panel'),
-  form: document.getElementById('booking-form'),
-  name: document.getElementById('bk-name'),
-  email: document.getElementById('bk-email'),
-  phone: document.getElementById('bk-phone'),
-  travelers: document.getElementById('bk-travelers'),
-  notes: document.getElementById('bk-notes'),
-  tripId: document.getElementById('bk-tripId'),
-
-  fCarrier: document.getElementById('bk-flight-carrier'),
-  fRoute: document.getElementById('bk-flight-route'),
-  fDate: document.getElementById('bk-flight-date'),
-  fDeparture: document.getElementById('bk-flight-departure'),
-  fDuration: document.getElementById('bk-flight-duration'),
-  fPrice: document.getElementById('bk-flight-price'),
-
-  cancel: document.getElementById('bk-cancel')
-};
-
-function openBookingPanel() {
-  BK.panel.style.display = 'block';
-  window.scrollTo({ top: BK.panel.offsetTop - 80, behavior: 'smooth' });
-}
-function closeBookingPanel() {
-  BK.panel.style.display = 'none';
-  BK.form.reset();
-  // clear readonly details
-  BK.tripId.value = '';
-  BK.fCarrier.value = '';
-  BK.fRoute.value = '';
-  BK.fDate.value = '';
-  BK.fDeparture.value = '';
-  BK.fDuration.value = '';
-  BK.fPrice.value = '';
-}
-
-// ===== API helpers =====
-async function apiGet(url, params = {}) {
-  const qs = new URLSearchParams(params).toString();
-  const res = await fetch(`${url}${qs ? `?${qs}` : ''}`);
-  if (!res.ok) throw new Error(`GET ${url} ${res.status}`);
-  return res.json();
-}
-
-async function apiPost(url, body) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) {
-    let msg = '';
-    try { msg = await res.text(); } catch {}
-    throw new Error(`POST ${url} ${res.status} ${msg}`);
-  }
-  return res.json();
-}
-
-// ===== Trips (unchanged rendering, but add a Book button) =====
-function tripCard(t) {
-  const stars = '★'.repeat(Math.round(t.rating || 5));
-  return `
-    <div class="card">
-      <img src="${t.imageUrl}" alt="${t.name}">
-      <div class="card-content">
-        <h3>${t.name}</h3>
-        <p class="stars">${stars}</p>
-        <p style="font-size:14px;color:#444;margin-top:8px;">${t.description || ''}</p>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn flight-btn" data-name="${t.name}">Flights</button>
-          <button class="btn book-trip-btn" data-id="${t._id}">Book Trip</button>
-        </div>
+const tripCard = (t) => `
+  <div class="card">
+    <img src="${t.imageUrl}" alt="${t.name}">
+    <div class="card-content">
+      <h3>${t.name}</h3>
+      <p class="stars">${'★'.repeat(Math.round(t.rating||5))}</p>
+      <p style="font-size:14px;color:#444;margin-top:8px;">${t.description||''}</p>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn flight-btn" data-name="${t.name}">Flights</button>
+        <button class="btn book-trip-btn" data-id="${t._id}">Book Trip</button>
       </div>
     </div>
-  `;
-}
+  </div>
+`;
 
-function renderTrips(raw) {
+const renderTrips = (raw) => {
   const list = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
-  cardsContainer.innerHTML = list.length ? list.map(tripCard).join('') : '<p>No trips found.</p>';
-}
+  cards.innerHTML = list.length ? list.map(tripCard).join('') : '<p>No trips found.</p>';
+};
 
-async function loadTrips(params = {}) {
-  try {
-    const data = await apiGet(ENDPOINTS.trips, params);
-    renderTrips(data);
-  } catch (e) {
-    console.error(e);
-    toast('Could not load trips');
-  }
-}
+const loadTrips = (p={}) => get(API.trips, p).then(renderTrips).catch(()=>toast('Failed to load trips'));
 
-async function runSearch() {
-  const q = searchInput.value.trim();
-  const category = categorySelect.value;
-  const params = {};
-  if (q) params.q = q;
-  if (category) params.category = category;
-  await loadTrips(params);
-}
+const runSearch = () => {
+  const p = {}; if (qIn.value.trim()) p.q = qIn.value.trim(); if (cat.value) p.category = cat.value;
+  loadTrips(p);
+};
 
-searchBtn?.addEventListener('click', runSearch);
-categorySelect?.addEventListener('change', runSearch);
-popularBtn?.addEventListener('click', async () => { await loadTrips({ q: 'popular' }); });
-resetBtn?.addEventListener('click', async () => {
-  searchInput.value = '';
-  categorySelect.value = '';
-  await loadTrips();
-});
+// ===== Flights =====
+const ff = { src:$('ff-source'), dst:$('ff-destination'), date:$('ff-date'), btn:$('ff-search'), out:$('ff-results') };
 
-// ===== Flights (existing) =====
-async function searchFlights({ source, destination, departureDate }) {
-  return apiPost(ENDPOINTS.flights, { source, destination, departureDate });
-}
-
-function renderFlights(list) {
-  if (!Array.isArray(list) || list.length === 0) {
-    FF.results.innerHTML = `<p>No flights found.</p>`;
-    return;
-  }
-  FF.results.innerHTML = `
+const renderFlights = (list=[]) => {
+  ff.out.innerHTML = !list.length ? '<p>No flights found.</p>' : `
     <div style="display:grid;gap:12px;">
-      ${list.map((f, idx) => `
+      ${list.map(f=>`
         <div style="background:#fff;color:#000;border-radius:12px;padding:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
             <strong>${f.carrier}</strong>
@@ -164,121 +56,74 @@ function renderFlights(list) {
             <span>Duration: ${f.duration}</span>
             <span>Price: $${f.price}</span>
             <button class="btn book-flight-btn"
-              data-carrier="${f.carrier}"
-              data-source="${f.source}"
-              data-destination="${f.destination}"
-              data-departure="${f.departure}"
-              data-duration="${f.duration}"
-              data-price="${f.price}"
-              data-date="${FF.date.value}"
-            >Book</button>
+              data-carrier="${f.carrier}" data-source="${f.source}" data-destination="${f.destination}"
+              data-departure="${f.departure}" data-duration="${f.duration}" data-price="${f.price}"
+              data-date="${ff.date.value}">Book</button>
           </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
+        </div>`).join('')}
+    </div>`;
+};
 
-FF?.btn?.addEventListener('click', async () => {
-  const source = FF.source.value.trim();
-  const destination = FF.dest.value.trim();
-  const departureDate = FF.date.value;
-
-  if (!source || !destination || !departureDate) {
-    toast('Please fill source, destination and date');
-    return;
-  }
-
+const searchFlights = async () => {
+  const source = ff.src.value.trim(), destination = ff.dst.value.trim(), departureDate = ff.date.value;
+  if (!source || !destination || !departureDate) return toast('Fill source, destination, date');
   try {
-    FF.btn.disabled = true;
-    FF.btn.textContent = 'Searching...';
-    const flights = await searchFlights({ source, destination, departureDate });
-    renderFlights(flights);
-    toast('Flights loaded');
-  } catch (e) {
-    console.error(e);
-    toast('Flight search failed');
-    FF.results.innerHTML = `<pre style="white-space:pre-wrap">${e.message}</pre>`;
-  } finally {
-    FF.btn.disabled = false;
-    FF.btn.textContent = 'Search Flights';
-  }
+    ff.btn.disabled = true; ff.btn.textContent = 'Searching...';
+    const flights = await post(API.flights, { source, destination, departureDate });
+    renderFlights(flights); toast('Flights loaded');
+  } catch { toast('Flight search failed'); }
+  finally { ff.btn.disabled = false; ff.btn.textContent = 'Search Flights'; }
+};
+
+// ===== Booking panel =====
+const bk = {
+  panel:$('booking-panel'), form:$('booking-form'),
+  name:$('bk-name'), email:$('bk-email'), phone:$('bk-phone'), trav:$('bk-travelers'), notes:$('bk-notes'),
+  tripId:$('bk-tripId'),
+  c:$('bk-flight-carrier'), route:$('bk-flight-route'), d:$('bk-flight-date'), dep:$('bk-flight-departure'), dur:$('bk-flight-duration'), price:$('bk-flight-price'),
+  cancel:$('bk-cancel')
+};
+const openBk = ()=>{ bk.panel.style.display='block'; window.scrollTo({top:bk.panel.offsetTop-80,behavior:'smooth'}) };
+const closeBk = ()=>{ bk.panel.style.display='none'; bk.form.reset(); bk.tripId.value=bk.c.value=bk.route.value=bk.d.value=bk.dep.value=bk.dur.value=bk.price.value=''; };
+
+cards.addEventListener('click', (e)=>{
+  const tBtn = e.target.closest('.book-trip-btn');
+  const fBtn = e.target.closest('.flight-btn');
+  if (tBtn){ closeBk(); bk.tripId.value = tBtn.dataset.id; openBk(); }
+  if (fBtn){ ff.dst.value = fBtn.dataset.name || ''; window.scrollTo({top:ff.dst.getBoundingClientRect().top + scrollY - 100, behavior:'smooth'}); }
 });
 
-// ===== Booking interactions =====
-
-// Open booking from a Trip card
-cardsContainer?.addEventListener('click', (e) => {
-  const btn = e.target.closest('.book-trip-btn');
-  if (!btn) return;
-  const tripId = btn.dataset.id;
-  closeBookingPanel();
-  BK.tripId.value = tripId;
-  openBookingPanel();
+ff.out.addEventListener('click', (e)=>{
+  const b = e.target.closest('.book-flight-btn'); if (!b) return;
+  closeBk();
+  bk.c.value = b.dataset.carrier; bk.route.value = `${b.dataset.source} → ${b.dataset.destination}`;
+  bk.d.value = b.dataset.date; bk.dep.value = b.dataset.departure; bk.dur.value = b.dataset.duration; bk.price.value = b.dataset.price;
+  openBk();
 });
 
-// Open booking from a Flight result
-FF.results?.addEventListener('click', (e) => {
-  const btn = e.target.closest('.book-flight-btn');
-  if (!btn) return;
-
-  closeBookingPanel();
-  // Prefill flight info
-  BK.fCarrier.value = btn.dataset.carrier || '';
-  BK.fRoute.value = `${btn.dataset.source || ''} → ${btn.dataset.destination || ''}`;
-  BK.fDate.value = btn.dataset.date || '';
-  BK.fDeparture.value = btn.dataset.departure || '';
-  BK.fDuration.value = btn.dataset.duration || '';
-  BK.fPrice.value = btn.dataset.price || '';
-  openBookingPanel();
-});
-
-// Submit booking to API
-BK.form?.addEventListener('submit', async (e) => {
+bk.form.addEventListener('submit', async (e)=>{
   e.preventDefault();
-
   const payload = {
-    name: BK.name.value.trim(),
-    email: BK.email.value.trim(),
-    phone: BK.phone.value.trim(),
-    travelers: Number(BK.travelers.value || 1),
-    notes: BK.notes.value.trim()
+    name: bk.name.value.trim(), email: bk.email.value.trim(), phone: bk.phone.value.trim(),
+    travelers: Number(bk.trav.value||1), notes: bk.notes.value.trim()
   };
-
-  // include tripId if present
-  if (BK.tripId.value) payload.tripId = BK.tripId.value;
-
-  // include flight if any flight fields exist
-  if (BK.fCarrier.value || BK.fRoute.value) {
-    const [source, destination] = (BK.fRoute.value || '').split('→').map(s => (s || '').trim());
-    payload.flight = {
-      carrier: BK.fCarrier.value || '',
-      source,
-      destination,
-      date: BK.fDate.value || '',
-      departure: BK.fDeparture.value || '',
-      duration: BK.fDuration.value || '',
-      price: Number(BK.fPrice.value || 0)
-    };
+  if (!payload.name || !payload.email) return toast('Name & email required');
+  if (bk.tripId.value) payload.tripId = bk.tripId.value;
+  if (bk.c.value || bk.route.value){
+    const [source,destination] = (bk.route.value||'').split('→').map(s=>(s||'').trim());
+    payload.flight = { carrier:bk.c.value, source, destination, date:bk.d.value, departure:bk.dep.value, duration:bk.dur.value, price:Number(bk.price.value||0) };
   }
-
-  if (!payload.name || !payload.email) {
-    toast('Name and email are required');
-    return;
-  }
-
-  try {
-    await apiPost(ENDPOINTS.bookings, payload);
-    toast('✅ Booking submitted!');
-    closeBookingPanel();
-  } catch (err) {
-    console.error(err);
-    toast('Booking failed');
-  }
+  try { await post(API.bookings, payload); toast('✅ Booking submitted'); closeBk(); }
+  catch { toast('Booking failed'); }
 });
 
-// Cancel
-BK.cancel?.addEventListener('click', closeBookingPanel);
+bk.cancel.addEventListener('click', closeBk);
 
-// ===== Boot =====
+// ===== Wire & boot =====
+qBtn.addEventListener('click', runSearch);
+cat.addEventListener('change', runSearch);
+popular.addEventListener('click', ()=>loadTrips({ q:'popular' }));
+reset.addEventListener('click', ()=>{ qIn.value=''; cat.value=''; loadTrips(); });
+ff.btn.addEventListener('click', searchFlights);
+
 loadTrips();
