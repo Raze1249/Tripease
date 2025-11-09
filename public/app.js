@@ -1,11 +1,12 @@
-// ===== Config / endpoints (same-origin) =====
+// ===== Endpoints =====
 const ENDPOINTS = {
   trips: '/api/trips',
   airports: '/api/airports',
-  flights: '/api/search-flights'
+  flights: '/api/search-flights',
+  bookings: '/api/bookings'
 };
 
-// ===== Elements =====
+// ===== Elements ===== (you likely already have most of these)
 const cardsContainer = document.getElementById('cardsContainer');
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
@@ -13,6 +14,7 @@ const categorySelect = document.getElementById('categorySelect');
 const resetBtn = document.getElementById('resetBtn');
 const popularBtn = document.getElementById('popularBtn');
 
+// Flights UI
 const FF = {
   source: document.getElementById('ff-source'),
   dest: document.getElementById('ff-destination'),
@@ -21,11 +23,50 @@ const FF = {
   results: document.getElementById('ff-results')
 };
 
+// Toast
 const toastEl = document.getElementById('toast');
 function toast(msg, ms = 2000) {
   toastEl.textContent = msg;
   toastEl.style.display = 'block';
   setTimeout(() => (toastEl.style.display = 'none'), ms);
+}
+
+// ===== Booking Panel Elements =====
+const BK = {
+  panel: document.getElementById('booking-panel'),
+  form: document.getElementById('booking-form'),
+  name: document.getElementById('bk-name'),
+  email: document.getElementById('bk-email'),
+  phone: document.getElementById('bk-phone'),
+  travelers: document.getElementById('bk-travelers'),
+  notes: document.getElementById('bk-notes'),
+  tripId: document.getElementById('bk-tripId'),
+
+  fCarrier: document.getElementById('bk-flight-carrier'),
+  fRoute: document.getElementById('bk-flight-route'),
+  fDate: document.getElementById('bk-flight-date'),
+  fDeparture: document.getElementById('bk-flight-departure'),
+  fDuration: document.getElementById('bk-flight-duration'),
+  fPrice: document.getElementById('bk-flight-price'),
+
+  cancel: document.getElementById('bk-cancel')
+};
+
+function openBookingPanel() {
+  BK.panel.style.display = 'block';
+  window.scrollTo({ top: BK.panel.offsetTop - 80, behavior: 'smooth' });
+}
+function closeBookingPanel() {
+  BK.panel.style.display = 'none';
+  BK.form.reset();
+  // clear readonly details
+  BK.tripId.value = '';
+  BK.fCarrier.value = '';
+  BK.fRoute.value = '';
+  BK.fDate.value = '';
+  BK.fDeparture.value = '';
+  BK.fDuration.value = '';
+  BK.fPrice.value = '';
 }
 
 // ===== API helpers =====
@@ -50,7 +91,7 @@ async function apiPost(url, body) {
   return res.json();
 }
 
-// ===== Trips =====
+// ===== Trips (unchanged rendering, but add a Book button) =====
 function tripCard(t) {
   const stars = '★'.repeat(Math.round(t.rating || 5));
   return `
@@ -62,6 +103,7 @@ function tripCard(t) {
         <p style="font-size:14px;color:#444;margin-top:8px;">${t.description || ''}</p>
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn flight-btn" data-name="${t.name}">Flights</button>
+          <button class="btn book-trip-btn" data-id="${t._id}">Book Trip</button>
         </div>
       </div>
     </div>
@@ -69,7 +111,6 @@ function tripCard(t) {
 }
 
 function renderTrips(raw) {
-  // backend may return {data:[],meta:{}} or []
   const list = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
   cardsContainer.innerHTML = list.length ? list.map(tripCard).join('') : '<p>No trips found.</p>';
 }
@@ -93,28 +134,16 @@ async function runSearch() {
   await loadTrips(params);
 }
 
-// UI events for trips
 searchBtn?.addEventListener('click', runSearch);
 categorySelect?.addEventListener('change', runSearch);
-popularBtn?.addEventListener('click', async () => {
-  await loadTrips({ q: 'popular' });
-});
+popularBtn?.addEventListener('click', async () => { await loadTrips({ q: 'popular' }); });
 resetBtn?.addEventListener('click', async () => {
   searchInput.value = '';
   categorySelect.value = '';
   await loadTrips();
 });
 
-// Card-level flight button to prefill destination
-cardsContainer?.addEventListener('click', (e) => {
-  const btn = e.target.closest('.flight-btn');
-  if (!btn) return;
-  const destName = btn.dataset.name || '';
-  FF.dest.value = destName;
-  window.scrollTo({ top: FF.dest.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
-});
-
-// ===== Flights =====
+// ===== Flights (existing) =====
 async function searchFlights({ source, destination, departureDate }) {
   return apiPost(ENDPOINTS.flights, { source, destination, departureDate });
 }
@@ -126,7 +155,7 @@ function renderFlights(list) {
   }
   FF.results.innerHTML = `
     <div style="display:grid;gap:12px;">
-      ${list.map(f => `
+      ${list.map((f, idx) => `
         <div style="background:#fff;color:#000;border-radius:12px;padding:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
             <strong>${f.carrier}</strong>
@@ -134,6 +163,15 @@ function renderFlights(list) {
             <span>Departs: ${f.departure}</span>
             <span>Duration: ${f.duration}</span>
             <span>Price: $${f.price}</span>
+            <button class="btn book-flight-btn"
+              data-carrier="${f.carrier}"
+              data-source="${f.source}"
+              data-destination="${f.destination}"
+              data-departure="${f.departure}"
+              data-duration="${f.duration}"
+              data-price="${f.price}"
+              data-date="${FF.date.value}"
+            >Book</button>
           </div>
         </div>
       `).join('')}
@@ -166,6 +204,81 @@ FF?.btn?.addEventListener('click', async () => {
     FF.btn.textContent = 'Search Flights';
   }
 });
+
+// ===== Booking interactions =====
+
+// Open booking from a Trip card
+cardsContainer?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.book-trip-btn');
+  if (!btn) return;
+  const tripId = btn.dataset.id;
+  closeBookingPanel();
+  BK.tripId.value = tripId;
+  openBookingPanel();
+});
+
+// Open booking from a Flight result
+FF.results?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.book-flight-btn');
+  if (!btn) return;
+
+  closeBookingPanel();
+  // Prefill flight info
+  BK.fCarrier.value = btn.dataset.carrier || '';
+  BK.fRoute.value = `${btn.dataset.source || ''} → ${btn.dataset.destination || ''}`;
+  BK.fDate.value = btn.dataset.date || '';
+  BK.fDeparture.value = btn.dataset.departure || '';
+  BK.fDuration.value = btn.dataset.duration || '';
+  BK.fPrice.value = btn.dataset.price || '';
+  openBookingPanel();
+});
+
+// Submit booking to API
+BK.form?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    name: BK.name.value.trim(),
+    email: BK.email.value.trim(),
+    phone: BK.phone.value.trim(),
+    travelers: Number(BK.travelers.value || 1),
+    notes: BK.notes.value.trim()
+  };
+
+  // include tripId if present
+  if (BK.tripId.value) payload.tripId = BK.tripId.value;
+
+  // include flight if any flight fields exist
+  if (BK.fCarrier.value || BK.fRoute.value) {
+    const [source, destination] = (BK.fRoute.value || '').split('→').map(s => (s || '').trim());
+    payload.flight = {
+      carrier: BK.fCarrier.value || '',
+      source,
+      destination,
+      date: BK.fDate.value || '',
+      departure: BK.fDeparture.value || '',
+      duration: BK.fDuration.value || '',
+      price: Number(BK.fPrice.value || 0)
+    };
+  }
+
+  if (!payload.name || !payload.email) {
+    toast('Name and email are required');
+    return;
+  }
+
+  try {
+    await apiPost(ENDPOINTS.bookings, payload);
+    toast('✅ Booking submitted!');
+    closeBookingPanel();
+  } catch (err) {
+    console.error(err);
+    toast('Booking failed');
+  }
+});
+
+// Cancel
+BK.cancel?.addEventListener('click', closeBookingPanel);
 
 // ===== Boot =====
 loadTrips();
