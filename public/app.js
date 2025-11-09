@@ -1,4 +1,6 @@
-// ===== Endpoints =====
+// ===================== Tripease Frontend (app.js) =====================
+
+// ----- Endpoints -----
 const API = {
   trips: '/api/trips',
   flights: '/api/search-flights',
@@ -11,17 +13,18 @@ const API = {
   }
 };
 
-// ===== Shorthand helpers =====
+// ----- Helpers -----
 const $ = id => document.getElementById(id);
-const get = (u, q={}) => fetch(u + (Object.keys(q).length ? `?${new URLSearchParams(q)}` : '')).then(r=>r.json());
+const get = (u, q={}) =>
+  fetch(u + (Object.keys(q).length ? `?${new URLSearchParams(q)}` : '')).then(r => r.json());
 const post = (u, b, cred=false) =>
   fetch(u, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(b), ...(cred?{credentials:'include'}:{}) })
-    .then(r=>{ if(!r.ok) throw new Error(`${r.status}`); return r.json(); });
+    .then(r => { if(!r.ok) throw new Error(`${r.status}`); return r.json(); });
 
 const toastEl = $('toast');
-const toast = (m, ms=1800) => { toastEl.textContent=m; toastEl.style.display='block'; setTimeout(()=>toastEl.style.display='none',ms); };
+const toast = (m, ms=1800) => { toastEl.textContent = m; toastEl.style.display = 'block'; setTimeout(()=>toastEl.style.display='none', ms); };
 
-// ===== Auth (minimal JWT cookie) =====
+// ===================== AUTH (Login / Register / Logout) =====================
 const A = {
   userEl: $('auth-user'),
   btnLogin: $('btn-login'),
@@ -57,39 +60,135 @@ function setUser(user){
   }
 }
 async function me(){
-  try{
+  try {
     const r = await fetch(API.auth.me, { credentials:'include' });
-    const j = await r.json(); setUser(j.user);
-  }catch{ setUser(null); }
+    const j = await r.json();
+    setUser(j.user);
+  } catch {
+    setUser(null);
+  }
 }
-// auth events
+
+// Auth events
 A.btnLogin?.addEventListener('click', ()=> open(A.mLogin));
 A.loginCancel?.addEventListener('click', ()=> close(A.mLogin));
 A.loginSubmit?.addEventListener('click', async ()=>{
   const email = A.loginEmail.value.trim(), password = A.loginPass.value.trim();
   if (!email || !password) return toast('Email & password required');
-  try{
+  try {
     await post(API.auth.login, { email, password }, true);
     close(A.mLogin); toast('Logged in'); me();
-  }catch{ toast('Login failed'); }
+  } catch { toast('Login failed'); }
 });
+
 A.btnRegister?.addEventListener('click', ()=> open(A.mRegister));
 A.regCancel?.addEventListener('click', ()=> close(A.mRegister));
 A.regSubmit?.addEventListener('click', async ()=>{
   const name = A.regName.value.trim(), email = A.regEmail.value.trim(), password = A.regPass.value.trim();
   if (!name || !email || !password) return toast('All fields required');
-  try{
+  try {
     await post(API.auth.register, { name, email, password }, true);
     close(A.mRegister); toast('Account created'); me();
-  }catch{ toast('Registration failed'); }
+  } catch { toast('Registration failed'); }
 });
+
 A.btnLogout?.addEventListener('click', async ()=>{
   await fetch(API.auth.logout, { method:'POST', credentials:'include' });
   toast('Logged out'); setUser(null);
 });
 
-// ===== Trips =====
-const cards = $('cardsContainer'), qIn = $('searchInput'), qBtn = $('searchBtn'), cat = $('categorySelect'), reset = $('resetBtn'), popular = $('popularBtn');
+// ===================== POPULAR PLACES (static gallery) =====================
+const POPULAR_PLACES = [
+  {
+    name: 'Bali, Indonesia',
+    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    blurb: 'Beaches, temples & tropical vibes', rating: 5
+  },
+  {
+    name: 'Swiss Alps',
+    imageUrl: 'https://images.unsplash.com/photo-1508264165352-258859e62245?auto=format&fit=crop&w=1200&q=80',
+    blurb: 'Snowy peaks & alpine towns', rating: 5
+  },
+  {
+    name: 'Santorini, Greece',
+    imageUrl: 'https://images.unsplash.com/photo-1508739826987-b79cd8b7da12?auto=format&fit=crop&w=1200&q=80',
+    blurb: 'White cliffs over the Aegean', rating: 5
+  },
+  {
+    name: 'Kyoto, Japan',
+    imageUrl: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80',
+    blurb: 'Shrines, gardens & tea houses', rating: 5
+  },
+  {
+    name: 'Maldives',
+    imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80',
+    blurb: 'Overwater villas & lagoons', rating: 5
+  },
+  {
+    name: 'Paris, France',
+    imageUrl: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=1200&q=80',
+    blurb: 'Cafés, art & the Eiffel Tower', rating: 5
+  }
+];
+
+const popularGrid = $('popularGrid');
+const popularPanel = $('popular-panel');
+
+const popularCard = p => `
+  <div class="card" style="width:260px">
+    <img src="${p.imageUrl}" alt="${p.name}">
+    <div class="card-content">
+      <h3>${p.name}</h3>
+      <p class="stars">${'★'.repeat(Math.round(p.rating||5))}</p>
+      <p style="font-size:14px;color:#444;margin-top:6px;">${p.blurb||''}</p>
+    </div>
+  </div>
+`;
+
+function renderPopular(){
+  if (!popularGrid || !popularPanel) return;
+  popularGrid.innerHTML = POPULAR_PLACES.map(popularCard).join('');
+  popularPanel.style.display = 'block';
+  window.scrollTo({ top: popularPanel.offsetTop - 80, behavior: 'smooth' });
+}
+
+$('popularBtn')?.addEventListener('click', renderPopular);
+
+// ===================== SUGGESTED TRIPS (top-rated from API with fallback) =====================
+const suggestedWrap = $('suggestedContainer');
+
+const SUGGESTED_FALLBACK = [
+  { _id:'sg1', name:'Goa Beaches',
+    imageUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80', rating:5 },
+  { _id:'sg2', name:'Himalayan Trek',
+    imageUrl:'https://images.unsplash.com/photo-1508264165352-258859e62245?auto=format&fit=crop&w=1200&q=80', rating:5 },
+  { _id:'sg3', name:'Rajasthan Heritage',
+    imageUrl:'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80', rating:4 }
+];
+
+const miniTripCard = t => `
+  <div class="card" style="width:240px">
+    <img src="${t.imageUrl}" alt="${t.name}">
+    <div class="card-content">
+      <h3>${t.name}</h3>
+      <p class="stars">${'★'.repeat(Math.round(t.rating||5))}</p>
+    </div>
+  </div>
+`;
+
+async function loadSuggestedTrips(){
+  if (!suggestedWrap) return;
+  try {
+    const data = await get(API.trips, { sort:'-rating', limit:6 });
+    const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+    suggestedWrap.innerHTML = (list.length ? list : SUGGESTED_FALLBACK).map(miniTripCard).join('');
+  } catch {
+    suggestedWrap.innerHTML = SUGGESTED_FALLBACK.map(miniTripCard).join('');
+  }
+}
+
+// ===================== TRIPS (list + search/filter) =====================
+const cards = $('cardsContainer'), qIn = $('searchInput'), qBtn = $('searchBtn'), cat = $('categorySelect'), reset = $('resetBtn');
 
 const tripCard = t => `
   <div class="card">
@@ -105,16 +204,20 @@ const tripCard = t => `
     </div>
   </div>
 `;
+
 const renderTrips = raw => {
+  if (!cards) return;
   const list = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
   cards.innerHTML = list.length ? list.map(tripCard).join('') : '<p>No trips found.</p>';
 };
 const loadTrips = (p={}) => get(API.trips, p).then(renderTrips).catch(()=>toast('Failed to load trips'));
-const runSearch = () => { const p={}; if(qIn.value.trim()) p.q=qIn.value.trim(); if(cat.value) p.category=cat.value; loadTrips(p); };
+const runSearch = () => { const p={}; if(qIn?.value.trim()) p.q=qIn.value.trim(); if(cat?.value) p.category=cat.value; loadTrips(p); };
 
-// ===== Flights =====
+// ===================== FLIGHTS (search + render) =====================
 const ff = { src:$('ff-source'), dst:$('ff-destination'), date:$('ff-date'), btn:$('ff-search'), out:$('ff-results') };
+
 const renderFlights = (list=[]) => {
+  if (!ff.out) return;
   ff.out.innerHTML = !list.length ? '<p>No flights found.</p>' : `
     <div style="display:grid;gap:12px;">
       ${list.map(f=>`
@@ -128,41 +231,45 @@ const renderFlights = (list=[]) => {
             <button class="btn book-flight-btn"
               data-carrier="${f.carrier}" data-source="${f.source}" data-destination="${f.destination}"
               data-departure="${f.departure}" data-duration="${f.duration}" data-price="${f.price}"
-              data-date="${ff.date.value}">Book</button>
+              data-date="${ff.date?.value||''}">Book</button>
           </div>
         </div>`).join('')}
     </div>`;
 };
+
 const searchFlights = async () => {
-  const source = ff.src.value.trim(), destination = ff.dst.value.trim(), departureDate = ff.date.value;
+  const source = ff.src?.value.trim(), destination = ff.dst?.value.trim(), departureDate = ff.date?.value;
   if (!source || !destination || !departureDate) return toast('Fill source, destination, date');
-  try{
+  try {
     ff.btn.disabled = true; ff.btn.textContent='Searching...';
     const flights = await post(API.flights, { source, destination, departureDate });
     renderFlights(flights); toast('Flights loaded');
-  }catch{ toast('Flight search failed'); }
-  finally{ ff.btn.disabled=false; ff.btn.textContent='Search Flights'; }
+  } catch { toast('Flight search failed'); }
+  finally { ff.btn.disabled=false; ff.btn.textContent='Search Flights'; }
 };
 
-// ===== Booking panel =====
+// ===================== BOOKING (panel + submit) =====================
 const bk = {
   panel:$('booking-panel'), form:$('booking-form'),
   name:$('bk-name'), email:$('bk-email'), phone:$('bk-phone'), trav:$('bk-travelers'), notes:$('bk-notes'),
   tripId:$('bk-tripId'),
-  c:$('bk-flight-carrier'), route:$('bk-flight-route'), d:$('bk-flight-date'), dep:$('bk-flight-departure'), dur:$('bk-flight-duration'), price:$('bk-flight-price'),
+  c:$('bk-flight-carrier'), route:$('bk-flight-route'), d:$('bk-flight-date'),
+  dep:$('bk-flight-departure'), dur:$('bk-flight-duration'), price:$('bk-flight-price'),
   cancel:$('bk-cancel')
 };
-const openBk = ()=>{ bk.panel.style.display='block'; window.scrollTo({top:bk.panel.offsetTop-80,behavior:'smooth'}); };
-const closeBk = ()=>{ bk.panel.style.display='none'; bk.form.reset(); bk.tripId.value=bk.c.value=bk.route.value=bk.d.value=bk.dep.value=bk.dur.value=bk.price.value=''; };
+const openBk = ()=>{ if(!bk.panel) return; bk.panel.style.display='block'; window.scrollTo({ top: bk.panel.offsetTop - 80, behavior: 'smooth' }); };
+const closeBk = ()=>{ if(!bk.panel) return; bk.panel.style.display='none'; bk.form?.reset(); bk.tripId.value=bk.c.value=bk.route.value=bk.d.value=bk.dep.value=bk.dur.value=bk.price.value=''; };
 
-// open from trip card / flight result
-cards.addEventListener('click', e=>{
+// from Trips cards
+cards?.addEventListener('click', e=>{
   const tBtn = e.target.closest('.book-trip-btn');
   const fBtn = e.target.closest('.flight-btn');
   if (tBtn){ closeBk(); bk.tripId.value = tBtn.dataset.id; openBk(); }
-  if (fBtn){ ff.dst.value = fBtn.dataset.name || ''; window.scrollTo({top:ff.dst.getBoundingClientRect().top + scrollY - 100, behavior:'smooth'}); }
+  if (fBtn){ if (ff.dst) { ff.dst.value = fBtn.dataset.name || ''; window.scrollTo({ top: ff.dst.getBoundingClientRect().top + scrollY - 100, behavior:'smooth' }); } }
 });
-ff.out.addEventListener('click', e=>{
+
+// from Flights results
+ff.out?.addEventListener('click', e=>{
   const b = e.target.closest('.book-flight-btn'); if (!b) return;
   closeBk();
   bk.c.value = b.dataset.carrier;
@@ -171,8 +278,8 @@ ff.out.addEventListener('click', e=>{
   openBk();
 });
 
-// submit booking (requires name+email)
-bk.form.addEventListener('submit', async e=>{
+// submit booking
+bk.form?.addEventListener('submit', async e=>{
   e.preventDefault();
   const payload = {
     name: bk.name.value.trim(), email: bk.email.value.trim(), phone: bk.phone.value.trim(),
@@ -181,20 +288,20 @@ bk.form.addEventListener('submit', async e=>{
   if (!payload.name || !payload.email) return toast('Name & email required');
   if (bk.tripId.value) payload.tripId = bk.tripId.value;
   if (bk.c.value || bk.route.value){
-    const [source,destination] = (bk.route.value||'').split('→').map(s=>(s||'').trim());
-    payload.flight = { carrier:bk.c.value, source, destination, date:bk.d.value, departure:bk.dep.value, duration:bk.dur.value, price:Number(bk.price.value||0) };
+    const [source, destination] = (bk.route.value||'').split('→').map(s => (s||'').trim());
+    payload.flight = { carrier: bk.c.value, source, destination, date: bk.d.value, departure: bk.dep.value, duration: bk.dur.value, price: Number(bk.price.value||0) };
   }
-  try{ await post(API.bookings, payload); toast('✅ Booking submitted'); closeBk(); }
-  catch{ toast('Booking failed'); }
+  try { await post(API.bookings, payload); toast('✅ Booking submitted'); closeBk(); }
+  catch { toast('Booking failed'); }
 });
-bk.cancel.addEventListener('click', closeBk);
+bk.cancel?.addEventListener('click', closeBk);
 
-// ===== Wire & boot =====
-$('ff-search').addEventListener('click', searchFlights);
-qBtn.addEventListener('click', runSearch);
-$('categorySelect').addEventListener('change', runSearch);
-$('resetBtn').addEventListener('click', ()=>{ $('searchInput').value=''; $('categorySelect').value=''; loadTrips(); });
-$('popularBtn').addEventListener('click', ()=>loadTrips({ q:'popular' }));
+// ===================== Wire & Boot =====================
+$('ff-search')?.addEventListener('click', searchFlights);
+qBtn?.addEventListener('click', runSearch);
+cat?.addEventListener('change', runSearch);
+reset?.addEventListener('click', ()=>{ if(qIn) qIn.value=''; if(cat) cat.value=''; loadTrips(); });
 
-me();         // check auth
-loadTrips();  // load trips
+me();                // auth check
+loadSuggestedTrips();// suggested trips strip
+loadTrips();         // main trips list
