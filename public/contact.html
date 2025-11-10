@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Contact | Tripease Explorer</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif}
+  body{
+    background:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80') no-repeat center/cover;
+    color:#111;overflow-x:hidden;
+  }
+  /* Containers */
+  header, footer, .contact, .map {
+    width:90%;
+    margin:20px auto;
+    padding:20px;
+    border-radius:16px;
+    background:rgba(255,255,255,0.88);
+    backdrop-filter:blur(8px);
+    border:1px solid rgba(0,0,0,0.06);
+  }
+  /* Header */
+  header{display:flex;align-items:center;justify-content:space-between}
+  header h1{font-size:20px;color:#000}
+  nav a{margin:0 10px;text-decoration:none;color:#000;font-weight:600}
+  nav a:hover{color:#00b3b3}
+  .search-box input{padding:6px;border-radius:8px;border:1px solid #ccc;outline:none}
+  /* Contact section */
+  .contact h2{text-align:center;margin-bottom:12px;color:#000}
+  .contact-content{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+  .info{flex:1 1 300px}
+  .info p{margin:8px 0;color:#111;font-weight:500}
+  .form-box{flex:1 1 350px;background:rgba(255,255,255,0.98);padding:18px;border-radius:12px}
+  form{max-width:640px;margin:0 auto}
+  input,textarea,select{
+    width:100%;padding:10px;margin:8px 0;border:1px solid #cfcfcf;border-radius:10px;outline:none;font-size:15px;color:#111;
+  }
+  textarea{min-height:120px;resize:vertical}
+  button{
+    width:100%;padding:12px;background:#00ffff;border:none;border-radius:10px;font-weight:700;color:#000;cursor:pointer;
+    transition:all .18s ease;
+  }
+  button:hover{background:#000;color:#fff}
+  /* Map */
+  .map iframe{width:100%;height:350px;border:0;border-radius:12px;display:block}
+  footer{text-align:center;background:rgba(0,0,0,0.6);color:#fff;font-weight:500}
+  /* Responsive */
+  @media (max-width:768px){
+    .contact-content{flex-direction:column;text-align:center}
+    .info, .form-box{flex:1 1 100%}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Tripease Explorer</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="#">Explore</a>
+    <a href="contact.html" style="color:#00b3b3">Contact</a>
+  </nav>
+  <div class="search-box">
+    <input type="text" placeholder="Search.." aria-label="Search">
+  </div>
+</header>
+
+<!-- ===== Contact Section ===== -->
+<section class="contact" aria-labelledby="contact-heading">
+  <h2 id="contact-heading">Contact Us</h2>
+  <div class="contact-content">
+    <div class="info" aria-label="Contact information">
+      <p>We’d love to hear from you! Whether you have questions, feedback, or collaboration ideas — reach out anytime.</p>
+      <p><strong>📍 Address:</strong> Poornima University, Sitapura, Jaipur, Rajasthan</p>
+      <p><strong>📞 Phone:</strong> +91 9079221858 / +91 8503957791</p>
+      <p><strong>✉ Email:</strong> tripease@gmail.com</p>
+      <p><strong>🌐 Website Handler:</strong> Tripease Web Team</p>
+    </div>
+    <div class="form-box" aria-label="Contact form">
+      <form id="contactForm" onsubmit="event.preventDefault(); handleSubmit();">
+        <input id="name" name="name" type="text" placeholder="Your Name" required>
+        <input id="email" name="email" type="email" placeholder="Your Email" required>
+        <input id="subject" name="subject" type="text" placeholder="Subject (optional)">
+        <textarea id="message" name="message" placeholder="Your Message" required></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Map Section ===== -->
+<section class="map" aria-label="Map showing Poornima University">
+  <iframe
+    src="https://www.google.com/maps?q=Poornima%20University%20Jaipur&z=15&output=embed"
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+    title="Poornima University Map - Jaipur">
+  </iframe>
+</section>
+
+<footer>
+  © 2025 Tripease Explorer | Managed by Tripease Web Team | info@tripease.com
+</footer>
+
+<!-- ===== Script: API Integration ===== -->
+<script>
+  async function handleSubmit(){
+    const form = document.getElementById('contactForm');
+    const payload = {
+      name: form.name.value.trim(),
+      email: form.email.value.trim(),
+      subject: form.subject.value.trim(),
+      message: form.message.value.trim()
+    };
+    if (!payload.name || !payload.email || !payload.message) {
+      alert('Please fill in Name, Email, and Message.');
+      return;
+    }
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Request failed');
+      alert('✅ Message sent! Our team will contact you soon.');
+      form.reset();
+    } catch (err) {
+      console.error('Contact error:', err);
+      alert('❌ Failed to send message. Please try again later.');
+    }
+  }
+</script>
+</body>
+</html>
