@@ -14,6 +14,10 @@ const API = {
 };
 
 // ----- Helpers -----
+let TRIP_VIEW = 'grid'; // 'grid' | 'list'
+
+const groupBy = (arr, key) =>
+  arr.reduce((acc, x) => ((acc[x[key] || 'Others'] ||= []).push(x), acc), {});
 const $ = id => document.getElementById(id);
 const get = (u, q={}) =>
   fetch(u + (Object.keys(q).length ? `?${new URLSearchParams(q)}` : '')).then(r => r.json());
