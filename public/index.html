@@ -142,18 +142,28 @@
   </section>
 
   <!-- Trips -->
-  <section class="panel">
-    <h2>Trips</h2>
-    <div class="row" style="margin-bottom:10px">
-      <select id="categorySelect">
-        <option value="">All Categories</option>
-        <option>Beach</option><option>Mount</option><option>Country</option>
-        <option>City</option><option>Desert</option><option>Adventure</option><option>Cultural</option>
-      </select>
-      <button id="resetBtn" class="btn">Reset</button>
-    </div>
-    <section class="places" id="cardsContainer"></section>
-  </section>
+ <!-- Trips -->
+<section class="panel">
+  <h2 style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <span>Trips</span>
+    <span>
+      <button id="viewGrid" class="btn" style="padding:6px 10px">Grid</button>
+      <button id="viewList" class="btn" style="padding:6px 10px;background:#555">List</button>
+    </span>
+  </h2>
+
+  <div class="row" style="margin-bottom:10px">
+    <select id="categorySelect">
+      <option value="">All Categories</option>
+      <option>Beach</option><option>Mount</option><option>Country</option>
+      <option>City</option><option>Desert</option><option>Adventure</option><option>Cultural</option>
+    </select>
+    <button id="resetBtn" class="btn">Reset</button>
+  </div>
+
+  <!-- This single container will render either Grid cards or List by category -->
+  <section class="places" id="cardsContainer"></section>
+</section>
 
   <footer>© 2025 Tripease Explorer | Crafted for Adventure Lovers</footer>
 
