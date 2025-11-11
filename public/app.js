@@ -14,10 +14,6 @@ const API = {
 };
 
 // ----- Helpers -----
-let TRIP_VIEW = 'grid'; // 'grid' | 'list'
-
-const groupBy = (arr, key) =>
-  arr.reduce((acc, x) => ((acc[x[key] || 'Others'] ||= []).push(x), acc), {});
 const $ = id => document.getElementById(id);
 const get = (u, q={}) =>
   fetch(u + (Object.keys(q).length ? `?${new URLSearchParams(q)}` : '')).then(r => r.json());
@@ -209,7 +205,11 @@ async function loadSuggestedTrips(){
   }
 }
 
-// ===================== TRIPS (list + search/filter) =====================
+// ===================== TRIPS (Grid/List with categories) =====================
+let TRIP_VIEW = 'grid'; // 'grid' | 'list'
+const groupBy = (arr, key) =>
+  arr.reduce((acc, x) => ((acc[x[key] || 'Others'] ||= []).push(x), acc), {});
+
 const cards = $('cardsContainer'), qIn = $('searchInput'), qBtn = $('searchBtn'), cat = $('categorySelect'), reset = $('resetBtn');
 
 const tripCard = t => `
@@ -227,13 +227,73 @@ const tripCard = t => `
   </div>
 `;
 
+function renderTripsGrid(list){
+  cards.classList.remove('trip-list');
+  cards.classList.add('places');
+  cards.innerHTML = list.map(tripCard).join('');
+}
+
+function listItem(t){
+  return `
+    <div class="item">
+      <img src="${t.imageUrl}" alt="${t.name}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
+      <div>
+        <h4>${t.name} <span class="badge">${t.category || 'Other'}</span></h4>
+        <div class="stars" style="color:gold">${'★'.repeat(Math.round(t.rating||5))}</div>
+        <p style="font-size:13px;color:#444;margin-top:4px">${t.description || ''}</p>
+      </div>
+      <div class="actions">
+        <button class="btn flight-btn" data-name="${t.name}">Flights</button>
+        <button class="btn book-trip-btn" data-id="${t._id}">Book</button>
+      </div>
+    </div>
+  `;
+}
+function renderTripsList(list){
+  cards.classList.remove('places');
+  cards.classList.add('trip-list');
+  const byCat = groupBy(list, 'category');
+  const html = Object.keys(byCat).sort().map(cat => `
+    <div class="cat-block">
+      <div class="cat-title">${cat}</div>
+      ${byCat[cat].map(listItem).join('')}
+    </div>
+  `).join('');
+  cards.innerHTML = html;
+}
+
 const renderTrips = raw => {
   if (!cards) return;
   const list = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
-  cards.innerHTML = list.length ? list.map(tripCard).join('') : '<p>No trips found.</p>';
+  if (!list.length) { cards.innerHTML = '<p>No trips found.</p>'; return; }
+  TRIP_VIEW === 'list' ? renderTripsList(list) : renderTripsGrid(list);
 };
+
 const loadTrips = (p={}) => get(API.trips, p).then(renderTrips).catch(()=>toast('Failed to load trips'));
-const runSearch = () => { const p={}; if(qIn?.value.trim()) p.q=qIn.value.trim(); if(cat?.value) p.category=cat.value; loadTrips(p); };
+const runSearch = () => {
+  const p={};
+  if(qIn?.value.trim()) p.q=qIn.value.trim();
+  if(cat?.value) p.category=cat.value;
+  p.sort = TRIP_VIEW === 'list' ? 'category name' : '-createdAt';
+  loadTrips(p);
+};
+
+// View toggles
+const viewGridBtn = $('viewGrid');
+const viewListBtn = $('viewList');
+
+viewGridBtn?.addEventListener('click', ()=>{
+  TRIP_VIEW = 'grid';
+  runSearch();
+  viewGridBtn.style.background = '#00b3b3';
+  viewListBtn.style.background = '#555';
+});
+viewListBtn?.addEventListener('click', ()=>{
+  TRIP_VIEW = 'list';
+  runSearch();
+  viewListBtn.style.background = '#00b3b3';
+  viewGridBtn.style.background = '#555';
+});
 
 // ===================== FLIGHTS (search + render) =====================
 const ff = { src:$('ff-source'), dst:$('ff-destination'), date:$('ff-date'), btn:$('ff-search'), out:$('ff-results') };
@@ -323,6 +383,7 @@ $('ff-search')?.addEventListener('click', searchFlights);
 qBtn?.addEventListener('click', runSearch);
 cat?.addEventListener('change', runSearch);
 reset?.addEventListener('click', ()=>{ if(qIn) qIn.value=''; if(cat) cat.value=''; loadTrips(); });
+$('popularBtn')?.addEventListener('click', renderPopular);
 
 me();                // auth check
 loadSuggestedTrips();// suggested trips strip
