@@ -146,6 +146,11 @@ const POPULAR_PLACES = [
   { name: 'Kyoto, Japan', imageUrl: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80', blurb: 'Shrines, gardens & tea houses', rating: 5 },
   { name: 'Maldives', imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80', blurb: 'Overwater villas & lagoons', rating: 5 },
   { name: 'Paris, France', imageUrl: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=1200&q=80', blurb: 'Cafés, art & the Eiffel Tower', rating: 5 }
+  { name: 'Kolkata Cultural Walk', imageUrl: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=60', blurb: 'Heritage lanes & trams', rating: 5 },
+  { name: 'Rajasthan Desert Camp', imageUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60', blurb: 'Camel safaris & folk nights', rating: 5 },
+  { name: 'Goa Beach Escape', imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=60', blurb: 'Beaches & nightlife', rating: 5 },
+  { name: 'Himachal Trek', imageUrl: 'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?auto=format&fit=crop&w=1200&q=60', blurb: 'Trekking & pine forests', rating: 5 },
+  { name: 'Andaman Islands', imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=60', blurb: 'Crystal waters & diving', rating: 5 }
 ];
 
 const popularGrid = $('popularGrid');
