@@ -174,10 +174,30 @@ $('popularBtn')?.addEventListener('click', renderPopular);
 const suggestedWrap = $('suggestedContainer');
 
 const SUGGESTED_FALLBACK = [
-  { _id:'sg1', name:'Goa Beaches', imageUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80', rating:5 },
-  { _id:'sg2', name:'Himalayan Trek', imageUrl:'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?auto=format&fit=crop&w=1200&q=80', rating:5, description:'Breathtaking trails', category:'Mount' },
-  { _id:'sg3', name:'Rajasthan Heritage', imageUrl:'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80', rating:4, description:'Palaces & desert safaris', category:'Cultural' }
+  {
+    _id:'sg1',
+    name:'Kolkata Cultural Walk',
+    imageUrl:'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=60',
+    rating:5
+  },
+  {
+    _id:'sg2',
+    name:'Rajasthan Desert Camp',
+    imageUrl:'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60',
+    rating:5,
+    description:'Sleep under the stars',
+    category:'Desert'
+  },
+  {
+    _id:'sg3',
+    name:'Goa Beach Escape',
+    imageUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=60',
+    rating:5,
+    description:'Sandy beaches & night markets',
+    category:'Beach'
+  }
 ];
+
 
 const miniTripCard = t => `
   <div class="card" style="width:240px">
