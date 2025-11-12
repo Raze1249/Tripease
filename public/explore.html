@@ -153,13 +153,59 @@
 
   <script>
     // ---------- Demo trip data (replace or augment with API results) ----------
-    const demoTrips = [
-      { id: 't1', title: 'Rajasthan Desert Camp', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=60', tags: ['Desert','Cultural'], mood: 'relax', duration: '3-4', price: 8500, desc: 'Sleep under the stars and enjoy folk music.' },
-      { id: 't2', title: 'Goa Beach Escape', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=60', tags: ['Beach','Relax'], mood: 'relax', duration: '3-4', price: 6000, desc: 'Sun, sand and seafood—perfect for a weekend.' },
-      { id: 't3', title: 'Himachal Trekking Trail', img: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60', tags: ['Mount','Adventure'], mood: 'adventure', duration: '5+', price: 12000, desc: 'Multi-day trek with stunning mountain views.' },
-      { id: 't4', title: 'Kolkata Cultural Walk', img: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=60', tags: ['City','Cultural'], mood: 'culture', duration: '1-2', price: 2200, desc: 'Heritage walk, museums and local cuisine.' },
-      { id: 't5', title: 'Andaman Island Cruise', img: 'https://images.unsplash.com/photos/a-boat-with-people-on-it-is-in-the-water-BH9HTBLJPXU?auto=format&fit=crop&w=1200&q=60', tags: ['Beach','Adventure'], mood: 'adventure', duration: '5+', price: 25000, desc: 'Snorkeling, diving and island hopping.' }
-    ];
+   // ---------- Demo trip data (replace or augment with API results) ----------
+const demoTrips = [
+  {
+    id: 't1',
+    title: 'Kolkata Cultural Walk',
+    img: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=60',
+    tags: ['City', 'Cultural'],
+    mood: 'culture',
+    duration: '1-2',
+    price: 2200,
+    desc: 'Heritage walk through colonial lanes, trams and local cuisine.'
+  },
+  {
+    id: 't2',
+    title: 'Rajasthan Desert Camp',
+    img: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60',
+    tags: ['Desert','Cultural'],
+    mood: 'relax',
+    duration: '3-4',
+    price: 8500,
+    desc: 'Sleep under the stars, camel rides and folk performances.'
+  },
+  {
+    id: 't3',
+    title: 'Goa Beach Escape',
+    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=60',
+    tags: ['Beach','Relax'],
+    mood: 'relax',
+    duration: '3-4',
+    price: 6000,
+    desc: 'Sun, sand and seafood—perfect for a weekend.'
+  },
+  {
+    id: 't4',
+    title: 'Himachal Trekking Trail',
+    img: 'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?auto=format&fit=crop&w=1200&q=60',
+    tags: ['Mount','Adventure'],
+    mood: 'adventure',
+    duration: '5+',
+    price: 12000,
+    desc: 'Multi-day trek with stunning mountain views.'
+  },
+  {
+    id: 't5',
+    title: 'Andaman Island Cruise',
+    img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=60',
+    tags: ['Beach','Adventure'],
+    mood: 'adventure',
+    duration: '5+',
+    price: 25000,
+    desc: 'Snorkeling, diving and island hopping.'
+  }
+];
 
     // ---------- State ----------
     let viewMode = 'grid';
