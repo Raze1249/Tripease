@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
       name: d.name || d.address?.cityName || 'Unknown',
       region: d.address?.countryName || '',
       description: d.detailedName || d.subType || '',
-      imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+      imageUrl: `https://source.unsplash.com/featured/?${encodeURIComponent(d.name || d.address?.cityName || 'travel')}`,
       rating: 5
     }));
 
