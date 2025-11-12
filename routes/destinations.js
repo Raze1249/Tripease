@@ -1,52 +1,69 @@
 // routes/destinations.js
 const router = require('express').Router();
-// Use node-fetch dynamic import like in server.cjs
 const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
 
-const DEST_URL = process.env.TRIP_DEST_API_URL;
-const DEST_KEY = process.env.TRIP_DEST_API_KEY;
+// --- Environment variables ---
+const CLIENT_ID = process.env.AMADEUS_CLIENT_ID;
+const CLIENT_SECRET = process.env.AMADEUS_CLIENT_SECRET;
+const API_URL = process.env.TRIP_DEST_API_URL || "https://test.api.amadeus.com/v1/reference-data/locations";
+const AUTH_URL = "https://test.api.amadeus.com/v1/security/oauth2/token";
 
-// Example proxy endpoint: GET /api/destinations?limit=8&region=asia
+// --- Cache token in memory ---
+let accessToken = null;
+let tokenExpiry = 0;
+
+// --- Helper: Fetch Access Token ---
+async function getAccessToken() {
+  const now = Date.now();
+  if (accessToken && now < tokenExpiry) return accessToken;
+
+  console.log('🔐 Requesting new Amadeus access token...');
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET
+  });
+
+  const res = await fetch(AUTH_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(`Amadeus Auth failed: ${JSON.stringify(data)}`);
+
+  accessToken = data.access_token;
+  tokenExpiry = now + (data.expires_in - 60) * 1000; // refresh 1 min early
+  console.log('✅ Amadeus token obtained');
+  return accessToken;
+}
+
+// --- GET /api/destinations?keyword=paris&subType=CITY ---
 router.get('/', async (req, res) => {
   try {
-    if (!DEST_URL || !DEST_KEY) {
-      return res.status(500).json({ message: 'Destination API not configured on server.' });
-    }
+    const { keyword = 'beach', subType = 'CITY', limit = 6 } = req.query;
+    const token = await getAccessToken();
 
-    // Build query params to forward (you can whitelist safe params)
-    const { limit = 8, region = '', q = '' } = req.query;
-    const params = new URLSearchParams();
-    params.append('key', DEST_KEY);
-    params.append('limit', String(limit));
-    if (region) params.append('region', region);
-    if (q) params.append('q', q);
-
-    const url = `${DEST_URL}?${params.toString()}`;
-
-    const r = await fetch(url);
-    if (!r.ok) {
-      const text = await r.text().catch(()=>null);
-      return res.status(r.status).json({ message: 'External API error', details: text });
-    }
-
+    const url = `${API_URL}?subType=${subType}&keyword=${encodeURIComponent(keyword)}&page[limit]=${limit}`;
+    const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     const data = await r.json();
 
-    // Normalize returned data to array of { name, image, description, region, rating?, id? }
-    // Adapt these mapping lines to match the real API response structure.
-    const items = (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []))
-      .map(d => ({
-        id: d.id || d.code || d.name,
-        name: d.name || d.title,
-        imageUrl: (d.image && d.image.url) || d.imageUrl || d.photo || '',
-        description: d.description || d.summary || '',
-        region: d.region || d.country || '',
-        rating: d.rating || 5
-      }));
+    if (!r.ok) return res.status(r.status).json(data);
+
+    const items = (data.data || []).map(d => ({
+      id: d.id,
+      name: d.name || d.address?.cityName || 'Unknown',
+      region: d.address?.countryName || '',
+      description: d.detailedName || d.subType || '',
+      imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+      rating: 5
+    }));
 
     res.json({ data: items });
   } catch (err) {
-    console.error('Destinations proxy error:', err);
-    res.status(500).json({ message: 'Failed to fetch destinations', error: String(err.message) });
+    console.error('Amadeus destinations error:', err);
+    res.status(500).json({ message: 'Failed to load destinations', error: err.message });
   }
 });
 
