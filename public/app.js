@@ -133,12 +133,12 @@ A.btnLogout?.addEventListener('click', async ()=> {
 
 // ===================== POPULAR PLACES (static gallery) =====================
 const POPULAR_PLACES = [
-  { name: 'Kolkata Cultural Walk', imageUrl: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=60', blurb: 'Heritage lanes & trams', rating: 5 },
-  { name: 'Rajasthan Desert Camp', imageUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60', blurb: 'Camel safaris & folk nights', rating: 5 },
-  { name: 'Goa Beach Escape', imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=60', blurb: 'Beaches & nightlife', rating: 5 },
-  { name: 'Himachal Trek', imageUrl: 'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?auto=format&fit=crop&w=1200&q=60', blurb: 'Trekking & pine forests', rating: 5 },
-  { name: 'Andaman Islands', imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=60', blurb: 'Crystal waters & diving', rating: 5 },
-  { name: 'Paris, France', imageUrl: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=1200&q=60', blurb: 'Cafés & the Eiffel Tower', rating: 5 }
+  { name: 'Kolkata Cultural Walk', imageUrl: 'https://images.unsplash.com/photo-1479646398076-8f15c2e587a7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8MXx4T0dYbmZIUzBUQXx8ZW58MHx8fHx8', blurb: 'Heritage lanes & trams', rating: 5 },
+  { name: 'Rajasthan Desert Camp', imageUrl: 'https://images.unsplash.com/photo-1605425368891-5533a8ede6c2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmFqYXN0aGFuJTIwZGVzZXJ0JTIwY2FtcHxlbnwwfHwwfHx8MA%3D%3D', blurb: 'Camel safaris & folk nights', rating: 5 },
+  { name: 'Goa Beach Escape', imageUrl: 'https://images.unsplash.com/photo-1727806775961-2b4346506646?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Z29hJTIwYmVhY2glMjBlc2NhcGV8ZW58MHx8MHx8fDA%3D', blurb: 'Beaches & nightlife', rating: 5 },
+  { name: 'Himachal Trek', imageUrl: 'https://plus.unsplash.com/premium_photo-1692386759483-c3b25c241acd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGhpbWFsYXlhJTIwdHJla2tpbmd8ZW58MHx8MHx8fDA%3D', blurb: 'Trekking & pine forests', rating: 5 },
+  { name: 'Andaman Islands', imageUrl: 'https://images.unsplash.com/photo-1752668223248-f49e9c042c23?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YW5kbWFuJTIwaXNsYW5kfGVufDB8fDB8fHww', blurb: 'Crystal waters & diving', rating: 5 },
+  { name: 'Paris, France', imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGFyaXMlMjBmcmFuY2V8ZW58MHx8MHx8fDA%3D', blurb: 'Cafés & the Eiffel Tower', rating: 5 }
 ];
 
 const popularGrid = $('popularGrid');
@@ -167,9 +167,9 @@ $('popularBtn')?.addEventListener('click', renderPopular);
 const suggestedWrap = $('suggestedContainer');
 
 const SUGGESTED_FALLBACK = [
-  { _id:'sg1', name:'Kolkata Cultural Walk', imageUrl:'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=60', rating:5 },
-  { _id:'sg2', name:'Rajasthan Desert Camp', imageUrl:'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60', rating:5, description:'Sleep under the stars', category:'Desert' },
-  { _id:'sg3', name:'Goa Beach Escape', imageUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=60', rating:5, description:'Sandy beaches', category:'Beach' }
+  { _id:'sg1', name:'Kolkata Cultural Walk', imageUrl:'https://images.unsplash.com/photo-1479646398076-8f15c2e587a7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8MXx4T0dYbmZIUzBUQXx8ZW58MHx8fHx8', rating:5 },
+  { _id:'sg2', name:'Rajasthan Desert Camp', imageUrl:'https://images.unsplash.com/photo-1605425368891-5533a8ede6c2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmFqYXN0aGFuJTIwZGVzZXJ0JTIwY2FtcHxlbnwwfHwwfHx8MA%3D%3D', rating:5, description:'Sleep under the stars', category:'Desert' },
+  { _id:'sg3', name:'Goa Beach Escape', imageUrl:'https://images.unsplash.com/photo-1727806775961-2b4346506646?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Z29hJTIwYmVhY2glMjBlc2NhcGV8ZW58MHx8MHx8fDA%3D', rating:5, description:'Sandy beaches', category:'Beach' }
 ];
 
 function miniTripCard(t){
