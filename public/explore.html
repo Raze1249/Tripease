@@ -218,7 +218,9 @@ const demoTrips = [
       trips.forEach(t => {
         const el = document.createElement('div'); el.className = 'card';
         el.innerHTML = `
-          <img src="${t.img}" alt="${t.title}" />
+          <img src="${t.img}" alt="${t.title}" 
+     onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80'">
+
           <div class="meta">
             <h4>${t.title}</h4>
             <p>${t.desc}</p>
