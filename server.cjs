@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const dotenv = require('dotenv').config();
 
 const MONGODB_URI = 'mongodb+srv://tripease_user:eb6zKS7H0bpBBC6q@cluster0.faxvovy.mongodb.net/TripeaseDB?retryWrites=true&w=majority&appName=Cluster0';
 const PORT = process.env.PORT || 3000;
@@ -48,7 +49,8 @@ app.post('/api/search-flights', (req, res) => {
 });
 
 // ---- Routers (make sure these files exist) ----
-app.use('/api/trips', require('./routes/trips'));         // CRUD + search
+app.use('/api/trips', require('./routes/trips'));  // CRUD + search
+app.use('/api/destinations', require('./routes/destinations'));
 app.use('/api/bookings', require('./routes/bookings'));   // create/list
 app.use('/api/auth', require('./routes/auth'));           // login/register/logout/me
 
