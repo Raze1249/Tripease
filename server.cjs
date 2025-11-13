@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use('/api/contact', require('./routes/contact'));
-
+app.use('/api/hotels', require('./routes/hotels'));
 
 // ---- DB ----
 mongoose.connect(MONGODB_URI)
