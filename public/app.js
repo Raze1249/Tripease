@@ -292,41 +292,49 @@ document.addEventListener('DOMContentLoaded', () => {
   const loadTrips = (p = {}) => get(API.trips, p).then(renderTrips).catch(err => { console.error(err); toast('Failed to load trips'); });
 
   // Robust search runner with logs and graceful parsing
-  async function runSearch() {
-    try {
-      console.log('runSearch() invoked');
-      if (!qIn) { console.error('Search input element not found (id="searchInput").'); return toast('Search input missing'); }
+ async function runSearch() {
+  try {
+    const qVal = (qIn?.value || "").trim();
+    const params = {};
+    if (cat && cat.value) params.category = cat.value;
+    params.sort = TRIP_VIEW === "list" ? "category name" : "-createdAt";
 
-      const qVal = (qIn.value || '').trim();
-      const params = {};
-      if (qVal) params.q = qVal;
-      if (cat && cat.value) params.category = cat.value;
-      params.sort = TRIP_VIEW === 'list' ? 'category name' : '-createdAt';
+    if (qBtn) { qBtn.disabled = true; qBtn.textContent = "Searching..."; }
 
-      console.log('Search params:', params);
-      if (qBtn) { qBtn.disabled = true; qBtn.textContent = 'Searching...'; }
+    let trips = [];
+    let destinations = [];
 
-      const url = buildUrl(API.trips, params);
-      console.log('Request URL:', url);
-
-      const res = await fetch(url);
-      console.log('Fetch status:', res.status);
-      const json = await res.json().catch(() => null);
-      console.log('Response JSON:', json);
-
-      const list = Array.isArray(json?.data) ? json.data : (Array.isArray(json) ? json : (json?.data || []));
-      console.log('Results count:', Array.isArray(list) ? list.length : 0);
-
-      renderTrips({ data: list });
-
-      if (!list.length) toast('No trips found for your search.');
-    } catch (err) {
-      console.error('runSearch error:', err);
-      toast('Search failed — check console.');
-    } finally {
-      if (qBtn) { qBtn.disabled = false; qBtn.textContent = 'Search'; }
+    // 1) Search local trips
+    if (qVal) {
+      const tripRes = await fetch(buildUrl(API.trips, { q: qVal, ...params }));
+      const tripJson = await tripRes.json().catch(() => null);
+      trips = Array.isArray(tripJson?.data) ? tripJson.data : [];
     }
+
+    // 2) Search Amadeus destination API
+    if (qVal) {
+      const destRes = await fetch(buildUrl(API.destinations, { keyword: qVal, limit: 8 }));
+      const destJson = await destRes.json().catch(() => null);
+      destinations = Array.isArray(destJson?.data) ? destJson.data : [];
+    }
+
+    // Combine results
+    const combined = [...destinations, ...trips];
+
+    if (!combined.length) {
+      cards.innerHTML = `<p>No results found for "${qVal}".</p>`;
+      return;
+    }
+
+    renderTrips({ data: combined });
+
+  } catch (err) {
+    console.error("runSearch error:", err);
+    toast("Search failed");
+  } finally {
+    if (qBtn) { qBtn.disabled = false; qBtn.textContent = "Search"; }
   }
+}
 
   // Bind search button & Enter key
   qBtn?.addEventListener('click', runSearch);
