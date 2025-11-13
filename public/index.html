@@ -109,6 +109,20 @@
     <h2>Suggested Trips for You</h2>
     <div class="row" id="suggestedContainer" style="margin-top:10px; gap:16px; flex-wrap:wrap;"></div>
   </section>
+  
+<!-- Hotels -->
+<section class="panel" id="hotels-panel">
+  <h2>Find Hotels</h2>
+  <div class="row" style="gap:8px;align-items:center">
+    <input id="hotel-location" type="text" placeholder="City or location (e.g. Goa)" />
+    <input id="hotel-checkin" type="date" />
+    <input id="hotel-checkout" type="date" />
+    <input id="hotel-guests" type="number" min="1" value="1" style="width:80px" />
+    <button id="hotel-search-btn" class="btn">Search Hotels</button>
+  </div>
+
+  <div id="hotels-results" style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px"></div>
+</section>
 
   <!-- Find Flights -->
   <section class="panel">
