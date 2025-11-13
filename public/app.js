@@ -227,9 +227,9 @@ document.addEventListener('DOMContentLoaded', () => {
      SUGGESTED TRIPS
      --------------------------- */
   const SUGGESTED_FALLBACK = [
-    { _id: 'sg1', name: 'Goa Beaches', imageUrl: FALLBACK_IMG, rating: 5 },
-    { _id: 'sg2', name: 'Himalayan Trek', imageUrl: FALLBACK_IMG, rating: 5, category: 'Mount' },
-    { _id: 'sg3', name: 'Rajasthan Heritage', imageUrl: FALLBACK_IMG, rating: 4, category: 'Cultural' }
+    { _id: 'sg1', name: 'Goa Beaches', imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z29hJTIwYmVhY2hlc3xlbnwwfHwwfHx8MA%3D%3D', rating: 5 },
+    { _id: 'sg2', name: 'Himalayan Trek', imageUrl: 'https://images.unsplash.com/photo-1617380613434-7495e9b45dfb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aGltYWxheWF8ZW58MHx8MHx8fDA%3D', rating: 5, category: 'Mount' },
+    { _id: 'sg3', name: 'Rajasthan Heritage', imageUrl: 'https://images.unsplash.com/photo-1521182289461-22be748bc522?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmFqYXN0aGFuJTIwaGVyaXRhZ2V8ZW58MHx8MHx8fDA%3D', rating: 4, category: 'Cultural' }
   ];
 
   const miniTripCard = t => `
