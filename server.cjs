@@ -13,6 +13,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/hotels', require('./routes/hotels'));
+app.use('/api/buses', require('./routes/buses'));
+app.use('/api/trains', require('./routes/trains'));
 
 // ---- DB ----
 mongoose.connect(MONGODB_URI)
