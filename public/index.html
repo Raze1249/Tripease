@@ -135,6 +135,38 @@
     </div>
     <div id="ff-results" style="margin-top:16px"></div>
   </section>
+  <!-- Bus Search -->
+<section class="panel" id="buses-panel">
+  <h2>Find Buses</h2>
+  <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">
+    <input id="bus-from" type="text" placeholder="From (city)" />
+    <input id="bus-to" type="text" placeholder="To (city)" />
+    <input id="bus-date" type="date" />
+    <input id="bus-passengers" type="number" min="1" value="1" style="width:80px" />
+    <button id="bus-search-btn" class="btn">Search Buses</button>
+  </div>
+  <div id="bus-results" style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px"></div>
+</section>
+
+<!-- Train Search -->
+<section class="panel" id="trains-panel">
+  <h2>Find Trains</h2>
+  <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">
+    <input id="train-from" type="text" placeholder="From (station/city)" />
+    <input id="train-to" type="text" placeholder="To (station/city)" />
+    <input id="train-date" type="date" />
+    <select id="train-class">
+      <option value="">Any Class</option>
+      <option value="SL">Sleeper (SL)</option>
+      <option value="3A">3A</option>
+      <option value="2A">2A</option>
+      <option value="1A">1A</option>
+    </select>
+    <button id="train-search-btn" class="btn">Search Trains</button>
+  </div>
+  <div id="train-results" style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px"></div>
+</section>
+
 
   <!-- Booking Panel -->
   <section id="booking-panel" class="panel" style="display:none">
