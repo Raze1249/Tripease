@@ -23,16 +23,19 @@ const API = {
 /* ============================
    Helpers
    ============================ */
-const $ = id => document.getElementById(id);
-const buildUrl = (u, q = {}) => u + (Object.keys(q).length ? `?${new URLSearchParams(q)}` : '');
-const get = (u, q = {}) => fetch(buildUrl(u, q)).then(r => r.json());
+const $ = (id) => document.getElementById(id);
+const buildUrl = (u, q = {}) =>
+  u + (Object.keys(q).length ? `?${new URLSearchParams(q).toString()}` : '');
+
+const get = (u, q = {}) => fetch(buildUrl(u, q)).then((r) => r.json());
+
 const post = (u, b, cred = false) =>
   fetch(u, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(b),
     ...(cred ? { credentials: 'include' } : {})
-  }).then(async r => {
+  }).then(async (r) => {
     if (!r.ok) {
       const t = await r.text().catch(() => null);
       throw new Error(t || `HTTP ${r.status}`);
@@ -60,11 +63,11 @@ function toast(message, ms = 1600) {
    DOM Ready Initialization
    ============================ */
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('Tripease app.js loaded');
+
   /* ---------------------------
      Element references
      --------------------------- */
-  const toastEl = $('toast');
-
   // Auth
   const A = {
     userEl: $('auth-user'),
@@ -150,8 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cancel: $('bk-cancel')
   };
 
-  const open = el => el && (el.style.display = 'block');
-  const close = el => el && (el.style.display = 'none');
+  const open = (el) => el && (el.style.display = 'block');
+  const close = (el) => el && (el.style.display = 'none');
 
   /* ============================
      AUTH
@@ -161,14 +164,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user) {
       A.userEl.style.display = 'inline';
       A.userEl.textContent = `Hello, ${user.name}`;
-      A.btnLogin && (A.btnLogin.style.display = 'none');
-      A.btnRegister && (A.btnRegister.style.display = 'none');
-      A.btnLogout && (A.btnLogout.style.display = 'inline-block');
+      if (A.btnLogin) A.btnLogin.style.display = 'none';
+      if (A.btnRegister) A.btnRegister.style.display = 'none';
+      if (A.btnLogout) A.btnLogout.style.display = 'inline-block';
     } else {
       A.userEl.style.display = 'none';
-      A.btnLogin && (A.btnLogin.style.display = 'inline-block');
-      A.btnRegister && (A.btnRegister.style.display = 'inline-block');
-      A.btnLogout && (A.btnLogout.style.display = 'none');
+      if (A.btnLogin) A.btnLogin.style.display = 'inline-block';
+      if (A.btnRegister) A.btnRegister.style.display = 'inline-block';
+      if (A.btnLogout) A.btnLogout.style.display = 'none';
     }
   }
 
@@ -254,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
-  const popularCard = p => `
+  const popularCard = (p) => `
     <div class="card" style="width:260px">
       <img src="${p.imageUrl || FALLBACK_IMG}" alt="${p.name}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
       <div class="card-content">
@@ -270,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const resp = await get(API.destinations, { limit, keyword, subType });
       const list = Array.isArray(resp?.data) ? resp.data : [];
       if (!list.length) return null;
-      return list.map(d => ({
+      return list.map((d) => ({
         name: d.name || d.title || 'Unknown',
         imageUrl: d.imageUrl || FALLBACK_IMG,
         blurb: d.description || d.region || '',
@@ -304,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { _id: 'sg3', name: 'Rajasthan Heritage', imageUrl: FALLBACK_IMG, rating: 4, category: 'Cultural' }
   ];
 
-  const miniTripCard = t => `
+  const miniTripCard = (t) => `
     <div class="card" style="width:240px">
       <img src="${t.imageUrl || FALLBACK_IMG}" alt="${t.name}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
       <div class="card-content">
@@ -340,9 +343,14 @@ document.addEventListener('DOMContentLoaded', () => {
      ============================ */
   let TRIP_VIEW = 'grid';
   const groupBy = (arr, key) =>
-    arr.reduce((acc, x) => ((acc[x[key] || 'Others'] ||= []).push(x), acc), {});
+    arr.reduce((acc, x) => {
+      const k = x[key] || 'Others';
+      if (!acc[k]) acc[k] = [];
+      acc[k].push(x);
+      return acc;
+    }, {});
 
-  const tripCard = t => `
+  const tripCard = (t) => `
     <div class="card">
       <img src="${t.imageUrl || FALLBACK_IMG}" alt="${t.name}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
       <div class="card-content">
@@ -389,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const html = Object.keys(byCat)
       .sort()
       .map(
-        catName => `
+        (catName) => `
       <div class="cat-block">
         <div class="cat-title">${catName}</div>
         ${byCat[catName].map(listItem).join('')}
@@ -407,13 +415,14 @@ document.addEventListener('DOMContentLoaded', () => {
       cards.innerHTML = '<p>No trips found.</p>';
       return;
     }
-    TRIP_VIEW === 'list' ? renderTripsList(list) : renderTripsGrid(list);
+    if (TRIP_VIEW === 'list') renderTripsList(list);
+    else renderTripsGrid(list);
   }
 
   const loadTrips = (p = {}) =>
     get(API.trips, p)
       .then(renderTrips)
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         toast('Failed to load trips');
       });
@@ -421,8 +430,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Combined search: local trips + external destinations
   async function runSearch() {
     try {
+      console.log('runSearch() called');
       if (!qIn) {
-        console.error('Search input missing');
+        console.error('searchInput not found');
         toast('Search input missing');
         return;
       }
@@ -461,7 +471,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const combined = [...(destinations || []), ...(trips || [])];
       if (!combined.length) {
-        cards.innerHTML = `<p>No results found${qVal ? ` for "${qVal}"` : ''}.</p>`;
+        if (cards)
+          cards.innerHTML = `<p>No results found${qVal ? ` for "${qVal}"` : ''}.</p>`;
         toast('No trips found for your search.');
         return;
       }
@@ -491,7 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   qBtn?.addEventListener('click', runSearch);
-  qIn?.addEventListener('keydown', e => {
+  qIn?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       runSearch();
@@ -501,15 +512,17 @@ document.addEventListener('DOMContentLoaded', () => {
   viewGridBtn?.addEventListener('click', () => {
     TRIP_VIEW = 'grid';
     runSearch();
-    viewGridBtn.style.background = '#00b3b3';
-    viewListBtn && (viewListBtn.style.background = '#555';
+    if (viewGridBtn) viewGridBtn.style.background = '#00b3b3';
+    if (viewListBtn) viewListBtn.style.background = '#555';
   });
+
   viewListBtn?.addEventListener('click', () => {
     TRIP_VIEW = 'list';
     runSearch();
-    viewListBtn.style.background = '#00b3b3';
-    viewGridBtn && (viewGridBtn.style.background = '#555';
+    if (viewListBtn) viewListBtn.style.background = '#00b3b3';
+    if (viewGridBtn) viewGridBtn.style.background = '#555';
   });
+
   reset?.addEventListener('click', () => {
     if (qIn) qIn.value = '';
     if (cat) cat.value = '';
@@ -527,7 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div style="display:grid;gap:12px;">
         ${list
           .map(
-            f => `
+            (f) => `
           <div style="background:#fff;color:#000;border-radius:12px;padding:12px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
               <strong>${f.carrier}</strong>
@@ -582,8 +595,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="padding:12px">
           <h3 style="margin:0 0 6px">${h.name}</h3>
           <p style="margin:0;font-size:13px;color:#444">${h.city || ''}${
-            h.country ? ', ' + h.country : ''
-          }</p>
+      h.country ? ', ' + h.country : ''
+    }</p>
           <p style="margin:6px 0;font-size:14px;color:#333">${(h.description || '').slice(
             0,
             120
@@ -645,7 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   hotelSearchBtn?.addEventListener('click', searchHotels);
-  hotelLocationInput?.addEventListener('keydown', e => {
+  hotelLocationInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       searchHotels();
@@ -700,7 +713,6 @@ document.addEventListener('DOMContentLoaded', () => {
     busSearchBtn.textContent = 'Searching...';
 
     try {
-      // adapt param names to your provider if needed
       const params = { source: from, destination: to, date, passengers, limit: 12 };
       const res = await fetch(buildUrl(API.buses, params));
       const json = await res.json().catch(() => null);
@@ -721,13 +733,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   busSearchBtn?.addEventListener('click', searchBuses);
-  busFromInput?.addEventListener('keydown', e => {
+  busFromInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       searchBuses();
     }
   });
-  busToInput?.addEventListener('keydown', e => {
+  busToInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       searchBuses();
@@ -782,7 +794,6 @@ document.addEventListener('DOMContentLoaded', () => {
     trainSearchBtn.textContent = 'Searching...';
 
     try {
-      // adapt param names to your provider if needed
       const params = { source: from, destination: to, date, class: classType, limit: 12 };
       const res = await fetch(buildUrl(API.trains, params));
       const json = await res.json().catch(() => null);
@@ -803,13 +814,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   trainSearchBtn?.addEventListener('click', searchTrains);
-  trainFromInput?.addEventListener('keydown', e => {
+  trainFromInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       searchTrains();
     }
   });
-  trainToInput?.addEventListener('keydown', e => {
+  trainToInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       searchTrains();
@@ -824,6 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bk.panel.style.display = 'block';
     window.scrollTo({ top: bk.panel.offsetTop - 80, behavior: 'smooth' });
   };
+
   const closeBk = () => {
     if (!bk.panel) return;
     bk.panel.style.display = 'none';
@@ -837,8 +849,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bk.price) bk.price.value = '';
   };
 
-  // Trips list: click handlers (book trip / jump to flights)
-  cards?.addEventListener('click', e => {
+  // Trips list: book / flights
+  cards?.addEventListener('click', (e) => {
     const tBtn = e.target.closest('.book-trip-btn');
     const fBtn = e.target.closest('.flight-btn');
     if (tBtn) {
@@ -858,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Flights results -> book
-  ff.out?.addEventListener('click', e => {
+  ff.out?.addEventListener('click', (e) => {
     const b = e.target.closest('.book-flight-btn');
     if (!b) return;
     closeBk();
@@ -872,7 +884,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Hotels results -> book
-  hotelsResults?.addEventListener('click', e => {
+  hotelsResults?.addEventListener('click', (e) => {
     const b = e.target.closest('.book-hotel-btn');
     if (!b) return;
     const id = b.dataset.id;
@@ -884,7 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Buses results -> book
-  busResults?.addEventListener('click', e => {
+  busResults?.addEventListener('click', (e) => {
     const b = e.target.closest('.book-bus-btn');
     if (!b) return;
     const id = b.dataset.id;
@@ -897,7 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Trains results -> book
-  trainResults?.addEventListener('click', e => {
+  trainResults?.addEventListener('click', (e) => {
     const b = e.target.closest('.book-train-btn');
     if (!b) return;
     const id = b.dataset.id;
@@ -910,7 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Booking form submit
-  bk.form?.addEventListener('submit', async e => {
+  bk.form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const payload = {
       name: bk.name?.value?.trim(),
@@ -924,7 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bk.c?.value || bk.route?.value) {
       const [source, destination] = (bk.route?.value || '')
         .split('→')
-        .map(s => (s || '').trim());
+        .map((s) => (s || '').trim());
       payload.flight = {
         carrier: bk.c?.value || '',
         source,
@@ -947,8 +959,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   bk.cancel?.addEventListener('click', closeBk);
 
-  // fallback global booking click for trip cards
-  document.addEventListener('click', ev => {
+  // Fallback global booking click for trip cards
+  document.addEventListener('click', (ev) => {
     const bookTrip = ev.target.closest('.book-trip-btn');
     if (bookTrip) {
       if (bk.tripId) bk.tripId.value = bookTrip.dataset.id;
