@@ -413,22 +413,33 @@
     </div>
   </div>
 </div>
+<!-- REGISTER MODAL (NEW UI) -->
+<div id="modal-register" class="auth-modal" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <h2>Create an account ✨</h2>
+      <p>Join Tripease and explore smarter</p>
+    </div>
+    <div class="auth-card-body">
+      <label class="auth-label" for="reg-name">Full Name</label>
+      <input id="reg-name" type="text" class="auth-input" placeholder="Your Name" />
 
-  <!-- Register Modal -->
-  <div id="modal-register" class="modal">
-    <div class="box">
-      <h3>Register</h3>
-      <input id="reg-name" type="text" placeholder="Full name" style="width:100%;margin-top:8px;">
-      <input id="reg-email" type="email" placeholder="Email" style="width:100%;margin-top:8px;">
-      <input id="reg-pass" type="password" placeholder="Password" style="width:100%;margin-top:8px;">
-      <div class="actions">
-        <button id="reg-cancel" class="btn" style="background:#666;">Cancel</button>
-        <button id="reg-submit" class="btn">Create Account</button>
-      </div>
+      <label class="auth-label" for="reg-email">Email</label>
+      <input id="reg-email" type="email" class="auth-input" placeholder="you@example.com" />
+
+      <label class="auth-label" for="reg-pass">Password</label>
+      <input id="reg-pass" type="password" class="auth-input" placeholder="Create a password" />
+
+      <button id="reg-submit" class="auth-btn auth-btn-primary auth-full">
+        Sign Up
+      </button>
+      <button id="reg-cancel" class="auth-btn auth-btn-ghost auth-full">
+        Cancel
+      </button>
+    </div>
+    <div class="auth-card-footer">
+      <span>Already have an account?</span>
+      <button id="switch-to-login" class="link-btn">Login instead</button>
     </div>
   </div>
-
-  <div id="toast"></div>
-  <script src="app.js"></script>
-</body>
-</html>
+</div>
