@@ -1,43 +1,35 @@
 {
-  "name": "tripease",
+  "name": "tripease-backend",
   "version": "1.0.0",
-  "description": "Tripease travel explorer with trips, flights, bookings, and user authentication",
+  "description": "Tripease Travel Explorer Backend with Secure API & Authentication",
   "main": "server.cjs",
   "type": "commonjs",
   "scripts": {
     "start": "node server.cjs",
-    "dev": "nodemon server.cjs"
+    "dev": "nodemon server.cjs",
+    "seed": "node seedTrips.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.5.0",
-    "node-fetch": "^3.3.2"
-    "xss-clean": "^0.1.4"
-    "hpp": "^0.2.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.0",
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^7.0.0",
-    "helmet": "^7.0.0",
+    "helmet": "^7.1.0",
+    "hpp": "^0.2.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.4",
+    "node-fetch": "^2.6.12",
+    "xss-clean": "^0.1.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.0"
   },
   "engines": {
     "node": ">=18"
   },
-  "keywords": [
-    "express",
-    "mongoose",
-    "travel",
-    "booking",
-    "jwt",
-    "auth",
-    "api"
-  ],
-  "author": "Krish Bangar",
-  "license": "MIT"
+  "author": "Tripease Team",
+  "license": "ISC"
 }
