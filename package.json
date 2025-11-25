@@ -17,6 +17,11 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.0",
     "node-fetch": "^3.3.2"
+    "xss-clean": "^0.1.4"
+    "hpp": "^0.2.3",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.0.0",
+    "helmet": "^7.0.0",
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
