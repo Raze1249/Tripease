@@ -64,10 +64,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Failed to retrieve trips', error: err.message });
   }
 });
-isSuggested: {
-  type: Boolean,
-  default: false
-}
 // -----------------------
 // POST /api/trips
 // Create new Trip
