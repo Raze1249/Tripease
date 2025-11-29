@@ -237,21 +237,21 @@ document.addEventListener('DOMContentLoaded', () => {
     {
       name: 'Bali, Indonesia',
       imageUrl:
-        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1704253411612-e4deb715dcd8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YmFsaSUyMGluZG9uZXNpYXxlbnwwfHwwfHx8MA%3D%3D',
       blurb: 'Beaches & temples',
       rating: 5
     },
     {
       name: 'Swiss Alps',
       imageUrl:
-        'https://images.unsplash.com/photo-1472689807769-993ee44a1bfc?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1586752488885-6ce47fdfd874?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8c3dpc3MlMjBhbHBzfGVufDB8fDB8fHww',
       blurb: 'Snowy peaks',
       rating: 5
     },
     {
       name: 'Santorini, Greece',
       imageUrl:
-        'https://images.unsplash.com/photo-1508739826987-b79cd8b7da12?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1580502304784-8985b7eb7260?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8U2FudG9yaW5pfGVufDB8fDB8fHww',
       blurb: 'Aegean views',
       rating: 5
     }
@@ -302,9 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
      SUGGESTED TRIPS
      ============================ */
   const SUGGESTED_FALLBACK = [
-    { _id: 'sg1', name: 'Goa Beaches', imageUrl: FALLBACK_IMG, rating: 5 },
-    { _id: 'sg2', name: 'Himalayan Trek', imageUrl: FALLBACK_IMG, rating: 5, category: 'Mount' },
-    { _id: 'sg3', name: 'Rajasthan Heritage', imageUrl: FALLBACK_IMG, rating: 4, category: 'Cultural' }
+    { _id: 'sg1', name: 'Goa Beaches', imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z29hJTIwYmVhY2hlc3xlbnwwfHwwfHx8MA%3D%3D', rating: 5 },
+    { _id: 'sg2', name: 'Himalayan Trek', imageUrl:'https://images.unsplash.com/photo-1617380613434-7495e9b45dfb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aGltYWxheWF8ZW58MHx8MHx8fDA%3D', rating: 5, category: 'Mount' },
+    { _id: 'sg3', name: 'Rajasthan Heritage', imageUrl: 'https://images.unsplash.com/photo-1628943714856-f78158c096a5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmFqYXN0aGFuJTIwaGVyaXRhZ2V8ZW58MHx8MHx8fDA%3D', rating: 4, category: 'Cultural' }
   ];
 
   const miniTripCard = (t) => `
@@ -320,12 +320,51 @@ document.addEventListener('DOMContentLoaded', () => {
  async function loadSuggestedTrips() {
   if (!suggestedWrap) return;
 
+  try {
+    // 1) Try local trips from /api/trips
+    const data = await get(API.trips, { sort: '-rating', limit: 10 });
+    let list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+    list = filterBadTrips(list);
+
+    if (list.length) {
+      suggestedWrap.innerHTML = list.map(miniTripCard).join('');
+      return;
+    }
+
+    // 2) Try external destinations from /api/destinations
+    const ext = await loadExternalDestinations({ limit: 10 });
+    const extClean = filterBadTrips(ext || []);
+
+    if (extClean.length) {
+      suggestedWrap.innerHTML = extClean.map(miniTripCard).join('');
+      return;
+    }
+
+    // 3) Fallback static suggestions
+    suggestedWrap.innerHTML = filterBadTrips(SUGGESTED_FALLBACK).map(miniTripCard).join('');
+  } catch (e) {
+    console.error('loadSuggestedTrips error', e);
+    suggestedWrap.innerHTML = filterBadTrips(SUGGESTED_FALLBACK).map(miniTripCard).join('');
+  }
+}
+
+
   // Names we NEVER want to show as trips
   const BLOCKED_NAMES = [
     'Abhishek Sharma',
     'Abhishek sharma'
     // add more if needed
   ];
+  // Helper to clean bad/irrelevant items out of lists
+function filterBadTrips(list) {
+  if (!Array.isArray(list)) return [];
+  return list.filter((t) => {
+    const name = (t.name || '').trim();
+    if (!name) return false;
+    if (BLOCKED_NAMES.includes(name)) return false;
+    return true;
+  });
+}
 
   const cleanList = (arr) => {
     if (!Array.isArray(arr)) return [];
@@ -436,16 +475,19 @@ document.addEventListener('DOMContentLoaded', () => {
     cards.innerHTML = html;
   }
 
-  function renderTrips(raw) {
-    if (!cards) return;
-    const list = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
-    if (!list.length) {
-      cards.innerHTML = '<p>No trips found.</p>';
-      return;
-    }
-    if (TRIP_VIEW === 'list') renderTripsList(list);
-    else renderTripsGrid(list);
+ function renderTrips(raw) {
+  if (!cards) return;
+  let list = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
+  list = filterBadTrips(list);
+
+  if (!list.length) {
+    cards.innerHTML = '<p>No trips found.</p>';
+    return;
   }
+  if (TRIP_VIEW === 'list') renderTripsList(list);
+  else renderTripsGrid(list);
+}
+
 
   const loadTrips = (p = {}) =>
     get(API.trips, p)
