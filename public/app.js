@@ -317,26 +317,54 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
 
-  async function loadSuggestedTrips() {
-    if (!suggestedWrap) return;
-    try {
-      const data = await get(API.trips, { sort: '-rating', limit: 6, isSuggested: true });
-      const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
-      if (list.length) {
-        suggestedWrap.innerHTML = list.map(miniTripCard).join('');
-        return;
-      }
-      const ext = await loadExternalDestinations({ limit: 6 });
-      if (ext && ext.length) {
-        suggestedWrap.innerHTML = ext.map(miniTripCard).join('');
-        return;
-      }
-      suggestedWrap.innerHTML = SUGGESTED_FALLBACK.map(miniTripCard).join('');
-    } catch (e) {
-      console.error(e);
-      suggestedWrap.innerHTML = SUGGESTED_FALLBACK.map(miniTripCard).join('');
+ async function loadSuggestedTrips() {
+  if (!suggestedWrap) return;
+
+  // Names we NEVER want to show as trips
+  const BLOCKED_NAMES = [
+    'Abhishek Sharma',
+    'Abhishek sharma'
+    // add more if needed
+  ];
+
+  const cleanList = (arr) => {
+    if (!Array.isArray(arr)) return [];
+    return arr.filter((t) => {
+      const n = (t.name || '').trim();
+      if (!n) return false;
+      // block exact matches from the list
+      if (BLOCKED_NAMES.includes(n)) return false;
+      return true;
+    });
+  };
+
+  try {
+    // 1) Try local trips from /api/trips
+    const data = await get(API.trips, { sort: '-rating', limit: 10 });
+    let list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+    list = cleanList(list);
+
+    if (list.length) {
+      suggestedWrap.innerHTML = list.map(miniTripCard).join('');
+      return;
     }
+
+    // 2) Try external destinations from /api/destinations
+    const ext = await loadExternalDestinations({ limit: 10 });
+    const extClean = cleanList(ext || []);
+
+    if (extClean.length) {
+      suggestedWrap.innerHTML = extClean.map(miniTripCard).join('');
+      return;
+    }
+
+    // 3) Fallback static suggestions
+    suggestedWrap.innerHTML = cleanList(SUGGESTED_FALLBACK).map(miniTripCard).join('');
+  } catch (e) {
+    console.error('loadSuggestedTrips error', e);
+    suggestedWrap.innerHTML = cleanList(SUGGESTED_FALLBACK).map(miniTripCard).join('');
   }
+}
 
   /* ============================
      TRIPS (grid/list + search)
