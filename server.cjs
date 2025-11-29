@@ -128,7 +128,7 @@ app.get('/api/health', (req, res) => {
  */
 
 // Trips (MongoDB)
-const tripRoutes = require('./routes/tripRoutes.js');
+const tripRoutes = require('./routes/trips.js');
 app.use('/api/trips', tripRoutes);
 
 // Flights (mock search) – kept here if you still use it
