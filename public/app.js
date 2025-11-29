@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadSuggestedTrips() {
     if (!suggestedWrap) return;
     try {
-      const data = await get(API.trips, { sort: '-rating', limit: 6 });
+      const data = await get(API.trips, { sort: '-rating', limit: 6, isSuggested: true });
       const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
       if (list.length) {
         suggestedWrap.innerHTML = list.map(miniTripCard).join('');
