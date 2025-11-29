@@ -301,10 +301,49 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ============================
      SUGGESTED TRIPS
      ============================ */
+
+  // Names we NEVER want to show as trips
+  const BLOCKED_NAMES = [
+    'Abhishek Sharma',
+    'Abhishek sharma'
+    // add more if needed
+  ];
+
+  // Filter out empty / irrelevant / blocked-name trips
+  const filterBadTrips = (list) => {
+    if (!Array.isArray(list)) return [];
+    return list.filter((t) => {
+      const name = (t.name || '').trim();
+      if (!name) return false;
+      if (BLOCKED_NAMES.includes(name)) return false;
+      return true;
+    });
+  };
+
   const SUGGESTED_FALLBACK = [
-    { _id: 'sg1', name: 'Goa Beaches', imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z29hJTIwYmVhY2hlc3xlbnwwfHwwfHx8MA%3D%3D', rating: 5 },
-    { _id: 'sg2', name: 'Himalayan Trek', imageUrl:'https://images.unsplash.com/photo-1617380613434-7495e9b45dfb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aGltYWxheWF8ZW58MHx8MHx8fDA%3D', rating: 5, category: 'Mount' },
-    { _id: 'sg3', name: 'Rajasthan Heritage', imageUrl: 'https://images.unsplash.com/photo-1628943714856-f78158c096a5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmFqYXN0aGFuJTIwaGVyaXRhZ2V8ZW58MHx8MHx8fDA%3D', rating: 4, category: 'Cultural' }
+    {
+      _id: 'sg1',
+      name: 'Goa Beaches',
+      imageUrl:
+        'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z29hJTIwYmVhY2hlc3xlbnwwfHwwfHx8MA%3D%3D',
+      rating: 5
+    },
+    {
+      _id: 'sg2',
+      name: 'Himalayan Trek',
+      imageUrl:
+        'https://images.unsplash.com/photo-1617380613434-7495e9b45dfb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aGltYWxheWF8ZW58MHx8MHx8fDA%3D',
+      rating: 5,
+      category: 'Mount'
+    },
+    {
+      _id: 'sg3',
+      name: 'Rajasthan Heritage',
+      imageUrl:
+        'https://images.unsplash.com/photo-1628943714856-f78158c096a5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmFqYXN0aGFuJTIwaGVyaXRhZ2V8ZW58MHx8MHx8fDA%3D',
+      rating: 4,
+      category: 'Cultural'
+    }
   ];
 
   const miniTripCard = (t) => `
@@ -317,93 +356,38 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
 
- async function loadSuggestedTrips() {
-  if (!suggestedWrap) return;
+  async function loadSuggestedTrips() {
+    if (!suggestedWrap) return;
 
-  try {
-    // 1) Try local trips from /api/trips
-    const data = await get(API.trips, { sort: '-rating', limit: 10 });
-    let list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
-    list = filterBadTrips(list);
+    try {
+      // 1) Local trips from /api/trips
+      const data = await get(API.trips, { sort: '-rating', limit: 10 });
+      let list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+      list = filterBadTrips(list);
 
-    if (list.length) {
-      suggestedWrap.innerHTML = list.map(miniTripCard).join('');
-      return;
+      if (list.length) {
+        suggestedWrap.innerHTML = list.map(miniTripCard).join('');
+        return;
+      }
+
+      // 2) External destinations from /api/destinations
+      const ext = await loadExternalDestinations({ limit: 10 });
+      const extClean = filterBadTrips(ext || []);
+
+      if (extClean.length) {
+        suggestedWrap.innerHTML = extClean.map(miniTripCard).join('');
+        return;
+      }
+
+      // 3) Static fallback
+      const fb = filterBadTrips(SUGGESTED_FALLBACK);
+      suggestedWrap.innerHTML = fb.map(miniTripCard).join('');
+    } catch (e) {
+      console.error('loadSuggestedTrips error', e);
+      const fb = filterBadTrips(SUGGESTED_FALLBACK);
+      suggestedWrap.innerHTML = fb.map(miniTripCard).join('');
     }
-
-    // 2) Try external destinations from /api/destinations
-    const ext = await loadExternalDestinations({ limit: 10 });
-    const extClean = filterBadTrips(ext || []);
-
-    if (extClean.length) {
-      suggestedWrap.innerHTML = extClean.map(miniTripCard).join('');
-      return;
-    }
-
-    // 3) Fallback static suggestions
-    suggestedWrap.innerHTML = filterBadTrips(SUGGESTED_FALLBACK).map(miniTripCard).join('');
-  } catch (e) {
-    console.error('loadSuggestedTrips error', e);
-    suggestedWrap.innerHTML = filterBadTrips(SUGGESTED_FALLBACK).map(miniTripCard).join('');
   }
-}
-
-
-  // Names we NEVER want to show as trips
-  const BLOCKED_NAMES = [
-    'Abhishek Sharma',
-    'Abhishek sharma'
-    // add more if needed
-  ];
-  // Helper to clean bad/irrelevant items out of lists
-function filterBadTrips(list) {
-  if (!Array.isArray(list)) return [];
-  return list.filter((t) => {
-    const name = (t.name || '').trim();
-    if (!name) return false;
-    if (BLOCKED_NAMES.includes(name)) return false;
-    return true;
-  });
-}
-
-  const cleanList = (arr) => {
-    if (!Array.isArray(arr)) return [];
-    return arr.filter((t) => {
-      const n = (t.name || '').trim();
-      if (!n) return false;
-      // block exact matches from the list
-      if (BLOCKED_NAMES.includes(n)) return false;
-      return true;
-    });
-  };
-
-  try {
-    // 1) Try local trips from /api/trips
-    const data = await get(API.trips, { sort: '-rating', limit: 10 });
-    let list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
-    list = cleanList(list);
-
-    if (list.length) {
-      suggestedWrap.innerHTML = list.map(miniTripCard).join('');
-      return;
-    }
-
-    // 2) Try external destinations from /api/destinations
-    const ext = await loadExternalDestinations({ limit: 10 });
-    const extClean = cleanList(ext || []);
-
-    if (extClean.length) {
-      suggestedWrap.innerHTML = extClean.map(miniTripCard).join('');
-      return;
-    }
-
-    // 3) Fallback static suggestions
-    suggestedWrap.innerHTML = cleanList(SUGGESTED_FALLBACK).map(miniTripCard).join('');
-  } catch (e) {
-    console.error('loadSuggestedTrips error', e);
-    suggestedWrap.innerHTML = cleanList(SUGGESTED_FALLBACK).map(miniTripCard).join('');
-  }
-}
 
   /* ============================
      TRIPS (grid/list + search)
@@ -475,19 +459,18 @@ function filterBadTrips(list) {
     cards.innerHTML = html;
   }
 
- function renderTrips(raw) {
-  if (!cards) return;
-  let list = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
-  list = filterBadTrips(list);
+  function renderTrips(raw) {
+    if (!cards) return;
+    let list = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
+    list = filterBadTrips(list);
 
-  if (!list.length) {
-    cards.innerHTML = '<p>No trips found.</p>';
-    return;
+    if (!list.length) {
+      cards.innerHTML = '<p>No trips found.</p>';
+      return;
+    }
+    if (TRIP_VIEW === 'list') renderTripsList(list);
+    else renderTripsGrid(list);
   }
-  if (TRIP_VIEW === 'list') renderTripsList(list);
-  else renderTripsGrid(list);
-}
-
 
   const loadTrips = (p = {}) =>
     get(API.trips, p)
@@ -521,7 +504,9 @@ function filterBadTrips(list) {
 
       // local trips
       try {
-        const tripRes = await fetch(buildUrl(API.trips, { ...(qVal ? { q: qVal } : {}), ...params }));
+        const tripRes = await fetch(
+          buildUrl(API.trips, { ...(qVal ? { q: qVal } : {}), ...params })
+        );
         const tripJson = await tripRes.json().catch(() => null);
         trips = Array.isArray(tripJson?.data) ? tripJson.data : [];
       } catch (err) {
@@ -531,7 +516,9 @@ function filterBadTrips(list) {
       // external destinations
       try {
         if (qVal) {
-          const destRes = await fetch(buildUrl(API.destinations, { keyword: qVal, limit: 8 }));
+          const destRes = await fetch(
+            buildUrl(API.destinations, { keyword: qVal, limit: 8 })
+          );
           const destJson = await destRes.json().catch(() => null);
           destinations = Array.isArray(destJson?.data) ? destJson.data : [];
         }
@@ -542,7 +529,9 @@ function filterBadTrips(list) {
       const combined = [...(destinations || []), ...(trips || [])];
       if (!combined.length) {
         if (cards)
-          cards.innerHTML = `<p>No results found${qVal ? ` for "${qVal}"` : ''}.</p>`;
+          cards.innerHTML = `<p>No results found${
+            qVal ? ` for "${qVal}"` : ''
+          }.</p>`;
         toast('No trips found for your search.');
         return;
       }
@@ -633,11 +622,16 @@ function filterBadTrips(list) {
     const source = ff.src?.value.trim();
     const destination = ff.dst?.value.trim();
     const departureDate = ff.date?.value;
-    if (!source || !destination || !departureDate) return toast('Fill source, destination, date');
+    if (!source || !destination || !departureDate)
+      return toast('Fill source, destination, date');
     try {
       ff.btn.disabled = true;
       ff.btn.textContent = 'Searching...';
-      const flights = await post(API.flights, { source, destination, departureDate });
+      const flights = await post(API.flights, {
+        source,
+        destination,
+        departureDate
+      });
       renderFlights(flights);
       toast('Flights loaded');
     } catch (e) {
@@ -659,7 +653,9 @@ function filterBadTrips(list) {
       <div class="card" style="background:#fff;color:#000;border-radius:12px;overflow:hidden">
         <img src="${
           h.imageUrl ||
-          `https://source.unsplash.com/800x600/?hotel,${encodeURIComponent(h.name || 'hotel')}`
+          `https://source.unsplash.com/800x600/?hotel,${encodeURIComponent(
+            h.name || 'hotel'
+          )}`
         }" alt="${h.name}" style="width:100%;height:160px;object-fit:cover"
         onerror="this.onerror=null;this.src='https://source.unsplash.com/800x600/?hotel'">
         <div style="padding:12px">
@@ -675,13 +671,23 @@ function filterBadTrips(list) {
             <div>
               ${
                 h.rating
-                  ? `<span style="color:gold">${'★'.repeat(Math.round(h.rating || 4))}</span>`
+                  ? `<span style="color:gold">${'★'.repeat(
+                      Math.round(h.rating || 4)
+                    )}</span>`
                   : ''
               }
             </div>
             <div style="text-align:right">
-              ${h.price ? `<div style="font-weight:700">${h.currency || 'USD'} ${h.price}</div>` : ''}
-              <button class="btn book-hotel-btn" data-id="${h.id}" data-name="${h.name}" style="margin-top:8px">
+              ${
+                h.price
+                  ? `<div style="font-weight:700">${h.currency || 'USD'} ${
+                      h.price
+                    }</div>`
+                  : ''
+              }
+              <button class="btn book-hotel-btn" data-id="${
+                h.id
+              }" data-name="${h.name}" style="margin-top:8px">
                 Book
               </button>
             </div>
@@ -743,13 +749,17 @@ function filterBadTrips(list) {
       <div class="card" style="background:#fff;color:#000;border-radius:12px;overflow:hidden">
         <img src="${
           b.imageUrl ||
-          `https://source.unsplash.com/800x600/?bus,${encodeURIComponent(b.destination || 'bus')}`
+          `https://source.unsplash.com/800x600/?bus,${encodeURIComponent(
+            b.destination || 'bus'
+          )}`
         }"
              alt="${b.operator}" style="width:100%;height:150px;object-fit:cover"
              onerror="this.onerror=null;this.src='https://source.unsplash.com/800x600/?bus'">
         <div style="padding:12px">
           <h3 style="margin:0 0 6px">${b.operator}</h3>
-          <p style="margin:0;font-size:13px;color:#444">${b.source} → ${b.destination}</p>
+          <p style="margin:0;font-size:13px;color:#444">${b.source} → ${
+      b.destination
+    }</p>
           <p style="margin:6px 0;font-size:13px;color:#555">
             Depart: ${b.departureTime || '-'} • Arrive: ${b.arrivalTime || '-'}
           </p>
@@ -759,10 +769,14 @@ function filterBadTrips(list) {
     }
           </p>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-            <div>${b.price ? `<strong>${b.currency || 'INR'} ${b.price}</strong>` : ''}</div>
-            <button class="btn book-bus-btn" data-id="${b.id}" data-operator="${b.operator}" data-route="${
-      b.source
-    }→${b.destination}">
+            <div>${
+              b.price
+                ? `<strong>${b.currency || 'INR'} ${b.price}</strong>`
+                : ''
+            }</div>
+            <button class="btn book-bus-btn" data-id="${b.id}" data-operator="${
+      b.operator
+    }" data-route="${b.source}→${b.destination}">
               Book
             </button>
           </div>
@@ -832,18 +846,26 @@ function filterBadTrips(list) {
              onerror="this.onerror=null;this.src='https://source.unsplash.com/800x600/?train'">
         <div style="padding:12px">
           <h3 style="margin:0 0 6px">${t.name || t.number}</h3>
-          <p style="margin:0;font-size:13px;color:#444">${t.source} → ${t.destination}</p>
+          <p style="margin:0;font-size:13px;color:#444">${t.source} → ${
+      t.destination
+    }</p>
           <p style="margin:6px 0;font-size:13px;color:#555">
-            Train No: ${t.number || '-'} ${t.classType ? `• Class: ${t.classType}` : ''}
+            Train No: ${t.number || '-'} ${
+      t.classType ? `• Class: ${t.classType}` : ''
+    }
           </p>
           <p style="margin:0;font-size:13px;color:#555">
             Depart: ${t.departureTime || '-'} • Arrive: ${t.arrivalTime || '-'}
           </p>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-            <div>${t.price ? `<strong>${t.currency || 'INR'} ${t.price}</strong>` : ''}</div>
-            <button class="btn book-train-btn" data-id="${t.id}" data-name="${t.name || t.number}" data-route="${
-      t.source
-    }→${t.destination}">
+            <div>${
+              t.price
+                ? `<strong>${t.currency || 'INR'} ${t.price}</strong>`
+                : ''
+            }</div>
+            <button class="btn book-train-btn" data-id="${t.id}" data-name="${
+      t.name || t.number
+    }" data-route="${t.source}→${t.destination}">
               Book
             </button>
           </div>
@@ -1001,7 +1023,8 @@ function filterBadTrips(list) {
       travelers: Number(bk.trav?.value || 1),
       notes: bk.notes?.value?.trim()
     };
-    if (!payload.name || !payload.email) return toast('Name & email required');
+    if (!payload.name || !payload.email)
+      return toast('Name & email required');
     if (bk.tripId && bk.tripId.value) payload.tripId = bk.tripId.value;
     if (bk.c?.value || bk.route?.value) {
       const [source, destination] = (bk.route?.value || '')
@@ -1045,3 +1068,4 @@ function filterBadTrips(list) {
   loadSuggestedTrips();
   loadTrips();
 });
+
