@@ -1,166 +1,265 @@
-<script>
-  const API_DEST = '/api/destinations';
-  const API_UNSPLASH = '/api/unsplash-image';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Explore Destinations | Tripease Explorer</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif}
+    body{
+      background:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80') no-repeat center/cover;
+      color:#fff;overflow-x:hidden;padding-bottom:60px;
+    }
+    header{
+      width:90%;margin:20px auto;padding:12px 20px;background:rgba(255,255,255,.12);
+      border-radius:40px;display:flex;justify-content:space-between;align-items:center;
+      backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2)
+    }
+    nav a{text-decoration:none;color:#000;margin:0 10px;font-weight:600}
+    nav a:hover{color:#00b3b3}
+    .search-row{width:90%;margin:22px auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .search-row input,.search-row select{
+      padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,.06);min-width:180px
+    }
+    .btn{
+      background:#00b3b3;color:#fff;border:none;padding:10px 14px;border-radius:10px;
+      cursor:pointer;transition:.2s;
+    }
+    .btn:hover{opacity:.9}
+    .panel{
+      width:90%;margin:0 auto;background:rgba(255,255,255,.12);
+      border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,.12)
+    }
+    .grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:18px;margin-top:14px
+    }
+    .card{
+      background:#fff;color:#000;border-radius:12px;overflow:hidden;
+      box-shadow:0 8px 24px rgba(0,0,0,.12)
+    }
+    .card img{width:100%;height:160px;object-fit:cover;display:block}
+    .card .body{padding:12px}
+    .card h3{margin:0 0 6px;font-size:18px}
+    .card p{margin:0;color:#444;font-size:13px;line-height:1.4}
+    .meta{font-size:12px;color:#666;margin-top:8px}
+    #message{width:90%;margin:16px auto;color:#fff;text-align:center;min-height:20px}
+    footer{text-align:center;padding:24px;color:#fff;opacity:.9}
+    @media (max-width:520px){
+      .search-row{flex-direction:column;align-items:stretch}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;gap:14px">
+      <a href="index.html" style="font-weight:700;color:#00b3b3;text-decoration:none;font-size:18px">
+        Tripease
+      </a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="explore.html" style="color:#00b3b3">Explore</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
 
-  const grid = document.getElementById('dest-grid');
-  const msg = document.getElementById('message');
-  const keywordEl = document.getElementById('dest-keyword');
-  const subtypeEl = document.getElementById('dest-subtype');
-  const limitEl = document.getElementById('dest-limit');
-  const searchBtn = document.getElementById('dest-search');
-  const randomBtn = document.getElementById('dest-random');
+    <div style="display:flex;gap:10px;align-items:center">
+      <button onclick="location.href='index.html'" class="btn" style="background:transparent;color:#fff;border:1px solid #fff">
+        Back Home
+      </button>
+    </div>
+  </header>
 
-  const GENERIC_FALLBACK =
-    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
+  <main>
+    <section class="search-row">
+      <input id="dest-keyword" type="text" placeholder="Search destinations (city, landmark, beach)..." />
+      <select id="dest-subtype">
+        <option value="CITY">City</option>
+        <option value="AIRPORT">Airport</option>
+        <option value="POINT_OF_INTEREST">Point of Interest</option>
+        <option value="NEIGHBORHOOD">Neighborhood</option>
+        <option value="ALL">All</option>
+      </select>
+      <input id="dest-limit" type="number" value="8" min="1" max="20" style="width:90px" />
+      <button id="dest-search" class="btn">Search</button>
+      <button id="dest-random" class="btn" style="background:#fff;color:#000">Surprise me</button>
+    </section>
 
-  function showMessage(txt, isError = false) {
-    msg.textContent = txt || '';
-    msg.style.color = isError ? '#ffdddd' : '#dfffe6';
-  }
+    <div id="message"></div>
 
-  function clearMessage(){ showMessage(''); }
+    <section class="panel">
+      <h2 style="margin:0 0 8px;color:#fff">Results</h2>
+      <div id="dest-grid" class="grid" aria-live="polite"></div>
+    </section>
+  </main>
 
-  function escapeHtml(str){
-    if(!str) return '';
-    return String(str)
-      .replaceAll('&','&amp;')
-      .replaceAll('<','&lt;')
-      .replaceAll('>','&gt;')
-      .replaceAll('"','&quot;')
-      .replaceAll("'",'&#39;');
-  }
+  <footer>© 2025 Tripease Explorer</footer>
 
-  // Check if existing image URL looks usable
-  function hasUsableImage(item) {
-    const url = item.imageUrl || item.image;
-    if (!url) return false;
-    if (typeof url !== 'string') return false;
-    if (!url.startsWith('http')) return false;
-    if (url.includes('placeholder') || url.includes('default')) return false;
-    return true;
-  }
+  <script>
+    const API_DEST = '/api/destinations';
+    const API_UNSPLASH = '/api/unsplash-image';
 
-  // Ask backend Unsplash proxy for an image for this destination
-  async function fillUnsplashImage(item) {
-    if (hasUsableImage(item)) return item;
+    const grid = document.getElementById('dest-grid');
+    const msg = document.getElementById('message');
+    const keywordEl = document.getElementById('dest-keyword');
+    const subtypeEl = document.getElementById('dest-subtype');
+    const limitEl = document.getElementById('dest-limit');
+    const searchBtn = document.getElementById('dest-search');
+    const randomBtn = document.getElementById('dest-random');
 
-    const parts = [];
-    if (item.name) parts.push(item.name);
-    if (item.region) parts.push(item.region);
-    if (item.address?.cityName) parts.push(item.address.cityName);
-    if (item.address?.countryName) parts.push(item.address.countryName);
-    parts.push('travel');
+    const GENERIC_FALLBACK =
+      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
 
-    const q = encodeURIComponent(parts.filter(Boolean).join(' ')) || 'travel destination';
+    function showMessage(txt, isError = false) {
+      msg.textContent = txt || '';
+      msg.style.color = isError ? '#ffdddd' : '#dfffe6';
+    }
 
-    try {
-      const res = await fetch(`${API_UNSPLASH}?q=${q}`);
-      const json = await res.json().catch(() => ({}));
-      if (json && json.url) {
-        item.imageUrl = json.url;
-      } else {
+    function clearMessage(){ showMessage(''); }
+
+    function escapeHtml(str){
+      if(!str) return '';
+      return String(str)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
+    }
+
+    // Check if existing image URL looks usable
+    function hasUsableImage(item) {
+      const url = item.imageUrl || item.image;
+      if (!url) return false;
+      if (typeof url !== 'string') return false;
+      if (!url.startsWith('http')) return false;
+      if (url.includes('placeholder') || url.includes('default')) return false;
+      return true;
+    }
+
+    // Ask backend Unsplash proxy for an image for this destination
+    async function fillUnsplashImage(item) {
+      if (hasUsableImage(item)) return item;
+
+      const parts = [];
+      if (item.name) parts.push(item.name);
+      if (item.region) parts.push(item.region);
+      if (item.address?.cityName) parts.push(item.address.cityName);
+      if (item.address?.countryName) parts.push(item.address.countryName);
+      parts.push('travel');
+
+      const q = encodeURIComponent(parts.filter(Boolean).join(' ')) || 'travel destination';
+
+      try {
+        const res = await fetch(`${API_UNSPLASH}?q=${q}`);
+        const json = await res.json().catch(() => ({}));
+        if (json && json.url) {
+          item.imageUrl = json.url;
+        } else {
+          item.imageUrl = GENERIC_FALLBACK;
+        }
+      } catch (err) {
+        console.error('fillUnsplashImage error', err);
         item.imageUrl = GENERIC_FALLBACK;
       }
-    } catch (err) {
-      console.error('fillUnsplashImage error', err);
-      item.imageUrl = GENERIC_FALLBACK;
+      return item;
     }
-    return item;
-  }
 
-  function cardHtml(item){
-    const img = item.imageUrl || item.image || GENERIC_FALLBACK;
-    const name = item.name || item.title || 'Unknown';
-    const region = item.region || item.address?.countryName || '';
-    const desc = item.description || (item.raw && item.raw.detailedName) || '';
-    return `
-      <article class="card" role="article" aria-label="${escapeHtml(name)}">
-        <img src="${img}" alt="${escapeHtml(name)}"
-             onerror="this.onerror=null;this.src='${GENERIC_FALLBACK}'"/>
-        <div class="body">
-          <h3>${escapeHtml(name)}</h3>
-          <div class="meta">${escapeHtml(region)}</div>
-          <p>${escapeHtml(desc)}</p>
-        </div>
-      </article>
-    `;
-  }
+    function cardHtml(item){
+      const img = item.imageUrl || item.image || GENERIC_FALLBACK;
+      const name = item.name || item.title || 'Unknown';
+      const region = item.region || item.address?.countryName || '';
+      const desc = item.description || (item.raw && item.raw.detailedName) || '';
+      return `
+        <article class="card" role="article" aria-label="${escapeHtml(name)}">
+          <img src="${img}" alt="${escapeHtml(name)}"
+               onerror="this.onerror=null;this.src='${GENERIC_FALLBACK}'"/>
+          <div class="body">
+            <h3>${escapeHtml(name)}</h3>
+            <div class="meta">${escapeHtml(region)}</div>
+            <p>${escapeHtml(desc)}</p>
+          </div>
+        </article>
+      `;
+    }
 
-  async function fetchDestinations({keyword='', subType='CITY', limit=8} = {}){
-    try{
-      showMessage('Searching...');
-      grid.innerHTML = '';
-      const q = new URLSearchParams();
-      if(keyword) q.set('keyword', keyword);
-      if(subType && subType !== 'ALL') q.set('subType', subType);
-      q.set('limit', String(limit || 8));
-      const res = await fetch(API_DEST + '?' + q.toString());
-      if(!res.ok){
-        await res.json().catch(()=>null); // consume body
-        showMessage('No destinations (external API unavailable).', true);
+    async function fetchDestinations({keyword='', subType='CITY', limit=8} = {}){
+      try{
+        showMessage('Searching...');
+        grid.innerHTML = '';
+        const q = new URLSearchParams();
+        if(keyword) q.set('keyword', keyword);
+        if(subType && subType !== 'ALL') q.set('subType', subType);
+        q.set('limit', String(limit || 8));
+        const res = await fetch(API_DEST + '?' + q.toString());
+        if(!res.ok){
+          await res.json().catch(()=>null); // consume body
+          showMessage('No destinations (external API unavailable).', true);
+          return [];
+        }
+        const json = await res.json();
+        return Array.isArray(json.data) ? json.data : [];
+      }catch(err){
+        console.error('fetchDestinations error', err);
+        showMessage('Failed to fetch destinations. Try again later.', true);
         return [];
       }
-      const json = await res.json();
-      return Array.isArray(json.data) ? json.data : [];
-    }catch(err){
-      console.error('fetchDestinations error', err);
-      showMessage('Failed to fetch destinations. Try again later.', true);
-      return [];
     }
-  }
 
-  async function renderDestinations(params){
-    try{
-      clearMessage();
-      const list = await fetchDestinations(params);
-      if(!list || !list.length){
-        grid.innerHTML = '<div style="color:#fff;padding:28px">No destinations found.</div>';
-        return;
+    async function renderDestinations(params){
+      try{
+        clearMessage();
+        const list = await fetchDestinations(params);
+        if(!list || !list.length){
+          grid.innerHTML = '<div style="color:#fff;padding:28px">No destinations found.</div>';
+          return;
+        }
+
+        // Ensure every item has a decent image (with overrides handled in backend)
+        const enhanced = await Promise.all(list.map(fillUnsplashImage));
+
+        grid.innerHTML = enhanced.map(cardHtml).join('');
+      }catch(err){
+        console.error(err);
+        grid.innerHTML = '<div style="color:#fff;padding:28px">Error rendering destinations.</div>';
       }
-
-      // 🔥 Ensure every item has a decent image (with overrides for key locations)
-      const enhanced = await Promise.all(list.map(fillUnsplashImage));
-
-      grid.innerHTML = enhanced.map(cardHtml).join('');
-    }catch(err){
-      console.error(err);
-      grid.innerHTML = '<div style="color:#fff;padding:28px">Error rendering destinations.</div>';
     }
-  }
 
-  // Events
-  searchBtn.addEventListener('click', ()=>{
-    const kw = keywordEl.value.trim();
-    const sub = subtypeEl.value;
-    const lim = Number(limitEl.value) || 8;
-    renderDestinations({keyword: kw, subType: sub, limit: lim});
-  });
+    // Events
+    searchBtn.addEventListener('click', ()=>{
+      const kw = keywordEl.value.trim();
+      const sub = subtypeEl.value;
+      const lim = Number(limitEl.value) || 8;
+      renderDestinations({keyword: kw, subType: sub, limit: lim});
+    });
 
-  keywordEl.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter') searchBtn.click();
-  });
+    keywordEl.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter') searchBtn.click();
+    });
 
-  randomBtn.addEventListener('click', async ()=>{
-    const samples = [
-      'goa beach escape',
-      'kolkata cultural walk',
-      'rajasthan desert camp',
-      'himachal trek',
-      'andaman island cruise',
-      'maldives',
-      'bali',
-      'paris',
-      'mountain',
-      'island'
-    ];
-    const pick = samples[Math.floor(Math.random()*samples.length)];
-    keywordEl.value = pick;
-    subtypeEl.value = 'CITY';
-    renderDestinations({keyword: pick, subType: 'CITY', limit: 12});
-  });
+    randomBtn.addEventListener('click', async ()=>{
+      const samples = [
+        'goa beach escape',
+        'kolkata cultural walk',
+        'rajasthan desert camp',
+        'himachal trek',
+        'andaman island cruise',
+        'maldives',
+        'bali',
+        'paris',
+        'mountain',
+        'island'
+      ];
+      const pick = samples[Math.floor(Math.random()*samples.length)];
+      keywordEl.value = pick;
+      subtypeEl.value = 'CITY';
+      renderDestinations({keyword: pick, subType: 'CITY', limit: 12});
+    });
 
-  // Load initial destinations (popular-ish)
-  (function init(){
-    renderDestinations({keyword:'beach', subType:'CITY', limit:8});
-  })();
-</script>
+    // Load initial destinations (popular-ish)
+    (function init(){
+      renderDestinations({keyword:'beach', subType:'CITY', limit:8});
+    })();
+  </script>
+</body>
+</html>
