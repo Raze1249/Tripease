@@ -282,17 +282,48 @@ try {
    GET /api/unsplash-image?q=goa beach
    -> { url: "https://images.unsplash.com/..." }
 */
+/* ---------- Unsplash IMAGE PROXY (IMPROVED) ----------
+   GET /api/unsplash-image?q=goa beach
+   -> { url: "https://images.unsplash.com/..." }
+
+   Uses:
+   - Curated static images for specific destinations (Goa, Kolkata, Rajasthan, Himachal, Andaman, etc.)
+   - Falls back to Unsplash search if no override matches
+*/
+const IMAGE_OVERRIDES = {
+  kolkata: 'https://images.unsplash.com/photo-1588783216315-f46af9aa2344?auto=format&fit=crop&w=1200&q=80',
+  'kolkata cultural walk': 'https://images.unsplash.com/photo-1607860108855-64b2653ef897?auto=format&fit=crop&w=1200&q=80',
+  rajasthan: 'https://images.unsplash.com/photo-1524492514791-505dacd0f0a5?auto=format&fit=crop&w=1200&q=80',
+  'desert camp': 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?auto=format&fit=crop&w=1200&q=80',
+  goa: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1200&q=80',
+  'goa beach escape': 'https://images.unsplash.com/photo-1500534314211-0a24cd03f2c0?auto=format&fit=crop&w=1200&q=80',
+  himachal: 'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?auto=format&fit=crop&w=1200&q=80',
+  trek: 'https://images.unsplash.com/photo-1526481280695-3c687fd543c0?auto=format&fit=crop&w=1200&q=80',
+  'himalayan trek': 'https://images.unsplash.com/photo-1601758124321-4667c3c605c9?auto=format&fit=crop&w=1200&q=80',
+  andaman: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80',
+  'andaman island cruise': 'https://images.unsplash.com/photo-1468413253725-0d5181091126?auto=format&fit=crop&w=1200&q=80'
+};
+
 app.get('/api/unsplash-image', async (req, res) => {
   try {
     if (!UNSPLASH_ACCESS_KEY) {
       return res.status(500).json({ error: 'Unsplash key not configured' });
     }
 
-    const q = (req.query.q || 'travel destination').toString();
+    const qRaw = (req.query.q || 'travel destination').toString();
+    const qLower = qRaw.toLowerCase();
 
+    // 1) Check curated overrides first
+    for (const key in IMAGE_OVERRIDES) {
+      if (qLower.includes(key)) {
+        return res.json({ url: IMAGE_OVERRIDES[key], source: 'override' });
+      }
+    }
+
+    // 2) Fallback to Unsplash search
     const unsplashRes = await axios.get('https://api.unsplash.com/search/photos', {
       params: {
-        query: q,
+        query: qRaw,
         per_page: 1,
         orientation: 'landscape'
       },
@@ -300,6 +331,22 @@ app.get('/api/unsplash-image', async (req, res) => {
         Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`
       }
     });
+
+    const results = unsplashRes.data && unsplashRes.data.results;
+    if (!results || !results.length) {
+      return res.json({ url: null });
+    }
+
+    const photo = results[0];
+    const url =
+      photo.urls && (photo.urls.regular || photo.urls.full || photo.urls.small);
+
+    return res.json({ url, source: 'unsplash' });
+  } catch (err) {
+    console.error('Unsplash API error:', err.message || err);
+    res.status(500).json({ error: 'Failed to fetch from Unsplash' });
+  }
+});
 
     const results = unsplashRes.data && unsplashRes.data.results;
     if (!results || !results.length) {
