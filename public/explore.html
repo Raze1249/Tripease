@@ -1,6 +1,6 @@
 <script>
   const API_DEST = '/api/destinations';
-  const API_UNSPLASH = '/api/unsplash-image'; // NEW: our backend proxy
+  const API_UNSPLASH = '/api/unsplash-image';
 
   const grid = document.getElementById('dest-grid');
   const msg = document.getElementById('message');
@@ -30,18 +30,28 @@
       .replaceAll("'",'&#39;');
   }
 
-  // --- NEW: get Unsplash image from backend for a destination ---
+  // Check if existing image URL looks usable
+  function hasUsableImage(item) {
+    const url = item.imageUrl || item.image;
+    if (!url) return false;
+    if (typeof url !== 'string') return false;
+    if (!url.startsWith('http')) return false;
+    if (url.includes('placeholder') || url.includes('default')) return false;
+    return true;
+  }
+
+  // Ask backend Unsplash proxy for an image for this destination
   async function fillUnsplashImage(item) {
-    // If API already provides an image, don't touch it
-    if (item.imageUrl || item.image) return item;
+    if (hasUsableImage(item)) return item;
 
     const parts = [];
     if (item.name) parts.push(item.name);
     if (item.region) parts.push(item.region);
+    if (item.address?.cityName) parts.push(item.address.cityName);
     if (item.address?.countryName) parts.push(item.address.countryName);
     parts.push('travel');
 
-    const q = encodeURIComponent(parts.filter(Boolean).join(' '));
+    const q = encodeURIComponent(parts.filter(Boolean).join(' ')) || 'travel destination';
 
     try {
       const res = await fetch(`${API_UNSPLASH}?q=${q}`);
@@ -108,7 +118,7 @@
         return;
       }
 
-      // 🔥 Fill images from Unsplash for items missing imageUrl
+      // 🔥 Ensure every item has a decent image (with overrides for key locations)
       const enhanced = await Promise.all(list.map(fillUnsplashImage));
 
       grid.innerHTML = enhanced.map(cardHtml).join('');
@@ -131,7 +141,18 @@
   });
 
   randomBtn.addEventListener('click', async ()=>{
-    const samples = ['goa','kolkata','rajasthan','himachal','andaman','beach','mountain','historic','temple','island'];
+    const samples = [
+      'goa beach escape',
+      'kolkata cultural walk',
+      'rajasthan desert camp',
+      'himachal trek',
+      'andaman island cruise',
+      'maldives',
+      'bali',
+      'paris',
+      'mountain',
+      'island'
+    ];
     const pick = samples[Math.floor(Math.random()*samples.length)];
     keywordEl.value = pick;
     subtypeEl.value = 'CITY';
