@@ -11,6 +11,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xssClean = require('xss-clean');
 const hpp = require('hpp');
 const path = require('path');
+const axios = require('axios'); // <-- NEW: for Unsplash API
 
 // ---------- ENV CONFIG ----------
 const PORT = process.env.PORT || 3000;
@@ -23,10 +24,16 @@ const MONGODB_URI = process.env.MONGODB_URI;
 // You can also pass multiple origins separated by commas
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
+// Unsplash access key (for /api/unsplash-image)
+const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
+
 // Amadeus / Unsplash keys are already used inside routes (destinations.js, hotels.js, etc.)
 
 if (!MONGODB_URI) {
   console.warn('⚠ MONGODB_URI is not set. Set it in .env / Render environment.');
+}
+if (!UNSPLASH_ACCESS_KEY) {
+  console.warn('⚠ UNSPLASH_ACCESS_KEY is not set. /api/unsplash-image will not work.');
 }
 
 // ---------- INIT APP ----------
@@ -271,6 +278,45 @@ try {
   console.warn('Bookings route not loaded:', e.message);
 }
 
+/* ---------- Unsplash IMAGE PROXY (NEW) ----------
+   GET /api/unsplash-image?q=goa beach
+   -> { url: "https://images.unsplash.com/..." }
+*/
+app.get('/api/unsplash-image', async (req, res) => {
+  try {
+    if (!UNSPLASH_ACCESS_KEY) {
+      return res.status(500).json({ error: 'Unsplash key not configured' });
+    }
+
+    const q = (req.query.q || 'travel destination').toString();
+
+    const unsplashRes = await axios.get('https://api.unsplash.com/search/photos', {
+      params: {
+        query: q,
+        per_page: 1,
+        orientation: 'landscape'
+      },
+      headers: {
+        Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`
+      }
+    });
+
+    const results = unsplashRes.data && unsplashRes.data.results;
+    if (!results || !results.length) {
+      return res.json({ url: null });
+    }
+
+    const photo = results[0];
+    const url =
+      photo.urls && (photo.urls.regular || photo.urls.full || photo.urls.small);
+
+    return res.json({ url });
+  } catch (err) {
+    console.error('Unsplash API error:', err.message || err);
+    res.status(500).json({ error: 'Failed to fetch from Unsplash' });
+  }
+});
+
 // ---------- 404 HANDLER ----------
 app.use('/api', (req, res, next) => {
   res.status(404).json({ message: 'API route not found' });
@@ -281,8 +327,7 @@ app.use((err, req, res, next) => {
   console.error('Global error handler:', err);
   if (res.headersSent) return next(err);
   res.status(err.status || 500).json({
-    message: err.message || 'Something went wrong on the server.',
-    // In production you might hide stack:
+    message: err.message || 'Something went wrong on the server.'
     // stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
