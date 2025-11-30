@@ -11,12 +11,11 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xssClean = require('xss-clean');
 const hpp = require('hpp');
 const path = require('path');
-const axios = require('axios'); // <-- NEW: for Unsplash API
+const axios = require('axios'); // For Unsplash API
 
 // ---------- ENV CONFIG ----------
 const PORT = process.env.PORT || 3000;
 
-// DO NOT hard-code this; set in .env and in Render
 // Example: MONGODB_URI=mongodb+srv://.../TripeaseDB
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -27,7 +26,10 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 // Unsplash access key (for /api/unsplash-image)
 const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
 
-// Amadeus / Unsplash keys are already used inside routes (destinations.js, hotels.js, etc.)
+// Optional Aviationstack keys
+const AVIATIONSTACK_API_KEY = process.env.AVIATIONSTACK_API_KEY;
+const AVIATIONSTACK_URL =
+  process.env.AVIATIONSTACK_URL || 'http://api.aviationstack.com/v1/airports';
 
 if (!MONGODB_URI) {
   console.warn('⚠ MONGODB_URI is not set. Set it in .env / Render environment.');
@@ -74,7 +76,7 @@ app.use(express.json({ limit: '1mb' }));
 // Parse cookies (for JWT auth)
 app.use(cookieParser());
 
-// Prevent MongoDB operator injection (& etc in query/body)
+// Prevent MongoDB operator injection
 app.use(
   mongoSanitize({
     replaceWith: '_'
@@ -88,7 +90,7 @@ app.use(xssClean());
 app.use(hpp());
 
 // ---------- RATE LIMITING ----------
-// Global limiter for all API routes (you can tune this)
+// Global limiter for all API routes
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
   max: 500, // 500 requests per IP per window
@@ -128,22 +130,13 @@ app.get('/api/health', (req, res) => {
 });
 
 // ---------- ROUTES ----------
-/**
- * IMPORTANT:
- * Only require routes that actually exist in your repo.
- * If you haven't created some of these yet, comment them out.
- */
 
 // Trips (MongoDB)
 const tripRoutes = require('./routes/trips.js');
 app.use('/api/trips', tripRoutes);
 
-// Flights (mock search) – kept here if you still use it
+// Flights (mock search) – uses in-memory airport cache optionally
 const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
-
-const AVIATIONSTACK_API_KEY = process.env.AVIATIONSTACK_API_KEY; // optional now
-const AVIATIONSTACK_URL =
-  process.env.AVIATIONSTACK_URL || 'http://api.aviationstack.com/v1/airports';
 
 // In-memory airport cache (optional)
 let airportCache = [];
@@ -179,7 +172,7 @@ app.get('/api/airports', (req, res) => {
   res.json(airportCache || []);
 });
 
-// Mock flight generator (same as before)
+// Mock flight generator (deterministic)
 function generateMockFlights(source, destination, date) {
   const flights = [];
   const carriers = ['Air Tripease', 'Global Wings', 'Oceanic Air', 'SkyPath'];
@@ -218,19 +211,38 @@ function generateMockFlights(source, destination, date) {
   return flights;
 }
 
-// Flight search
+// Flight search (stable mock)
 app.post('/api/search-flights', (req, res) => {
-  const { source, destination, departureDate } = req.body || {};
-  if (!source || !destination || !departureDate) {
-    return res
-      .status(400)
-      .json({ message: 'Missing required parameters: source, destination, departureDate.' });
+  try {
+    const { source, destination, departureDate } = req.body || {};
+
+    if (!source || !destination || !departureDate) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Missing required parameters: source, destination, departureDate.'
+      });
+    }
+
+    const flights = generateMockFlights(
+      String(source),
+      String(destination),
+      String(departureDate)
+    );
+
+    return res.json({
+      ok: true,
+      data: flights
+    });
+  } catch (err) {
+    console.error('search-flights error:', err);
+    return res.status(500).json({
+      ok: false,
+      message: 'Failed to search flights on server.'
+    });
   }
-  const flights = generateMockFlights(source, destination, departureDate);
-  res.json(flights);
 });
 
-// Destinations (Amadeus + Unsplash)
+// Destinations (Amadeus + Unsplash inside router)
 try {
   const destinationsRouter = require('./routes/destinations.js');
   app.use('/api/destinations', destinationsRouter);
@@ -278,10 +290,6 @@ try {
   console.warn('Bookings route not loaded:', e.message);
 }
 
-/* ---------- Unsplash IMAGE PROXY (NEW) ----------
-   GET /api/unsplash-image?q=goa beach
-   -> { url: "https://images.unsplash.com/..." }
-*/
 /* ---------- Unsplash IMAGE PROXY (IMPROVED) ----------
    GET /api/unsplash-image?q=goa beach
    -> { url: "https://images.unsplash.com/..." }
@@ -342,22 +350,6 @@ app.get('/api/unsplash-image', async (req, res) => {
       photo.urls && (photo.urls.regular || photo.urls.full || photo.urls.small);
 
     return res.json({ url, source: 'unsplash' });
-  } catch (err) {
-    console.error('Unsplash API error:', err.message || err);
-    res.status(500).json({ error: 'Failed to fetch from Unsplash' });
-  }
-});
-
-    const results = unsplashRes.data && unsplashRes.data.results;
-    if (!results || !results.length) {
-      return res.json({ url: null });
-    }
-
-    const photo = results[0];
-    const url =
-      photo.urls && (photo.urls.regular || photo.urls.full || photo.urls.small);
-
-    return res.json({ url });
   } catch (err) {
     console.error('Unsplash API error:', err.message || err);
     res.status(500).json({ error: 'Failed to fetch from Unsplash' });
