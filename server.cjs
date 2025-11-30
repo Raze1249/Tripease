@@ -72,6 +72,8 @@ app.use(
 
 // Parse JSON safely
 app.use(express.json({ limit: '1mb' }));
+// Parse HTML form submissions (contact form, etc.)
+app.use(express.urlencoded({ extended: true }));
 
 // Parse cookies (for JWT auth)
 app.use(cookieParser());
@@ -288,6 +290,14 @@ try {
   app.use('/api/bookings', bookingsRouter);
 } catch (e) {
   console.warn('Bookings route not loaded:', e.message);
+}
+
+// Contact messages
+try {
+  const contactRouter = require('./routes/contact.js');
+  app.use('/api/contact', contactRouter);
+} catch (e) {
+  console.warn('Contact route not loaded:', e.message);
 }
 
 /* ---------- Unsplash IMAGE PROXY (IMPROVED) ----------
