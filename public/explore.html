@@ -91,8 +91,52 @@
 
     function clearMessage(){ showMessage(''); }
 
+    // ---------- NEW: smarter image resolver ----------
+    const IMAGE_OVERRIDES = {
+      // key: lowercase substring to match in name/region
+      'goa': 'https://images.unsplash.com/photo-1560179406-1c6c60e0dc76?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Z29hfGVufDB8fDB8fHww',
+      'kolkata': 'https://images.unsplash.com/photo-1603813507806-0d311a6eecd1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8a29sa2F0YXxlbnwwfHwwfHx8MA%3D%3D',
+      'rajasthan': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmFqYXN0aGFufGVufDB8fDB8fHww',
+      'jaipur': 'https://images.unsplash.com/photo-1602643163983-ed0babc39797?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cmFqYXN0aGFufGVufDB8fDB8fHww',
+      'udaipur': 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dWRhaXB1cnxlbnwwfHwwfHx8MA%3D%3D',
+      'himachal': 'https://images.unsplash.com/photo-1581791534721-e599df4417f7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8aGltYWNoYWx8ZW58MHx8MHx8fDA%3D',
+      'manali': 'https://images.unsplash.com/photo-1712388430474-ace0c16051e2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFuYWxpfGVufDB8fDB8fHww',
+      'andaman': 'https://images.unsplash.com/photo-1642498232612-a837df233825?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YW5kYW1hbnxlbnwwfHwwfHx8MA%3D%3D',
+      'maldives': 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFsZGl2ZXN8ZW58MHx8MHx8fDA%3D',
+      'bali': 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=438&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      'paris': 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGFyaXN8ZW58MHx8MHx8fDA%3D',
+      'santorini': 'https://images.unsplash.com/photo-1580502304784-8985b7eb7260?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8c2FudG9yaW5pfGVufDB8fDB8fHww'
+    };
+
+    function getImageForDestination(item){
+      // 1) If API already gave image, use it
+      if (item.imageUrl) return item.imageUrl;
+      if (item.image) return item.image;
+
+      const rawName = String(item.name || item.title || '').toLowerCase();
+      const rawRegion = String(item.region || item.address?.cityName || item.address?.countryName || '').toLowerCase();
+
+      // 2) If name/region contains known key, use curated image
+      for (const key in IMAGE_OVERRIDES){
+        if (rawName.includes(key) || rawRegion.includes(key)){
+          return IMAGE_OVERRIDES[key];
+        }
+      }
+
+      // 3) Otherwise use a dynamic Unsplash query based on place name + region
+      const qParts = [];
+      if (item.name) qParts.push(item.name);
+      if (item.region) qParts.push(item.region);
+      if (item.address?.countryName) qParts.push(item.address.countryName);
+      qParts.push('travel');
+
+      const query = encodeURIComponent(qParts.filter(Boolean).join(' '));
+      // Unsplash Source: random photo related to query
+      return `https://source.unsplash.com/800x600/?${query}`;
+    }
+
     function cardHtml(item){
-      const img = item.imageUrl || item.image || 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
+      const img = getImageForDestination(item);
       const name = item.name || item.title || 'Unknown';
       const region = item.region || item.address?.countryName || '';
       const desc = item.description || (item.raw && item.raw.detailedName) || '';
@@ -128,7 +172,7 @@
         q.set('limit', String(limit || 8));
         const res = await fetch(API_DEST + '?' + q.toString());
         if(!res.ok){
-          const body = await res.json().catch(()=>null);
+          await res.json().catch(()=>null); // just to consume body if needed
           showMessage('No destinations (external API unavailable). Showing suggestions below.', true);
           return [];
         }
@@ -169,7 +213,7 @@
 
     randomBtn.addEventListener('click', async ()=>{
       // small list of sample keywords to show varied results
-      const samples = ['beach','mountain','historic','temple','island','lake','desert','city','market','waterfall'];
+      const samples = ['goa','kolkata','rajasthan','himachal','andaman','beach','mountain','historic','temple','island'];
       const pick = samples[Math.floor(Math.random()*samples.length)];
       keywordEl.value = pick;
       subtypeEl.value = 'CITY';
