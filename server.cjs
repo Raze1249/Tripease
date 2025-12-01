@@ -22,6 +22,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 // Example: FRONTEND_URL=https://tripease-web.onrender.com
 // You can also pass multiple origins separated by commas
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const allowedOrigins = FRONTEND_URL.split(',').map((o) => o.trim());
 
 // Unsplash access key (for /api/unsplash-image)
 const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
@@ -40,7 +41,8 @@ if (!UNSPLASH_ACCESS_KEY) {
 
 // ---------- INIT APP ----------
 const app = express();
-
+// Behind Render/Heroku/Nginx proxy: trust X-Forwarded-* headers
+app.set('trust proxy', 1);
 // Hide Express signature
 app.disable('x-powered-by');
 
