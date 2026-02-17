@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Trip = require("./models/Trip");
 
-mongoose.connect("YOUR_MONGODB_URI")
+mongoose.connect("mongodb://atlas-sql-68d57ffb5cbe9e684a5da234-ios1qs.a.query.mongodb.net/TripeaseDB?ssl=true&authSource=admin")
   .then(async () => {
 
     await Trip.deleteMany(); // optional (only during development)
