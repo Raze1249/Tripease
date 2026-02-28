@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 const Trip = require("./models/Trip");
 
-mongoose.connect("mongodb://atlas-sql-68d57ffb5cbe9e684a5da234-ios1qs.a.query.mongodb.net/TripeaseDB?ssl=true&authSource=admin") 
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log("MongoDB connection error:", err.message));
   
   .then(async () => {
 
