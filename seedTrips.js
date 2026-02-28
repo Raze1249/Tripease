@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Trip = require("./models/Trip");
 
-mongoose.connect("mongodb+srv://tripease_user:pxzXeeGRDNhbgxuA@cluster0.faxvovy.mongodb.net/TripeaseDB")
+mongoose.connect("mongodb+srv://tripease_user:T8lxSPnozHfNsytK@cluster0.faxvovy.mongodb.net/TripeaseDB?retryWrites=true&w=majority&appName=Cluster0")
   .then(async () => {
 
     await Trip.deleteMany(); // optional (only during development)
