@@ -15,12 +15,7 @@ const axios = require('axios'); // For Unsplash API
 
 // ---------- ENV CONFIG ----------
 const PORT = process.env.PORT || 3000;
-
-// Example: MONGODB_URI=mongodb+srv://.../TripeaseDB
 const MONGODB_URI = process.env.MONGODB_URI;
-
-// Example: FRONTEND_URL=https://tripease-web.onrender.com
-// You can also pass multiple origins separated by commas
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 // Unsplash access key (for /api/unsplash-image)
 const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
@@ -39,7 +34,6 @@ if (!UNSPLASH_ACCESS_KEY) {
 
 // ---------- INIT APP ----------
 const app = express();
-// Behind Render/Heroku/Nginx proxy: trust X-Forwarded-* headers
 app.set('trust proxy', 1);
 // Hide Express signature
 app.disable('x-powered-by');
@@ -147,33 +141,62 @@ let airportCache = [];
 async function fetchAirportData() {
   if (!AVIATIONSTACK_API_KEY) {
     console.warn('⚠ AVIATIONSTACK_API_KEY not set, airport cache will stay empty.');
-    return;
   }
+
   try {
     console.log('Attempting to fetch airports from Aviationstack...');
-    const response = await fetch(`${AVIATIONSTACK_URL}?access_key=${AVIATIONSTACK_API_KEY}`);
-    const data = await response.json();
-    const validAirports = (data.data || []).filter(
-      (a) => a.iata_code && a.airport_name && a.city
+
+    const response = await fetch(
+      `${AVIATIONSTACK_URL}?access_key=${AVIATIONSTACK_API_KEY}`
     );
-    airportCache = validAirports.map((a) => ({
-      iata: a.iata_code,
-      name: a.airport_name,
-      city: a.city,
-      country: a.country_name
-    }));
-    console.log(`✅ Cached ${airportCache.length} airports.`);
+
+    const data = await response.json();
+
+    console.log('AVIATIONSTACK RESPONSE:', JSON.stringify(data).slice(0, 300));
+
+    if (data.error) {
+      console.error('❌ Aviationstack API Error:', data.error);
+    } else {
+      const validAirports = (data.data || []).filter(
+        (a) => a.iata_code && a.airport_name && a.city
+      );
+
+      airportCache = validAirports.map((a) => ({
+        iata: a.iata_code,
+        name: a.airport_name,
+        city: a.city,
+        country: a.country_name
+      }));
+
+      console.log(`✅ Cached ${airportCache.length} airports.`);
+    }
   } catch (err) {
-    console.error('Error fetching airport data:', err.message);
+    console.error('❌ Fetch failed FULL error:', err);
+  }
+
+  // ✅ 🔥 ADD FALLBACK HERE
+  if (!airportCache.length) {
+    airportCache = [
+      { iata: 'DEL', name: 'Indira Gandhi International Airport', city: 'Delhi', country: 'India' },
+      { iata: 'BOM', name: 'Chhatrapati Shivaji Maharaj International Airport', city: 'Mumbai', country: 'India' },
+      { iata: 'BLR', name: 'Kempegowda International Airport', city: 'Bangalore', country: 'India' }
+    ];
+
+    console.log('⚠ Using fallback airport data');
   }
 }
-fetchAirportData().catch(() => {});
+setInterval(fetchAirportData, 1000 * 60 * 10); // every 10 min
+fetchAirportData(); // initial call
 
 // Airport autocomplete
-app.get('/api/airports', (req, res) => {
-  res.json(airportCache || []);
-});
+app.get('/api/airports', async (req, res) => {
+  if (!airportCache.length) {
+    console.log('Cache empty, fetching airports...');
+    await fetchAirportData();
+  }
 
+  res.json(airportCache);
+});
 // Mock flight generator (deterministic)
 function generateMockFlights(source, destination, date) {
   const flights = [];
