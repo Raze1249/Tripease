@@ -239,25 +239,55 @@ function generateMockFlights(source, destination, date) {
 // Flight search (stable mock)
 app.post('/api/search-flights', (req, res) => {
   try {
-    const { source, destination, departureDate } = req.body || {};
+    let { source, destination, departureDate } = req.body || {};
+
+    console.log('Incoming request:', req.body);
 
     if (!source || !destination || !departureDate) {
       return res.status(400).json({
         ok: false,
-        message: 'Missing required parameters: source, destination, departureDate.'
+        message: 'Missing required parameters'
       });
     }
 
+    // ✅ 1. Convert city names → IATA
+    const cityToIATA = {
+      mumbai: 'BOM',
+      delhi: 'DEL',
+      bangalore: 'BLR',
+      chennai: 'MAA',
+      kolkata: 'CCU'
+    };
+
+    const sourceCode = cityToIATA[source.toLowerCase()] || source.toUpperCase();
+    const destCode = cityToIATA[destination.toLowerCase()] || destination.toUpperCase();
+
+    // ✅ 2. Convert date DD-MM-YYYY → YYYY-MM-DD
+    const parts = departureDate.split('-');
+    let formattedDate = departureDate;
+
+    if (parts.length === 3) {
+      formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
+    console.log('Converted:', {
+      sourceCode,
+      destCode,
+      formattedDate
+    });
+
+    // ✅ 3. Generate flights
     const flights = generateMockFlights(
-      String(source),
-      String(destination),
-      String(departureDate)
+      sourceCode,
+      destCode,
+      formattedDate
     );
 
     return res.json({
       ok: true,
       data: flights
     });
+
   } catch (err) {
     console.error('search-flights error:', err);
     return res.status(500).json({
