@@ -239,9 +239,7 @@ function generateMockFlights(source, destination, date) {
 // Flight search (stable mock)
 app.post('/api/search-flights', (req, res) => {
   try {
-    let { source, destination, departureDate } = req.body || {};
-
-    console.log('Incoming request:', req.body);
+    const { source, destination, departureDate } = req.body || {};
 
     if (!source || !destination || !departureDate) {
       return res.status(400).json({
@@ -250,53 +248,63 @@ app.post('/api/search-flights', (req, res) => {
       });
     }
 
-    // ✅ 1. Convert city names → IATA
-    const cityToIATA = {
-      mumbai: 'BOM',
-      delhi: 'DEL',
-      bangalore: 'BLR',
-      chennai: 'MAA',
-      kolkata: 'CCU'
-    };
+    // ✨ Demo flights (static but looks real)
+    const flights = [
+      {
+        id: 'FL001',
+        airline: 'IndiGo',
+        source,
+        destination,
+        departure: '06:30',
+        arrival: '08:45',
+        duration: '2h 15m',
+        price: 3200
+      },
+      {
+        id: 'FL002',
+        airline: 'Air India',
+        source,
+        destination,
+        departure: '09:00',
+        arrival: '11:30',
+        duration: '2h 30m',
+        price: 4100
+      },
+      {
+        id: 'FL003',
+        airline: 'Vistara',
+        source,
+        destination,
+        departure: '13:15',
+        arrival: '15:25',
+        duration: '2h 10m',
+        price: 4500
+      },
+      {
+        id: 'FL004',
+        airline: 'SpiceJet',
+        source,
+        destination,
+        departure: '18:40',
+        arrival: '21:00',
+        duration: '2h 20m',
+        price: 3500
+      }
+    ];
 
-    const sourceCode = cityToIATA[source.toLowerCase()] || source.toUpperCase();
-    const destCode = cityToIATA[destination.toLowerCase()] || destination.toUpperCase();
-
-    // ✅ 2. Convert date DD-MM-YYYY → YYYY-MM-DD
-    const parts = departureDate.split('-');
-    let formattedDate = departureDate;
-
-    if (parts.length === 3) {
-      formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
-
-    console.log('Converted:', {
-      sourceCode,
-      destCode,
-      formattedDate
-    });
-
-    // ✅ 3. Generate flights
-    const flights = generateMockFlights(
-      sourceCode,
-      destCode,
-      formattedDate
-    );
-
-    return res.json({
+    res.json({
       ok: true,
       data: flights
     });
 
   } catch (err) {
-    console.error('search-flights error:', err);
-    return res.status(500).json({
+    console.error(err);
+    res.status(500).json({
       ok: false,
-      message: 'Failed to search flights on server.'
+      message: 'Error fetching demo flights'
     });
   }
 });
-
 // Destinations (Amadeus + Unsplash inside router)
 try {
   const destinationsRouter = require('./routes/destinations.js');
