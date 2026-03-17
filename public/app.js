@@ -608,9 +608,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>Duration: ${f.duration || 'N/A'}</span>
             <span>Price: $${f.price}</span>
             <button class="btn book-flight-btn"
-              data-airline="${f.airline}" data-source="${f.source}" data-destination="${f.destination}"
-              data-departure="${f.departure}" data-duration="${f.duration}" data-price="${f.price}"
-              data-date="${ff.date?.value || ''}">Book</button>
+  data-carrier="${f.airline}" data-source="${f.source}" data-destination="${f.destination}"
+  data-departure="${f.departure}" data-duration="${f.duration}" data-price="${f.price}"
+  data-date="${ff.date?.value || ''}">Book</button>
           </div>
         </div>`
         )
