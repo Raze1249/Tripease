@@ -158,13 +158,13 @@ async function fetchAirportData() {
       console.error('❌ Aviationstack API Error:', data.error);
     } else {
       const validAirports = (data.data || []).filter(
-        (a) => a.iata_code && a.airport_name && a.city
+        (a) => a.iata_code && a.airport_name
       );
 
       airportCache = validAirports.map((a) => ({
         iata: a.iata_code,
         name: a.airport_name,
-        city: a.city,
+        city: a.city || a.city_iata_code || 'Unknown',
         country: a.country_name
       }));
 
