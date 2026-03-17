@@ -592,66 +592,59 @@ document.addEventListener('DOMContentLoaded', () => {
      FLIGHTS
      ============================ */
   function renderFlights(list = []) {
-  if (!ff.out) return;
-  ff.out.innerHTML = !list.length
-    ? '<p>No flights found.</p>'
-    : `
-    <div style="display:grid;gap:12px;">
-      ${list
-        .map(
-          (f) => `
-        <div style="background:#fff;color:#000;border-radius:12px;padding:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-            <strong>${f.airline}</strong>
-            <span>${f.source} → ${f.destination}</span>
-            <span>Departs: ${f.departure}</span>
-            <span>Duration: ${f.duration || 'N/A'}</span>
-            <span>Price: $${f.price}</span>
-            <button class="btn book-flight-btn"
-  data-carrier="${f.airline}" data-source="${f.source}" data-destination="${f.destination}"
-  data-departure="${f.departure}" data-duration="${f.duration}" data-price="${f.price}"
-  data-date="${ff.date?.value || ''}">Book</button>
-          </div>
-        </div>`
-        )
-        .join('')}
-    </div>`;
-}}
-
- async function searchFlights() {
-  const source = ff.src?.value.trim();
-  const destination = ff.dst?.value.trim();
-  const departureDate = ff.date?.value;
-  if (!source || !destination || !departureDate)
-    return toast('Fill source, destination, date');
-
-  try {
-    ff.btn.disabled = true;
-    ff.btn.textContent = 'Searching...';
-
-    const flights = await post(API.flights, {
-      source,
-      destination,
-      departureDate
-    });
-
-    if (!flights.ok || !flights.data) {
-      renderFlights([]);
-      toast('No flights found');
-      return;
-    }
-
-    renderFlights(flights.data); // ✅ Pass only the array
-    toast('Flights loaded');
-
-  } catch (e) {
-    console.error(e);
-    toast('Flight search failed');
-  } finally {
-    ff.btn.disabled = false;
-    ff.btn.textContent = 'Search Flights';
+    if (!ff.out) return;
+    ff.out.innerHTML = !list.length
+      ? '<p>No flights found.</p>'
+      : `
+      <div style="display:grid;gap:12px;">
+        ${list
+          .map(
+            (f) => `
+          <div style="background:#fff;color:#000;border-radius:12px;padding:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+              <strong>${f.carrier}</strong>
+              <span>${f.source} → ${f.destination}</span>
+              <span>Departs: ${f.departure}</span>
+              <span>Duration: ${f.duration}</span>
+              <span>Price: $${f.price}</span>
+              <button class="btn book-flight-btn"
+                data-carrier="${f.carrier}" data-source="${f.source}" data-destination="${f.destination}"
+                data-departure="${f.departure}" data-duration="${f.duration}" data-price="${f.price}"
+                data-date="${ff.date?.value || ''}">Book</button>
+            </div>
+          </div>`
+          )
+          .join('')}
+      </div>`;
   }
-}
+
+  async function searchFlights() {
+    const source = ff.src?.value.trim();
+    const destination = ff.dst?.value.trim();
+    const departureDate = ff.date?.value;
+    if (!source || !destination || !departureDate)
+      return toast('Fill source, destination, date');
+    try {
+      ff.btn.disabled = true;
+      ff.btn.textContent = 'Searching...';
+      const flights = await post(API.flights, {
+        source,
+        destination,
+        departureDate
+      });
+      renderFlights(flights);
+      toast('Flights loaded');
+    } catch (e) {
+      console.error(e);
+      toast('Flight search failed');
+    } finally {
+      ff.btn.disabled = false;
+      ff.btn.textContent = 'Search Flights';
+    }
+  }
+
+  ff.btn?.addEventListener('click', searchFlights);
+
   /* ============================
      HOTELS
      ============================ */
@@ -1075,4 +1068,3 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSuggestedTrips();
   loadTrips();
 });
-
