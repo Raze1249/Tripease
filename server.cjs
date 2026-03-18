@@ -282,6 +282,7 @@ app.get('/api/hotels', (req, res) => {
         imageUrl: "https://media.istockphoto.com/id/2246675945/photo/cozy-clean-minimalistic-and-comfortable-brick-and-wooden-cabin-hostel-bedroom-prepared-for.webp?a=1&b=1&s=612x612&w=0&k=20&c=KcEavx94MElD0vHwvbP5P1vxcCFycH93EiOBkNPTuqY="
       }
     ];
+    console.log("Sending hotels:", hotels);
 
     res.json({ data: hotels }); // ✅ IMPORTANT
   } catch (err) {
