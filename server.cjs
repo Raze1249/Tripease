@@ -248,58 +248,14 @@ app.post('/api/search-flights', (req, res) => {
     }
 
     const flights = generateMockFlights(source, destination, departureDate);
-
+  
     res.json(flights); // ✅ FIXED
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Flight search failed' });
   }
 });
-
-    // ✨ Demo flights (static but looks real)
-    const flights = [
-      {
-        id: 'FL001',
-        airline: 'IndiGo',
-        source,
-        destination,
-        departure: '06:30',
-        arrival: '08:45',
-        duration: '2h 15m',
-        price: 3200
-      },
-      {
-        id: 'FL002',
-        airline: 'Air India',
-        source,
-        destination,
-        departure: '09:00',
-        arrival: '11:30',
-        duration: '2h 30m',
-        price: 4100
-      },
-      {
-        id: 'FL003',
-        airline: 'Vistara',
-        source,
-        destination,
-        departure: '13:15',
-        arrival: '15:25',
-        duration: '2h 10m',
-        price: 4500
-      },
-      {
-        id: 'FL004',
-        airline: 'SpiceJet',
-        source,
-        destination,
-        departure: '18:40',
-        arrival: '21:00',
-        duration: '2h 20m',
-        price: 3500
-      }
-    ];
-
+ 
 // Destinations (Amadeus + Unsplash inside router)
 try {
   const destinationsRouter = require('./routes/destinations.js');
