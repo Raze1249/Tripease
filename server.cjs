@@ -256,7 +256,7 @@ app.get('/api/buses', (req, res) => {
     duration: '6h',
     seatsAvailable: 25,
     price: 500,
-    imageUrl: `https://source.unsplash.com/800x600/?bus,${destination}`
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvEtE4BU8hmBO3VjiKhhJkiAzUfJ7C09zjQwuH63ny3v_jnsJ6SdBtYOuT-VZzVhY4ozK340rJVP2Kd-nneNF6zHrbaIOI&s&ec=121585077"
   },
   {
     id: 'BUS002',
@@ -268,7 +268,7 @@ app.get('/api/buses', (req, res) => {
     duration: '6h',
     seatsAvailable: 12,
     price: 850,
-    imageUrl: `https://source.unsplash.com/800x600/?bus,${destination}`
+    imageUrl:"https://www.shutterstock.com/image-vector/volvo-icon-logo-sign-symbol-260nw-2412641097.jpg"
   },
   {
     id: 'BUS003',
@@ -280,7 +280,7 @@ app.get('/api/buses', (req, res) => {
     duration: '6h 30m',
     seatsAvailable: 8,
     price: 700,
-    imageUrl: `https://source.unsplash.com/800x600/?bus,${destination}`
+    imageUrl:"https://i.pinimg.com/474x/61/49/06/6149068bc75957cf93f1821004a408be.jpg"
   }
 ];
     res.json({ data: buses });
