@@ -243,10 +243,18 @@ app.post('/api/search-flights', (req, res) => {
 
     if (!source || !destination || !departureDate) {
       return res.status(400).json({
-        ok: false,
         message: 'Missing required parameters'
       });
     }
+
+    const flights = generateMockFlights(source, destination, departureDate);
+
+    res.json(flights); // ✅ FIXED
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Flight search failed' });
+  }
+});
 
     // ✨ Demo flights (static but looks real)
     const flights = [
