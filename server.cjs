@@ -244,6 +244,55 @@ app.get('/api/buses', (req, res) => {
         message: 'Missing parameters'
       });
     }
+    app.get('/api/hotels', (req, res) => {
+  try {
+    const { location, checkin, checkout, guests } = req.query;
+
+    if (!location) {
+      return res.status(400).json({
+        message: 'Location is required'
+      });
+    }
+
+    const hotels = [
+      {
+        id: 'HT001',
+        name: 'Taj Palace',
+        city: location,
+        rating: 5,
+        price: 8500,
+        currency: 'INR',
+        description: 'Luxury hotel with premium amenities',
+        imageUrl: 'https://images.unsplash.com/photo-1717326630872-f9b8b65050a4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dGFqJTIwaG90ZWx8ZW58MHx8MHx8fDA%3D'
+      },
+      {
+        id: 'HT002',
+        name: 'Hotel Grand Stay',
+        city: location,
+        rating: 4,
+        price: 4500,
+        currency: 'INR',
+        description: 'Comfortable stay at affordable price',
+        imageUrl: 'https://media.istockphoto.com/id/522297577/photo/building-with-lamppost.webp?a=1&b=1&s=612x612&w=0&k=20&c=xq2AO5lOAFnC7Moqe0tycRu8cRF7FCxoc2EvzBI6dGk='
+      },
+      {
+        id: 'HT003',
+        name: 'Budget Inn',
+        city: location,
+        rating: 3,
+        price: 2200,
+        currency: 'INR',
+        description: 'Budget-friendly rooms for travelers',
+        imageUrl: 'https://media.istockphoto.com/id/2246675945/photo/cozy-clean-minimalistic-and-comfortable-brick-and-wooden-cabin-hostel-bedroom-prepared-for.webp?a=1&b=1&s=612x612&w=0&k=20&c=KcEavx94MElD0vHwvbP5P1vxcCFycH93EiOBkNPTuqY='
+      }
+    ];
+
+    res.json({ data: hotels });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Hotel search failed' });
+  }
+});
 
     const buses = [
   {
