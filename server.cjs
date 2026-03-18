@@ -300,11 +300,7 @@ app.post('/api/search-flights', (req, res) => {
       }
     ];
 
-    res.json({
-      ok: true,
-      data: flights
-    });
-
+   res.json(flights);
   } catch (err) {
     console.error(err);
     res.status(500).json({
