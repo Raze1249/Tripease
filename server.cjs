@@ -244,17 +244,7 @@ app.get('/api/buses', (req, res) => {
         message: 'Missing parameters'
       });
     }
-    app.get('/api/hotels', (req, res) => {
-  try {
-    const { location, checkin, checkout, guests } = req.query;
-
-    if (!location) {
-      return res.status(400).json({
-        message: 'Location is required'
-      });
-    }
-
-   app.get('/api/hotels', (req, res) => {
+app.get('/api/hotels', (req, res) => {
   try {
     const { location } = req.query;
 
