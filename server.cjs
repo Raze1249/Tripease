@@ -246,41 +246,43 @@ app.get('/api/buses', (req, res) => {
     }
 
     const buses = [
-      {
-        id: 'BUS001',
-        operator: 'RSRTC',
-        source,
-        destination,
-        departureTime: '06:00',
-        arrivalTime: '12:00',
-        duration: '6h',
-        seatsAvailable: 25,
-        price: 500
-      },
-      {
-        id: 'BUS002',
-        operator: 'Volvo Travels',
-        source,
-        destination,
-        departureTime: '09:30',
-        arrivalTime: '15:30',
-        duration: '6h',
-        seatsAvailable: 12,
-        price: 850
-      },
-      {
-        id: 'BUS003',
-        operator: 'RedBus Express',
-        source,
-        destination,
-        departureTime: '18:00',
-        arrivalTime: '00:30',
-        duration: '6h 30m',
-        seatsAvailable: 8,
-        price: 700
-      }
-    ];
-
+  {
+    id: 'BUS001',
+    operator: 'RSRTC',
+    source,
+    destination,
+    departureTime: '06:00',
+    arrivalTime: '12:00',
+    duration: '6h',
+    seatsAvailable: 25,
+    price: 500,
+    imageUrl: `https://source.unsplash.com/800x600/?bus,${destination}`
+  },
+  {
+    id: 'BUS002',
+    operator: 'Volvo Travels',
+    source,
+    destination,
+    departureTime: '09:30',
+    arrivalTime: '15:30',
+    duration: '6h',
+    seatsAvailable: 12,
+    price: 850,
+    imageUrl: `https://source.unsplash.com/800x600/?bus,${destination}`
+  },
+  {
+    id: 'BUS003',
+    operator: 'RedBus Express',
+    source,
+    destination,
+    departureTime: '18:00',
+    arrivalTime: '00:30',
+    duration: '6h 30m',
+    seatsAvailable: 8,
+    price: 700,
+    imageUrl: `https://source.unsplash.com/800x600/?bus,${destination}`
+  }
+];
     res.json({ data: buses });
   } catch (err) {
     console.error(err);
@@ -299,44 +301,46 @@ app.get('/api/trains', (req, res) => {
     }
 
     const trains = [
-      {
-        id: 'TR001',
-        name: 'Rajdhani Express',
-        number: '12951',
-        source,
-        destination,
-        departureTime: '07:00',
-        arrivalTime: '13:00',
-        duration: '6h',
-        classType: '3AC',
-        price: 1500
-      },
-      {
-        id: 'TR002',
-        name: 'Shatabdi Express',
-        number: '12002',
-        source,
-        destination,
-        departureTime: '08:30',
-        arrivalTime: '14:00',
-        duration: '5h 30m',
-        classType: 'CC',
-        price: 1200
-      },
-      {
-        id: 'TR003',
-        name: 'Duronto Express',
-        number: '12245',
-        source,
-        destination,
-        departureTime: '22:00',
-        arrivalTime: '05:30',
-        duration: '7h 30m',
-        classType: 'Sleeper',
-        price: 900
-      }
-    ];
-
+  {
+    id: 'TR001',
+    name: 'Rajdhani Express',
+    number: '12951',
+    source,
+    destination,
+    departureTime: '07:00',
+    arrivalTime: '13:00',
+    duration: '6h',
+    classType: '3AC',
+    price: 1500,
+    imageUrl: `https://source.unsplash.com/800x600/?train,${destination}`
+  },
+  {
+    id: 'TR002',
+    name: 'Shatabdi Express',
+    number: '12002',
+    source,
+    destination,
+    departureTime: '08:30',
+    arrivalTime: '14:00',
+    duration: '5h 30m',
+    classType: 'CC',
+    price: 1200,
+    imageUrl: `https://source.unsplash.com/800x600/?train,${destination}`
+  },
+  {
+    id: 'TR003',
+    name: 'Duronto Express',
+    number: '12245',
+    source,
+    destination,
+    departureTime: '22:00',
+    arrivalTime: '05:30',
+    duration: '7h 30m',
+    classType: 'Sleeper',
+    price: 900,
+    imageUrl: `https://source.unsplash.com/800x600/?train,${destination}`
+  }
+];
     res.json({ data: trains });
   } catch (err) {
     console.error(err);
