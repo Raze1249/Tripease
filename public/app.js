@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ${list.map((f) => `
           <div style="background:#fff;color:#000;border-radius:12px;padding:12px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-              <strong>${f.carrier}</strong>
+              <strong>${f.airline}</strong>
               <span>${f.source} → ${f.destination}</span>
               <span>Departs: ${f.departure}</span>
               <span>Duration: ${f.duration}</span>
