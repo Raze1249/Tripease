@@ -254,40 +254,46 @@ app.get('/api/buses', (req, res) => {
       });
     }
 
+   app.get('/api/hotels', (req, res) => {
+  try {
+    const { location } = req.query;
+
+    const city = location || "Delhi";
+
     const hotels = [
       {
         id: 'HT001',
         name: 'Taj Palace',
-        city: location,
+        city,
         rating: 5,
         price: 8500,
         currency: 'INR',
         description: 'Luxury hotel with premium amenities',
-        imageUrl: 'https://images.unsplash.com/photo-1717326630872-f9b8b65050a4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dGFqJTIwaG90ZWx8ZW58MHx8MHx8fDA%3D'
+        imageUrl: "https://images.unsplash.com/photo-1660145416818-b9a2b1a1f193?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dGFqJTIwaG90ZWx8ZW58MHx8MHx8fDA%3D"
       },
       {
         id: 'HT002',
         name: 'Hotel Grand Stay',
-        city: location,
+        city,
         rating: 4,
         price: 4500,
         currency: 'INR',
-        description: 'Comfortable stay at affordable price',
-        imageUrl: 'https://media.istockphoto.com/id/522297577/photo/building-with-lamppost.webp?a=1&b=1&s=612x612&w=0&k=20&c=xq2AO5lOAFnC7Moqe0tycRu8cRF7FCxoc2EvzBI6dGk='
+        description: 'Comfortable stay',
+        imageUrl:"https://images.unsplash.com/photo-1620210357906-ebc7c3f18012?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Z3JhbmQlMjBzdGF5fGVufDB8fDB8fHww"
       },
       {
         id: 'HT003',
         name: 'Budget Inn',
-        city: location,
+        city,
         rating: 3,
         price: 2200,
         currency: 'INR',
-        description: 'Budget-friendly rooms for travelers',
-        imageUrl: 'https://media.istockphoto.com/id/2246675945/photo/cozy-clean-minimalistic-and-comfortable-brick-and-wooden-cabin-hostel-bedroom-prepared-for.webp?a=1&b=1&s=612x612&w=0&k=20&c=KcEavx94MElD0vHwvbP5P1vxcCFycH93EiOBkNPTuqY='
+        description: 'Affordable rooms',
+        imageUrl: "https://media.istockphoto.com/id/2246675945/photo/cozy-clean-minimalistic-and-comfortable-brick-and-wooden-cabin-hostel-bedroom-prepared-for.webp?a=1&b=1&s=612x612&w=0&k=20&c=KcEavx94MElD0vHwvbP5P1vxcCFycH93EiOBkNPTuqY="
       }
     ];
 
-    res.json({ data: hotels });
+    res.json({ data: hotels }); // ✅ IMPORTANT
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Hotel search failed' });
