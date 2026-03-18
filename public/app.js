@@ -591,15 +591,17 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ============================
      FLIGHTS
      ============================ */
-  function renderFlights(list = []) {
-    if (!ff.out) return;
-    ff.out.innerHTML = !list.length
-      ? '<p>No flights found.</p>'
-      : `
+ function renderFlights(data) {
+  if (!ff.out) return;
+
+  // ✅ Normalize response
+  const list = Array.isArray(data) ? data : data?.data || [];
+
+  ff.out.innerHTML = !list.length
+    ? '<p>No flights found.</p>'
+    : `
       <div style="display:grid;gap:12px;">
-        ${list
-          .map(
-            (f) => `
+        ${list.map((f) => `
           <div style="background:#fff;color:#000;border-radius:12px;padding:12px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
               <strong>${f.carrier}</strong>
@@ -608,16 +610,20 @@ document.addEventListener('DOMContentLoaded', () => {
               <span>Duration: ${f.duration}</span>
               <span>Price: $${f.price}</span>
               <button class="btn book-flight-btn"
-                data-carrier="${f.carrier}" data-source="${f.source}" data-destination="${f.destination}"
-                data-departure="${f.departure}" data-duration="${f.duration}" data-price="${f.price}"
-                data-date="${ff.date?.value || ''}">Book</button>
+                data-carrier="${f.carrier}"
+                data-source="${f.source}"
+                data-destination="${f.destination}"
+                data-departure="${f.departure}"
+                data-duration="${f.duration}"
+                data-price="${f.price}"
+                data-date="${ff.date?.value || ''}">
+                Book
+              </button>
             </div>
-          </div>`
-          )
-          .join('')}
+          </div>
+        `).join('')}
       </div>`;
-  }
-
+}
   async function searchFlights() {
     const source = ff.src?.value.trim();
     const destination = ff.dst?.value.trim();
