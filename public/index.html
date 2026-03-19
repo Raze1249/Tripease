@@ -137,6 +137,25 @@
       font-size: 12px;
       color: #444;
     }
+    
+    .results-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 10px;
+
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    
+     .trip-card {
+      width: 280px;
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+    }
 
     .link-btn {
       border: none;
@@ -245,7 +264,7 @@
       <input id="searchInput" type="text" placeholder="Search trips..."/>
       <button id="searchBtn">🔍</button>
     </div>
-     <div id="searchResults"></div>
+     
     <!-- Auth Bar -->
     <div class="auth-bar">
       <span id="auth-user" class="auth-user" style="display:none;"></span>
@@ -261,7 +280,7 @@
       </button>
     </div>
   </header>
-
+    <div id="searchResults"></div>
   <section class="hero">
     <h1>Explore Beyond Boundaries,<br/>Travel Beyond Expectations</h1>
     <p style="color:#000000;">
