@@ -376,6 +376,14 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
   }
+function openAuthModal() {
+  document.querySelector('.auth-overlay').classList.add('active');
+  document.querySelector('.auth-modal').classList.add('active');
+}
+function closeAuthModal() {
+  document.querySelector('.auth-overlay').classList.remove('active');
+  document.querySelector('.auth-modal').classList.remove('active');
+}
 
  function renderTripsList(list, targetId = "cardsContainer") {
   const container = document.getElementById(targetId);
