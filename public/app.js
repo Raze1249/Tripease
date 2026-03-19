@@ -532,6 +532,14 @@ function openBookingPanel(city) {
 }
    
  document.addEventListener("DOMContentLoaded", () => {
+  const searchBtn = document.getElementById("searchBtn");
+
+  if (searchBtn) {
+    searchBtn.addEventListener("click", runSearch);
+  }
+});
+   
+ document.addEventListener("DOMContentLoaded", () => {
   const cancelBtn = document.getElementById("bk-cancel");
 
   if (cancelBtn) {
