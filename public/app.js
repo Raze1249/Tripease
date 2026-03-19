@@ -513,29 +513,7 @@ async function runSearch() {
 }
    
 function openBookingPanel(city) {
-  const panel = document.getElementById("booking-panel");
-
-  if (panel) {
-    // show panel
-    panel.style.display = "block";
-    panel.scrollIntoView({ behavior: "smooth" });
-
-    // highlight safely
-    panel.classList.add("highlight");
-    setTimeout(() => panel.classList.remove("highlight"), 1500);
-  }
-
-  // fill route
-  const route = document.getElementById("bk-flight-route");
-  if (route) {
-    route.value = `${city} → Your Destination`;
-  }
-
-  // set trip id
-  const tripId = document.getElementById("bk-tripId");
-  if (tripId) {
-    tripId.value = city;
-  }
+  console.log("CLICKED:", city); // 👈 add this
 }
    
  document.addEventListener("DOMContentLoaded", () => {
