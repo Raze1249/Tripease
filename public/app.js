@@ -511,35 +511,42 @@ async function runSearch() {
     }
   }
 }
-  function openBookingPanel(city) {
-  // 1. Fill input (change ID according to your input)
-  const input = document.getElementById("sourceInput");
-  if (input) input.value = city;
+   
+function openBookingPanel(city) {
+  const panel = document.getElementById("booking-panel");
 
-  // 2. If you have destination input also
-  const dest = document.getElementById("destinationInput");
-  if (dest) dest.value = "";
-
-  // 3. Scroll to booking panel
-  const panel = document.getElementById("bookingSection");
   if (panel) {
+    // show panel
+    panel.style.display = "block";
     panel.scrollIntoView({ behavior: "smooth" });
+
+    // highlight safely
+    panel.classList.add("highlight");
+    setTimeout(() => panel.classList.remove("highlight"), 1500);
   }
 
-  // 4. (Optional) highlight panel
-  panel?.classList.add("highlight");
+  // fill route
+  const route = document.getElementById("bk-flight-route");
+  if (route) {
+    route.value = `${city} → Your Destination`;
+  }
 
-  setTimeout(() => {
-    panel?.classList.remove("highlight");
-  }, 1500);
+  // set trip id
+  const tripId = document.getElementById("bk-tripId");
+  if (tripId) {
+    tripId.value = city;
+  }
 }
-  qBtn?.addEventListener('click', runSearch);
-  qIn?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      runSearch();
-    }
-  });
+   
+ document.addEventListener("DOMContentLoaded", () => {
+  const cancelBtn = document.getElementById("bk-cancel");
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      document.getElementById("booking-panel").style.display = "none";
+    });
+  }
+});
 
   viewGridBtn?.addEventListener('click', () => {
     TRIP_VIEW = 'grid';
