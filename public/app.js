@@ -380,6 +380,13 @@ function openAuthModal() {
   document.querySelector('.auth-overlay').classList.add('active');
   document.querySelector('.auth-modal').classList.add('active');
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById("loginBtn");
+
+  if (loginBtn) {
+    loginBtn.addEventListener("click", openAuthModal);
+  }
+});
 function closeAuthModal() {
   document.querySelector('.auth-overlay').classList.remove('active');
   document.querySelector('.auth-modal').classList.remove('active');
