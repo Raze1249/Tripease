@@ -309,41 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   // Filter out empty / irrelevant / blocked-name trips
-  const filterBadTrips = (list) => {
-    if (!Array.isArray(list)) return [];
-    return list.filter((t) => {
-      const name = (t.name || '').trim();
-      if (!name) return false;
-      if (BLOCKED_NAMES.includes(name)) return false;
-      return true;
-    });
-  };
-
-  const SUGGESTED_FALLBACK = [
-    {
-      _id: 'sg1',
-      name: 'Goa Beaches',
-      imageUrl:
-        'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z29hJTIwYmVhY2hlc3xlbnwwfHwwfHx8MA%3D%3D',
-      rating: 5
-    },
-    {
-      _id: 'sg2',
-      name: 'Himalayan Trek',
-      imageUrl:
-        'https://images.unsplash.com/photo-1617380613434-7495e9b45dfb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aGltYWxheWF8ZW58MHx8MHx8fDA%3D',
-      rating: 5,
-      category: 'Mount'
-    },
-    {
-      _id: 'sg3',
-      name: 'Rajasthan Heritage',
-      imageUrl:
-        'https://images.unsplash.com/photo-1628943714856-f78158c096a5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmFqYXN0aGFuJTIwaGVyaXRhZ2V8ZW58MHx8MHx8fDA%3D',
-      rating: 4,
-      category: 'Cultural'
-    }
-  ];
 
   const miniTripCard = (t) => `
     <div class="card" style="width:240px">
@@ -355,39 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
 
-  async function loadSuggestedTrips() {
-    if (!suggestedWrap) return;
-
-    try {
-      // 1) Local trips from /api/trips
-      const data = await get(API.trips, { sort: '-rating', limit: 10 });
-      let list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
-      list = filterBadTrips(list);
-
-      if (list.length) {
-        suggestedWrap.innerHTML = list.map(miniTripCard).join('');
-        return;
-      }
-
-      // 2) External destinations from /api/destinations
-      const ext = await loadExternalDestinations({ limit: 10 });
-      const extClean = filterBadTrips(ext || []);
-
-      if (extClean.length) {
-        suggestedWrap.innerHTML = extClean.map(miniTripCard).join('');
-        return;
-      }
-
-      // 3) Static fallback
-      const fb = filterBadTrips(SUGGESTED_FALLBACK);
-      suggestedWrap.innerHTML = fb.map(miniTripCard).join('');
-    } catch (e) {
-      console.error('loadSuggestedTrips error', e);
-      const fb = filterBadTrips(SUGGESTED_FALLBACK);
-      suggestedWrap.innerHTML = fb.map(miniTripCard).join('');
-    }
-  }
-
+ 
   /* ============================
      TRIPS (grid/list + search)
      ============================ */
