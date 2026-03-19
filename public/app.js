@@ -726,6 +726,8 @@ const list =
   Array.isArray(json?.data) ? json.data :
   Array.isArray(json) ? json :
   [];
+
+console.log("FINAL LIST:", list);
       if (!hotelsResults) {
         toast('Hotels container missing');
         return;
