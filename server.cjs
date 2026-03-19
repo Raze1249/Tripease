@@ -243,26 +243,64 @@ app.get('/api/hotels', (req, res) => {
 
   const hotels = [
     {
-      id: 'HT001',
-      name: 'Taj Palace',
-      city,
-      rating: 5,
-      price: 8500,
-      currency: 'INR',
-      description: 'Luxury hotel',
-      imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945'
-    },
-    {
-      id: 'HT002',
-      name: 'Hotel Grand Stay',
-      city,
-      rating: 4,
-      price: 4500,
-      currency: 'INR',
-      description: 'Comfort stay',
-      imageUrl: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa'
-    }
-  ];
+  id: 'HT003',
+  name: 'Royal Orchid Hotel',
+  city,
+  rating: 4.5,
+  price: 6200,
+  currency: 'INR',
+  description: 'Premium comfort with modern amenities',
+  imageUrl: "https://imgs.search.brave.com/qRnXp-QZd8V0U_M6UmEJbjDHNohHOfa9qYs8VL_bwog/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/cm95YWxvcmNoaWRo/b3RlbHMuY29tL2lt/YWdlcy9jb250YWN0/LWJhbm5lci5qcGc"
+},
+{
+  id: 'HT004',
+  name: 'Sunrise Residency',
+  city,
+  rating: 3.8,
+  price: 2800,
+  currency: 'INR',
+  description: 'Affordable and cozy stay',
+  imageUrl:"https://imgs.search.brave.com/TBv4VvK5BrV00wrwcUG_iSMdFYu1v4tqe1Y7xwZIYjY/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aGUt/c3VucmlzZS1yZXNp/ZGVuY2UuYmFuZ2tv/a3Nob3RlbHMuY29t/L2RhdGEvUGljdHVy/ZXMvNzAweDUwMHcv/Njg3NC82ODc0NzMv/Njg3NDczNjAxL2Jh/bmdrb2stdGhlLXN1/bnJpc2UtcmVzaWRl/bmNlLXBpY3R1cmUt/NDguSlBFRw"
+},
+{
+  id: 'HT005',
+  name: 'The Urban Nest',
+  city,
+  rating: 4.2,
+  price: 3900,
+  currency: 'INR',
+  description: 'Stylish rooms in the city center',
+  imageUrl: "https://imgs.search.brave.com/fURuf83bwGK9xXpE6FFjnJFifxfTXpG0rxyIUHi1a7g/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9zdGF0/aWMtaW1nLmJhZzJi/YWcuaW4vcHJvcGVy/dHktaW1hZ2VzL2lt/Zy05NDl4NDQ5L2Jh/bmdhbG9yZS9uZXN0/LWhvdGVscy1ieS11/cmJhbi8yLndlYnA_/Zm9ybWF0PXdlYnAm/cXVhbGl0eT05MCZo/ZWlnaHQ9NDAwcHg"
+},
+{
+  id: 'HT006',
+  name: 'Green Valley Resort',
+  city,
+  rating: 4.7,
+  price: 7800,
+  currency: 'INR',
+  description: 'Nature retreat with scenic views',
+  imageUrl: "https://imgs.search.brave.com/dh1IrA-q4yDdjI3i05sI3SHpOooQET0GcgU447YYeu4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9yMWlt/Z2h0bGFrLm1tdGNk/bi5jb20vMDg3ZThj/ZWUtNzc2OS00ZmZk/LTlhN2MtMWFjMjk2/Zjk4OTI1LmpwZWc_/Jm91dHB1dC1xdWFs/aXR5PTc1JmRvd25z/aXplPTUyMDozNTAm/Y3JvcD01MjA6MzUw/OzAsMjAmb3V0cHV0/LWZvcm1hdD1qcGcm/ZG93bnNpemU9NDgw/OjMzNiZjcm9wPTQ4/MDozMzY"
+},
+{
+  id: 'HT007',
+  name: 'City Comfort Inn',
+  city,
+  rating: 3.9,
+  price: 3100,
+  currency: 'INR',
+  description: 'Budget-friendly and well located',
+  imageUrl: "https://imgs.search.brave.com/7W_tu9pZtQxSDBA3CPe1l8TMuS__4diRt_m5c1k47vI/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9hdy1k/LnRyaXBjZG4uY29t/L2ltYWdlcy8wMjAx/cjEyMDAwODcxcnAx/MjE2Q0NfV185NjBf/Mjc0X1I1LndlYnA"
+},
+{
+  id: 'HT010',
+  name: 'Heritage Palace Stay',
+  city,
+  rating: 4.8,
+  price: 9500,
+  currency: 'INR',
+  description: 'Experience royal heritage living',
+  imageUrl: "https://imgs.search.brave.com/JO9aF8Pz8VQ64yyWsb_njLDUQRlXMgn7EkVKFCoTDhI/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/c2VsZnJvYWRpZXou/Y29tL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDE5LzAxL0NsYXNz/aWMtUm9vbXMtYXQt/dGhlLUhlcml0YWdl/LVBhbGFjZS1TdGF5/LUluLUphaXB1ci0z/MDB4MjAwLmpwZw"
 
   res.json({ data: hotels }); // 🔥 MUST BE THIS
 });
