@@ -156,6 +156,15 @@
       border-radius: 12px;
       padding: 10px;
     }
+    .highlight {
+  animation: glow 1.5s ease;
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 0px transparent; }
+  50% { box-shadow: 0 0 20px #00b3b3; }
+  100% { box-shadow: 0 0 0px transparent; }
+}
 
     .link-btn {
       border: none;
