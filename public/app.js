@@ -391,12 +391,15 @@ document.addEventListener('DOMContentLoaded', () => {
       .join('');
     container.innerHTML = html;
   }
+function filterBadTrips(list) {
+  return list.filter(trip => trip && trip.name);
+}
 
 function renderTrips(raw, targetId = "cardsContainer") {
   const container = document.getElementById(targetId);
   if (!container) return;
-    let list = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
-    list = filterBadTrips(list);
+   let list = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
+     list = filterBadTrips(list);
 
     if (!list.length) {
       container.innerHTML = '<p>No trips found.</p>';
