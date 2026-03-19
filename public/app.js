@@ -720,7 +720,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const params = { location, checkin, checkout, guests, limit: 12 };
       const res = await fetch(buildUrl(API.hotels, params));
       const json = await res.json().catch(() => null);
-      const list = Array.isArray(json?.data) ? json.data : [];
+console.log("🔥 HOTEL RESPONSE:", json);
+
+const list =
+  Array.isArray(json?.data) ? json.data :
+  Array.isArray(json) ? json :
+  [];
       if (!hotelsResults) {
         toast('Hotels container missing');
         return;
