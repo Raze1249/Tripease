@@ -352,7 +352,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById(targetId);
     container.classList.remove('trip-list');
     container.classList.add('places');
-    container.innerHTML = list.map(tripCard).join('');
+    container.innerHTML = list.map(trip => `
+  <div class="trip-card" onclick="openBookingPanel('${trip.name}')">
+    <img src="${trip.imageUrl}" />
+    <h3>${trip.name}</h3>
+  </div>
+`).join('');
   }
 
   function listItem(t) {
@@ -505,6 +510,28 @@ async function runSearch() {
       qBtn.textContent = 'Search';
     }
   }
+}
+  function openBookingPanel(city) {
+  // 1. Fill input (change ID according to your input)
+  const input = document.getElementById("sourceInput");
+  if (input) input.value = city;
+
+  // 2. If you have destination input also
+  const dest = document.getElementById("destinationInput");
+  if (dest) dest.value = "";
+
+  // 3. Scroll to booking panel
+  const panel = document.getElementById("bookingSection");
+  if (panel) {
+    panel.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // 4. (Optional) highlight panel
+  panel?.classList.add("highlight");
+
+  setTimeout(() => {
+    panel?.classList.remove("highlight");
+  }, 1500);
 }
   qBtn?.addEventListener('click', runSearch);
   qIn?.addEventListener('keydown', (e) => {
