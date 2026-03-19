@@ -292,6 +292,26 @@ app.get('/api/hotels', (req, res) => {
   description: 'Budget-friendly and well located',
   imageUrl: "https://imgs.search.brave.com/7W_tu9pZtQxSDBA3CPe1l8TMuS__4diRt_m5c1k47vI/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9hdy1k/LnRyaXBjZG4uY29t/L2ltYWdlcy8wMjAx/cjEyMDAwODcxcnAx/MjE2Q0NfV185NjBf/Mjc0X1I1LndlYnA"
 },
+  {
+  id: 'HT008',
+  name: 'Elite Suites',
+  city,
+  rating: 4.6,
+  price: 6900,
+  currency: 'INR',
+  description: 'Elegant suites with top facilities',
+  imageUrl: "https://imgs.search.brave.com/o7MK5Pk3mRXwUoSvS9l-lb42RjgL5J8dBP-gaPrHDwU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9zdGF0/aWMyMS5jb20taG90/ZWwuY29tL3VwbG9h/ZHMvaG90ZWwvNzUz/ODkvcGhvdG8vbGdf/ZWxpdGUtc3VpdGVz/LWhvdGVsLWFsbWFs/cWFfMTY5OTc0MTU0/OTExMS5qcGc"
+},
+{
+  id: 'HT009',
+  name: 'Blue Lagoon Hotel',
+  city,
+  rating: 4.1,
+  price: 4200,
+  currency: 'INR',
+  description: 'Relaxing stay with poolside view',
+  imageUrl: "https://imgs.search.brave.com/ddYzWhYKRa-xAU83mvTv3X2eImS_56yTaf3WEfoFh0Q/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pMC53/cC5jb20vZ2lybHdo/b3RyYXZlbHN0aGV3/b3JsZC5jb20vd3At/Y29udGVudC91cGxv/YWRzL0JsdWUtTGFn/b29uLVJldHJlYXQu/anBnP3Jlc2l6ZT0x/MDI0LDQ3MyZzc2w9/MQ"
+},
 {
   id: 'HT010',
   name: 'Heritage Palace Stay',
