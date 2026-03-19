@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Popular / Suggested
   const popularGrid = $('popularGrid');
   const popularPanel = $('popular-panel');
-  const suggestedWrap = $('suggestedContainer');
 
   // Trips & search
   const cards = $('cardsContainer');
