@@ -64,21 +64,16 @@
       background: rgba(0,0,0,0.45);
       backdrop-filter: blur(4px);
       z-index: 999;
-      display: none;
     }
 
     .auth-modal {
       position: fixed;
       inset: 0;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
     }
-    .auth-overlay,
-.auth-modal {
-  display: none !important;
-}
 
     .auth-card {
       width: 320px;
@@ -156,28 +151,11 @@
     }
     
      .trip-card {
-  width: 280px;
-  background: white;
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
-}
-
-.trip-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
-}
-    .highlight {
-  animation: glow 1.5s ease;
-}
-
-@keyframes glow {
-  0% { box-shadow: 0 0 0px transparent; }
-  50% { box-shadow: 0 0 20px #00b3b3; }
-  100% { box-shadow: 0 0 0px transparent; }
-}
+      width: 280px;
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+    }
 
     .link-btn {
       border: none;
@@ -191,15 +169,6 @@
     .link-btn:hover {
       text-decoration: underline;
     }
-    @media (max-width: 480px) {
-  .results-container {
-    gap: 10px;
-  }
-
-  .trip-card {
-    width: 100%;
-  }
-}
 
     /* Small screens */
     @media (max-width: 480px) {
