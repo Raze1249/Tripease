@@ -348,11 +348,11 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
 
-  function renderTripsGrid(list) {
-    if (!cards) return;
-    cards.classList.remove('trip-list');
-    cards.classList.add('places');
-    cards.innerHTML = list.map(tripCard).join('');
+  function renderTripsGrid(list, targetId = "cardsContainer") {
+  const container = document.getElementById(targetId);
+    container.classList.remove('trip-list');
+    container.classList.add('places');
+    container.innerHTML = list.map(tripCard).join('');
   }
 
   function listItem(t) {
@@ -372,10 +372,11 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
   }
 
-  function renderTripsList(list) {
-    if (!cards) return;
-    cards.classList.remove('places');
-    cards.classList.add('trip-list');
+ function renderTripsList(list, targetId = "cardsContainer") {
+  const container = document.getElementById(targetId);
+  if (!container) return;
+    container.classList.remove('places');
+    container.classList.add('trip-list');
     const byCat = groupBy(list, 'category');
     const html = Object.keys(byCat)
       .sort()
@@ -388,20 +389,21 @@ document.addEventListener('DOMContentLoaded', () => {
     `
       )
       .join('');
-    cards.innerHTML = html;
+    container.innerHTML = html;
   }
 
-  function renderTrips(raw) {
-    if (!cards) return;
+function renderTrips(raw, targetId = "cardsContainer") {
+  const container = document.getElementById(targetId);
+  if (!container) return;
     let list = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
     list = filterBadTrips(list);
 
     if (!list.length) {
-      cards.innerHTML = '<p>No trips found.</p>';
+      container.innerHTML = '<p>No trips found.</p>';
       return;
     }
-    if (TRIP_VIEW === 'list') renderTripsList(list);
-    else renderTripsGrid(list);
+    if (TRIP_VIEW === 'list') renderTripsList(list, targetId);
+    else renderTripsGrid(list, targetId);
   }
 
   const loadTrips = (p = {}) =>
@@ -413,85 +415,94 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
   // Combined search: local trips + external destinations
-  async function runSearch() {
+async function runSearch() {
+  try {
+    console.log('runSearch() called');
+
+    if (!qIn) {
+      console.error('searchInput not found');
+      toast('Search input missing');
+      return;
+    }
+
+    const qVal = (qIn.value || '').trim();
+    const params = {};
+
+    if (cat && cat.value) params.category = cat.value;
+    params.sort = TRIP_VIEW === 'list' ? 'category name' : '-createdAt';
+
+    if (qBtn) {
+      qBtn.disabled = true;
+      qBtn.textContent = 'Searching...';
+    }
+
+    let trips = [];
+    let destinations = [];
+
     try {
-      console.log('runSearch() called');
-      if (!qIn) {
-        console.error('searchInput not found');
-        toast('Search input missing');
-        return;
-      }
-      const qVal = (qIn.value || '').trim();
-      const params = {};
-      if (cat && cat.value) params.category = cat.value;
-      params.sort = TRIP_VIEW === 'list' ? 'category name' : '-createdAt';
-
-      if (qBtn) {
-        qBtn.disabled = true;
-        qBtn.textContent = 'Searching...';
-      }
-
-      let trips = [];
-      let destinations = [];
-
-      // local trips
-      try {
-        const tripRes = await fetch(
-          buildUrl(API.trips, { ...(qVal ? { q: qVal } : {}), ...params })
-        );
-        const tripJson = await tripRes.json().catch(() => null);
-        trips = Array.isArray(tripJson?.data) ? tripJson.data : [];
-      } catch (err) {
-        console.warn('local trips search failed', err);
-      }
-
-      // external destinations
-      try {
-        if (qVal) {
-          const destRes = await fetch(
-            buildUrl(API.destinations, { keyword: qVal, limit: 8 })
-          );
-          const destJson = await destRes.json().catch(() => null);
-          destinations = Array.isArray(destJson?.data) ? destJson.data : [];
-        }
-      } catch (err) {
-        console.warn('destinations search failed', err);
-      }
-
-      const combined = [...(destinations || []), ...(trips || [])];
-      if (!combined.length) {
-        if (cards)
-          cards.innerHTML = `<p>No results found${
-            qVal ? ` for "${qVal}"` : ''
-          }.</p>`;
-        toast('No trips found for your search.');
-        return;
-      }
-
-      const normalized = combined.map((it, idx) => {
-        if (it._id || it.id) return it;
-        return {
-          _id: it.id || `dest-${idx}-${(it.name || '').replace(/\s+/g, '-')}`,
-          name: it.name || it.title || 'Unknown',
-          imageUrl: it.imageUrl || it.image || FALLBACK_IMG,
-          description: it.description || it.blurb || '',
-          rating: it.rating || 5,
-          category: it.category || it.subType || 'Destination'
-        };
-      });
-
-      renderTrips({ data: normalized });
+      const tripRes = await fetch(
+        buildUrl(API.trips, { ...(qVal ? { q: qVal } : {}), ...params })
+      );
+      const tripJson = await tripRes.json().catch(() => null);
+      trips = Array.isArray(tripJson?.data) ? tripJson.data : [];
     } catch (err) {
-      console.error('runSearch error', err);
-      toast('Search failed — see console');
-    } finally {
-      if (qBtn) {
-        qBtn.disabled = false;
-        qBtn.textContent = 'Search';
+      console.warn('local trips search failed', err);
+    }
+
+    try {
+      if (qVal) {
+        const destRes = await fetch(
+          buildUrl(API.destinations, { keyword: qVal, limit: 8 })
+        );
+        const destJson = await destRes.json().catch(() => null);
+        destinations = Array.isArray(destJson?.data) ? destJson.data : [];
       }
+    } catch (err) {
+      console.warn('destinations search failed', err);
+    }
+
+    const combined = [...destinations, ...trips];
+
+    const topContainer = document.getElementById("searchResults");
+
+    if (!combined.length) {
+      if (topContainer) {
+        topContainer.innerHTML = `<p>No results found${
+          qVal ? ` for "${qVal}"` : ''
+        }.</p>`;
+      }
+      toast('No trips found for your search.');
+      return;
+    }
+
+    const normalized = combined.map((it, idx) => {
+      if (it._id || it.id) return it;
+      return {
+        _id: it.id || `dest-${idx}-${(it.name || '').replace(/\s+/g, '-')}`,
+        name: it.name || it.title || 'Unknown',
+        imageUrl: it.imageUrl || it.image || FALLBACK_IMG,
+        description: it.description || it.blurb || '',
+        rating: it.rating || 5,
+        category: it.category || it.subType || 'Destination'
+      };
+    });
+
+    // ✅ Render at TOP
+    renderTrips({ data: normalized }, "searchResults");
+
+    // ✅ Hide bottom section
+    document.getElementById("cardsContainer").style.display = "none";
+
+  } catch (err) {
+    console.error('runSearch error', err);
+    toast('Search failed — see console');
+  } finally {
+    if (qBtn) {
+      qBtn.disabled = false;
+      qBtn.textContent = 'Search';
     }
   }
-
+}
   qBtn?.addEventListener('click', runSearch);
   qIn?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
