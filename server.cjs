@@ -235,15 +235,6 @@ function generateMockFlights(source, destination, date) {
 
   return flights;
 }
-app.get('/api/buses', (req, res) => {
-  try {
-    const { source, destination, date } = req.query;
-
-    if (!source || !destination || !date) {
-      return res.status(400).json({
-        message: 'Missing parameters'
-      });
-    }
 app.get('/api/hotels', (req, res) => {
   console.log("🔥 HOTEL API CALLED");
 
@@ -275,6 +266,16 @@ app.get('/api/hotels', (req, res) => {
 
   res.json({ data: hotels }); // 🔥 MUST BE THIS
 });
+
+app.get('/api/buses', (req, res) => {
+  try {
+    const { source, destination, date } = req.query;
+
+    if (!source || !destination || !date) {
+      return res.status(400).json({
+        message: 'Missing parameters'
+      });
+    }
 
     const buses = [
   {
