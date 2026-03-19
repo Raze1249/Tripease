@@ -301,7 +301,8 @@ app.get('/api/hotels', (req, res) => {
   currency: 'INR',
   description: 'Experience royal heritage living',
   imageUrl: "https://imgs.search.brave.com/JO9aF8Pz8VQ64yyWsb_njLDUQRlXMgn7EkVKFCoTDhI/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/c2VsZnJvYWRpZXou/Y29tL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDE5LzAxL0NsYXNz/aWMtUm9vbXMtYXQt/dGhlLUhlcml0YWdl/LVBhbGFjZS1TdGF5/LUluLUphaXB1ci0z/MDB4MjAwLmpwZw"
-
+}
+];
   res.json({ data: hotels }); // 🔥 MUST BE THIS
 });
 
