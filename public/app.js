@@ -1010,6 +1010,5 @@ console.log("FINAL LIST:", list);
      Boot
      ============================ */
   me();
-  loadSuggestedTrips();
   loadTrips();
 });
