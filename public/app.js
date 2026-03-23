@@ -257,8 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   const popularCard = (p) => `
-  <div class="card" style="width:260px; cursor:pointer"
-       onclick="openBookingPanel('${p.name}')">
+  <div class="card" data-name="${p.name}" style="width:260px; cursor:pointer">
     <img src="${p.imageUrl || FALLBACK_IMG}" alt="${p.name}"
       onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
 
@@ -301,6 +300,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   $('popularBtn')?.addEventListener('click', renderPopular);
+
+   popularGrid?.addEventListener('click', (e) => {
+  const card = e.target.closest('.card');
+  if (!card) return;
+
+  const city = card.dataset.name;
+  openBookingPanel(city);
+});
 
   /* ============================
      SUGGESTED TRIPS
