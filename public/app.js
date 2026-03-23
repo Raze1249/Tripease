@@ -352,10 +352,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById(targetId);
     container.classList.remove('trip-list');
     container.classList.add('places');
-    container.innerHTML = list.map(trip => `
-  <div class="trip-card" onclick="openBookingPanel('${trip.name}')">
+   container.innerHTML = list.map(trip => `
+  <div class="trip-card">
     <img src="${trip.imageUrl}" />
     <h3>${trip.name}</h3>
+
+    <button class="btn book-trip-btn" data-id="${trip._id}">
+      Book Trip
+    </button>
   </div>
 `).join('');
   }
