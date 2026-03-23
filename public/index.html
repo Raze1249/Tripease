@@ -210,18 +210,21 @@
     width: 100%;
   }
 }
-    .hero {
+.hero {
   text-align: center;
   margin-top: 60px;
   padding: 40px;
-  background: white;
+
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(14px);
+
   border-radius: 20px;
   width: 85%;
   margin-left: auto;
   margin-right: auto;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
 
+  border: 1px solid rgba(255,255,255,0.3);
+}
     /* Small screens */
     @media (max-width: 480px) {
       .auth-card {
@@ -233,7 +236,8 @@
     /* --------- MAIN PAGE STYLES --------- */
     *{margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif}
     body {
-  background: linear-gradient(to right, #e6f7ff, #f9fcff);
+  background: linear-gradient(135deg, #00b3b3, #007bff, #6a11cb);
+  min-height: 100vh;
   color: #000;
 }
     html {
@@ -290,13 +294,19 @@ section {
   transform: scale(1.05);
 }
     .popular-btn:hover{background:#0ff;color:#000}
-    .panel {
+   .panel {
   width: 90%;
   margin: 20px auto;
-  background: #ffffff;
-  border-radius: 18px;
   padding: 18px;
-  box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+
+  background: rgba(255, 255, 255, 0.25); /* translucent */
+  backdrop-filter: blur(12px);           /* glass effect */
+  -webkit-backdrop-filter: blur(12px);
+
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.3);
+
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
 }
     .panel h2{margin-bottom:10px}
     .row{display:flex;gap:10px;flex-wrap:wrap}
@@ -309,35 +319,44 @@ section {
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
 }
-   .card {
+  .card {
   width: 260px;
-  background: white;
   border-radius: 18px;
   overflow: hidden;
-  transition: all 0.25s ease;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(255,255,255,0.4);
+
+  transition: 0.3s ease;
 }
-    .card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 14px 35px rgba(0,0,0,0.18);
+
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 12px 40px rgba(0,0,0,0.2),   /* depth shadow */
+    0 0 25px rgba(0,179,179,0.4);  /* glow effect */
 }
     .card img{width:100%;height:180px;object-fit:cover}
     .card-content{padding:15px}
     .card-content h3{font-size:20px;margin-bottom:6px}
     .stars{color:gold;font-size:18px}
-    .btn {
+   .btn {
   background: linear-gradient(135deg, #00b3b3, #007bff);
   color: white;
   border: none;
-  padding: 8px 14px;
   border-radius: 10px;
+  padding: 8px 14px;
   cursor: pointer;
-  transition: 0.2s ease;
+
+  box-shadow: 0 4px 15px rgba(0, 179, 179, 0.4);
+  transition: 0.2s;
 }
 
 .btn:hover {
   transform: scale(1.05);
-  opacity: 0.9;
+  box-shadow: 0 6px 20px rgba(0, 179, 179, 0.6);
 }
     footer {
   background: #111;
