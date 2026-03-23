@@ -542,13 +542,6 @@ async function runSearch() {
   if (tripId) tripId.value = city;
 }
 
-  // 4. (Optional) highlight panel
-  panel?.classList.add("highlight");
-
-  setTimeout(() => {
-    panel?.classList.remove("highlight");
-  }, 1500);
-}
   qBtn?.addEventListener('click', runSearch);
   qIn?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
