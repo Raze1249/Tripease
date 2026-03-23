@@ -526,6 +526,13 @@ async function runSearch() {
   if (panel) {
     panel.style.display = "block";
     panel.scrollIntoView({ behavior: "smooth" });
+
+    // ✅ highlight inside function
+    panel.classList.add("highlight");
+
+    setTimeout(() => {
+      panel.classList.remove("highlight");
+    }, 1500);
   }
 
   const route = document.getElementById("bk-flight-route");
