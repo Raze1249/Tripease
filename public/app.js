@@ -257,15 +257,20 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   const popularCard = (p) => `
-    <div class="card" style="width:260px">
-      <img src="${p.imageUrl || FALLBACK_IMG}" alt="${p.name}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
-      <div class="card-content">
-        <h3>${p.name}</h3>
-        <p class="stars">${'★'.repeat(Math.round(p.rating || 5))}</p>
-        <p style="font-size:14px;color:#444;margin-top:6px;">${p.blurb || ''}</p>
-      </div>
+  <div class="card" style="width:260px; cursor:pointer"
+       onclick="openBookingPanel('${p.name}')">
+    <img src="${p.imageUrl || FALLBACK_IMG}" alt="${p.name}"
+      onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
+
+    <div class="card-content">
+      <h3>${p.name}</h3>
+      <p class="stars">${'★'.repeat(Math.round(p.rating || 5))}</p>
+      <p style="font-size:14px;color:#444;margin-top:6px;">
+        ${p.blurb || ''}
+      </p>
     </div>
-  `;
+  </div>
+`;
 
   async function loadExternalDestinations({ limit = 6, keyword = '', subType = 'CITY' } = {}) {
     try {
@@ -516,19 +521,19 @@ async function runSearch() {
   }
 }
   function openBookingPanel(city) {
-  // 1. Fill input (change ID according to your input)
-  const input = document.getElementById("sourceInput");
-  if (input) input.value = city;
+  const panel = document.getElementById("booking-panel");
 
-  // 2. If you have destination input also
-  const dest = document.getElementById("destinationInput");
-  if (dest) dest.value = "";
-
-  // 3. Scroll to booking panel
-  const panel = document.getElementById("bookingSection");
   if (panel) {
+    panel.style.display = "block";
     panel.scrollIntoView({ behavior: "smooth" });
   }
+
+  const route = document.getElementById("bk-flight-route");
+  if (route) route.value = `${city} → Your Destination`;
+
+  const tripId = document.getElementById("bk-tripId");
+  if (tripId) tripId.value = city;
+}
 
   // 4. (Optional) highlight panel
   panel?.classList.add("highlight");
