@@ -1062,6 +1062,18 @@ console.log("FINAL LIST:", list);
       openBk();
     }
   });
+   document.querySelectorAll(".image-strip img").forEach(img => {
+  img.addEventListener("click", () => {
+    const city = img.dataset.name;
+
+    // open booking panel
+    openBookingPanel(city);
+
+    // optional scroll
+    document.getElementById("booking-panel")
+      ?.scrollIntoView({ behavior: "smooth" });
+  });
+});
 
   /* ============================
      Boot
