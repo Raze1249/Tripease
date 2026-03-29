@@ -6,6 +6,11 @@ const TRAIN_BASE = process.env.TRIP_TRAIN_API_URL;
 const TRAIN_KEY = process.env.TRIP_TRAIN_API_KEY;
 const TRAIN_KEY_PARAM = process.env.TRIP_TRAIN_API_KEY_PARAM_NAME || '';
 const TRAIN_CACHE_TTL = Number(process.env.TRAIN_CACHE_TTL_MS || (1000 * 60 * 30));
+const FALLBACK_TRAINS = [
+  { id: 'demo-train-1', name: 'Shatabdi Express', number: '12001', source: 'Delhi', destination: 'Jaipur', departureTime: '06:05', arrivalTime: '10:40', duration: '4h 35m', classType: 'Chair Car', price: 1250, currency: 'INR', seatsAvailable: 23, imageUrl: 'https://source.unsplash.com/800x600/?train,station' },
+  { id: 'demo-train-2', name: 'Intercity Express', number: '12679', source: 'Bengaluru', destination: 'Chennai', departureTime: '07:00', arrivalTime: '12:10', duration: '5h 10m', classType: '2S', price: 680, currency: 'INR', seatsAvailable: 40, imageUrl: 'https://source.unsplash.com/800x600/?indian,train' },
+  { id: 'demo-train-3', name: 'Deccan Queen', number: '12123', source: 'Mumbai', destination: 'Pune', departureTime: '17:10', arrivalTime: '20:25', duration: '3h 15m', classType: 'CC', price: 550, currency: 'INR', seatsAvailable: 32, imageUrl: 'https://source.unsplash.com/800x600/?railway,journey' }
+];
 
 if (!TRAIN_BASE || !TRAIN_KEY) {
   console.warn('routes/trains: TRIP_TRAIN_API_URL or TRIP_TRAIN_API_KEY not set. Falling back to database trains.');
@@ -47,6 +52,20 @@ function normalizeTrain(raw, fallback = {}) {
     raw
   };
 }
+function getDemoTrains({ source = '', destination = '', classType = '', limit = 20 } = {}) {
+  const lim = Number(limit) || 20;
+  const srcQ = String(source || '').trim().toLowerCase();
+  const dstQ = String(destination || '').trim().toLowerCase();
+  const clsQ = String(classType || '').trim().toLowerCase();
+
+  const filtered = FALLBACK_TRAINS.filter((t) => {
+    const sourceOk = !srcQ || t.source.toLowerCase().includes(srcQ);
+    const destOk = !dstQ || t.destination.toLowerCase().includes(dstQ);
+    const classOk = !clsQ || t.classType.toLowerCase().includes(clsQ);
+    return sourceOk && destOk && classOk;
+  });
+  return filtered.slice(0, lim);
+}
 
 router.get('/', async (req, res) => {
   try {
@@ -67,7 +86,16 @@ router.get('/', async (req, res) => {
         toCity: new RegExp(`^${destination}$`, 'i')
       }).select('-__v');
 
-      return res.json({ source: 'database', count: trains.length, data: trains });
+      if (trains.length) {
+        return res.json({ source: 'database', count: trains.length, data: trains });
+      }
+      const demoTrains = getDemoTrains({ source, destination, classType, limit: req.query.limit });
+      return res.json({
+        source: 'demo',
+        count: demoTrains.length,
+        data: demoTrains,
+        demo: true
+      });
     }
 
     const requestQuery = { source, destination, date, classType };
@@ -108,7 +136,11 @@ router.get('/', async (req, res) => {
 
   } catch (err) {
 console.error('Train search error:', err);
-    return res.status(500).json({ message: 'Failed to fetch train data' });
+    const source = req.query.source || req.query.from || '';
+    const destination = req.query.destination || req.query.to || '';
+    const classType = req.query.classType || '';
+    const demoTrains = getDemoTrains({ source, destination, classType, limit: req.query.limit });
+    return res.json({ source: 'demo', count: demoTrains.length, data: demoTrains, demo: true });
   }
 });
 
