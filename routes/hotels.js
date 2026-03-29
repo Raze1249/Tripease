@@ -7,7 +7,11 @@ const HOTEL_BASE = process.env.TRIP_HOTEL_API_URL; // e.g. https://api.example-h
 const HOTEL_KEY = process.env.TRIP_HOTEL_API_KEY;
 const HOTEL_KEY_PARAM = process.env.TRIP_HOTEL_API_KEY_PARAM_NAME || ''; // e.g. 'api_key'
 const CACHE_TTL = Number(process.env.HOTEL_CACHE_TTL_MS || (1000 * 60 * 60)); // 1h default
-
+const FALLBACK_HOTELS = [
+  { id: 'demo-hotel-1', name: 'Seaside Bliss Resort', city: 'Goa', country: 'India', price: 6500, currency: 'INR', rating: 4.5, imageUrl: 'https://source.unsplash.com/800x600/?resort,beach', description: 'Beachfront stay with pool and breakfast.', amenities: ['WiFi', 'Pool', 'Breakfast'] },
+  { id: 'demo-hotel-2', name: 'Royal Heritage Haveli', city: 'Jaipur', country: 'India', price: 5200, currency: 'INR', rating: 4.3, imageUrl: 'https://source.unsplash.com/800x600/?heritage,hotel', description: 'Heritage-style rooms in the old city.', amenities: ['WiFi', 'Parking', 'Restaurant'] },
+  { id: 'demo-hotel-3', name: 'Urban Nest Hotel', city: 'Bengaluru', country: 'India', price: 4300, currency: 'INR', rating: 4.1, imageUrl: 'https://source.unsplash.com/800x600/?city,hotel', description: 'Modern business hotel near tech parks.', amenities: ['WiFi', 'Gym', 'Airport Shuttle'] }
+];
 if (!HOTEL_BASE || !HOTEL_KEY) {
   console.warn('routes/hotels: HOTEL_BASE or HOTEL_KEY not set. Add TRIP_HOTEL_API_URL and TRIP_HOTEL_API_KEY to .env.');
 }
@@ -53,6 +57,15 @@ function normalizeHotel(raw) {
   return { id, name, address, city, country, price, currency, rating, imageUrl, description, amenities, raw };
 }
 
+function getDemoHotels({ location = '', limit = 20 } = {}) {
+  const lim = Number(limit) || 20;
+  const q = String(location || '').trim().toLowerCase();
+  const filtered = q
+    ? FALLBACK_HOTELS.filter((h) => `${h.name} ${h.city} ${h.country}`.toLowerCase().includes(q))
+    : FALLBACK_HOTELS;
+  return filtered.slice(0, lim);
+}
+
 // GET /api/hotels?location=goa&checkin=2025-12-01&checkout=2025-12-05&guests=2&limit=10
 router.get('/', async (req, res) => {
   try {
@@ -61,7 +74,10 @@ router.get('/', async (req, res) => {
       const where = { type: 'hotel' };
       if (location) where.city = new RegExp(`^${location}$`, 'i');
       const localHotels = await Trip.find(where).select('-__v').limit(Number(req.query.limit || 20));
-      return res.json({ data: localHotels, source: 'database', live: false });
+      if (localHotels.length) {
+        return res.json({ data: localHotels, source: 'database', live: false });
+      }
+      return res.json({ data: getDemoHotels({ location, limit: req.query.limit }), source: 'demo', live: false, demo: true });
     }
 
     // Build a cache key using querystring
@@ -115,7 +131,8 @@ router.get('/', async (req, res) => {
     res.json({ data: normalized, cached: false });
   } catch (err) {
     console.error('routes/hotels error:', err && err.stack ? err.stack : String(err));
-    res.status(500).json({ message: 'Failed to fetch hotels', error: String(err.message || err) });
+     const location = req.query.location || req.query.city || '';
+    res.json({ data: getDemoHotels({ location, limit: req.query.limit }), source: 'demo', live: false, demo: true });
   }
 });
 
