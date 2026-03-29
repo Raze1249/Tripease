@@ -918,6 +918,47 @@ async function runSearch() {
       </div>
     `;
   }
+    const HOTEL_FALLBACK_RESULTS = [
+    {
+      id: 'fallback-hotel-1',
+      name: 'Seaside Bliss Resort',
+      city: 'Goa',
+      country: 'India',
+      price: 6500,
+      currency: 'INR',
+      rating: 4.5,
+      description: 'Beachfront stay with pool and complimentary breakfast.'
+    },
+    {
+      id: 'fallback-hotel-2',
+      name: 'Royal Heritage Haveli',
+      city: 'Jaipur',
+      country: 'India',
+      price: 5200,
+      currency: 'INR',
+      rating: 4.3,
+      description: 'Heritage-style rooms in the heart of the old city.'
+    },
+    {
+      id: 'fallback-hotel-3',
+      name: 'Urban Nest Hotel',
+      city: 'Bengaluru',
+      country: 'India',
+      price: 4300,
+      currency: 'INR',
+      rating: 4.1,
+      description: 'Modern business hotel near major tech parks.'
+    }
+  ];
+
+  function fallbackHotelsForLocation(location = '') {
+    const requestedCity = String(location || '').trim();
+    return HOTEL_FALLBACK_RESULTS.map((hotel, index) => ({
+      ...hotel,
+      id: `${hotel.id}-${requestedCity || 'demo'}-${index + 1}`,
+      city: requestedCity || hotel.city
+    }));
+  }
 
   async function searchHotels() {
     const location = hotelLocationInput?.value?.trim();
@@ -947,13 +988,19 @@ async function runSearch() {
         return;
       }
       if (!list.length) {
-        hotelsResults.innerHTML = `<p>No hotels found for ${location}.</p>`;
+        const fallbackList = fallbackHotelsForLocation(location);
+        hotelsResults.innerHTML = fallbackList.map(hotelCard).join('');
+        toast(`No live hotels found for ${location}. Showing suggestions.`);
         return;
       }
       hotelsResults.innerHTML = list.map(hotelCard).join('');
     } catch (err) {
       console.error('searchHotels error', err);
-      toast('Hotel search failed');
+       if (hotelsResults) {
+        const fallbackList = fallbackHotelsForLocation(location);
+        hotelsResults.innerHTML = fallbackList.map(hotelCard).join('');
+      }
+      toast('Hotel search failed. Showing suggestions.');
     } finally {
       hotelSearchBtn.disabled = false;
       hotelSearchBtn.textContent = 'Search Hotels';
