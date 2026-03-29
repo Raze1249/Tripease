@@ -5,11 +5,66 @@ const AMADEUS_CLIENT_ID = process.env.AMADEUS_CLIENT_ID;
 const AMADEUS_CLIENT_SECRET = process.env.AMADEUS_CLIENT_SECRET;
 const UNSPLASH_KEY = process.env.UNSPLASH_ACCESS_KEY;
 
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
+
+const DEMO_DESTINATIONS = [
+  {
+    name: 'Bali',
+    region: 'Indonesia',
+    imageUrl:
+      'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    name: 'Swiss Alps',
+    region: 'Switzerland',
+    imageUrl:
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    name: 'Kyoto',
+    region: 'Japan',
+    imageUrl:
+      'https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    name: 'Santorini',
+    region: 'Greece',
+    imageUrl:
+      'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    name: 'Paris',
+    region: 'France',
+    imageUrl:
+      'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    name: 'Dubai',
+    region: 'United Arab Emirates',
+    imageUrl:
+      'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    name: 'New York',
+    region: 'United States',
+    imageUrl:
+      'https://images.unsplash.com/photo-1496588152823-e59b6d6f3f84?auto=format&fit=crop&w=1200&q=80'
+  },
+  {
+    name: 'Sydney',
+    region: 'Australia',
+    imageUrl:
+      'https://images.unsplash.com/photo-1506973035872-a4ec16b8d4a7?auto=format&fit=crop&w=1200&q=80'
+  }
+];
+
 let accessToken = null;
 let tokenExpiry = 0;
 
 // 🔑 Get Amadeus token
 async function getToken() {
+  if (!AMADEUS_CLIENT_ID || !AMADEUS_CLIENT_SECRET) return null;
   if (accessToken && Date.now() < tokenExpiry) return accessToken;
 
   const res = await axios.post(
@@ -28,6 +83,9 @@ async function getToken() {
   return accessToken;
 }
 
+function getDemoDestinations(limit = 8) {
+  return DEMO_DESTINATIONS.slice(0, Number(limit) || 8);
+}
 // 🌍 GET /api/destinations
 router.get('/', async (req, res) => {
   try {
@@ -39,7 +97,9 @@ router.get('/', async (req, res) => {
     if (keyword.length > 10) keyword = keyword.slice(0, 10);
 
     const token = await getToken();
-
+     if (!token) {
+      return res.json({ data: getDemoDestinations(limit), demo: true });
+    }
     // 🌍 Amadeus API
     const amadeusRes = await axios.get(
       'https://test.api.amadeus.com/v1/reference-data/locations',
@@ -58,6 +118,7 @@ router.get('/', async (req, res) => {
 
         let imageUrl = '';
         try {
+           if (!UNSPLASH_KEY) throw new Error('UNSPLASH_ACCESS_KEY missing');
           const imgRes = await axios.get(
             'https://api.unsplash.com/search/photos',
             {
@@ -73,8 +134,7 @@ router.get('/', async (req, res) => {
 
           imageUrl = imgRes.data.results[0]?.urls?.regular;
         } catch {
-          imageUrl =
-            'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
+          imageUrl = FALLBACK_IMAGE;
         }
 
         return {
@@ -89,7 +149,7 @@ router.get('/', async (req, res) => {
 
   } catch (err) {
     console.error('DEST ERROR:', err.response?.data || err.message);
-    res.status(500).json({ message: 'Failed to fetch destinations' });
+    res.json({ data: getDemoDestinations(req.query.limit), demo: true });
   }
 });
 
