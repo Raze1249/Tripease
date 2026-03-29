@@ -414,16 +414,59 @@ section {
 }
 
 /* TOP NAV */
+/* ===== MODERN NAVBAR FIX ===== */
+
+..top-nav {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
 .top-nav nav {
   display: flex;
-  justify-content: space-between; /* 🔥 spreads items */
+  gap: 30px;
+  background: rgba(255,255,255,0.25);
+  padding: 10px 30px;
+  border-radius: 50px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.top-nav nav a {
+  text-decoration: none;
+  color: #000;
+  font-weight: 600;
+  position: relative;
+  padding: 6px 10px;
+  transition: 0.3s;
+}
+
+/* Hover effect */
+.top-nav nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 0%;
+  height: 2px;
+  background: #00b3b3;
+  transition: 0.3s;
+}
+
+.top-nav nav a:hover::after {
   width: 100%;
 }
-    .top-nav nav a {
-  flex: 1;
-  text-align: center;
-  font-weight: 600;
+
+.top-nav nav a:hover {
+  color: #00b3b3;
 }
+
+/* Active link */
+.top-nav nav a.active {
+  color: #00b3b3;
+  font-weight: 700;
+}
+
 /* BOTTOM BAR */
 .bottom-bar {
   display: flex;
@@ -541,18 +584,19 @@ section {
   <div class="main-container">
 
  <header>
+<header>
 
-  <!-- TOP ROW -->
+  <!-- UPDATED NAVBAR -->
   <div class="top-nav">
     <nav>
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="explore.html">Explore</a>
-      <a href="contact.html">Contact</a>
+      <a href="index.html" class="active">🏠 Home</a>
+      <a href="about.html">ℹ️ About</a>
+      <a href="explore.html">🌍 Explore</a>
+      <a href="contact.html">📞 Contact</a>
     </nav>
   </div>
 
-  <!-- BOTTOM ROW -->
+  <!-- YOUR ORIGINAL BOTTOM BAR (UNCHANGED) -->
   <div class="bottom-bar">
     
     <div class="search-box">
