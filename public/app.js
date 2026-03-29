@@ -211,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       await post(API.auth.register, { name, email, password }, true);
       close(A.mRegister);
+       document.getElementById("auth-overlay").style.display = "none";
       toast('Account created');
       me();
     } catch (e) {
