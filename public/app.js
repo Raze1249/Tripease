@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   const popularCard = (p) => `
-  <div class="card" data-name="${p.name}" style="width:260px; cursor:pointer">
+  <div class="card popular-place-card" data-name="${p.name}" style="width:260px; cursor:pointer" role="button" tabindex="0" aria-label="Book ${p.name}">
     <img src="${p.imageUrl || FALLBACK_IMG}" alt="${p.name}"
       onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">
 
@@ -314,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const external = await loadExternalDestinations({ limit: 8 });
     const items = external && external.length ? external : POPULAR_PLACES;
     popularGrid.innerHTML = items.map(popularCard).join('');
+     attachPopularCardHandlers();
     popularPanel.style.display = 'block';
     window.scrollTo({ top: popularPanel.offsetTop - 80, behavior: 'smooth' });
   }
@@ -338,6 +339,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!bookingChoiceModal) return;
     bookingChoiceModal.classList.remove('open');
     bookingChoiceModal.setAttribute('aria-hidden', 'true');
+  }
+
+  function onPopularCardChoose(cardEl) {
+    const city = cardEl?.dataset?.name || '';
+    if (!city) return;
+    openBookingChoice(city);
+  }
+
+  function attachPopularCardHandlers() {
+    popularGrid?.querySelectorAll('.popular-place-card').forEach((card) => {
+      card.addEventListener('click', () => onPopularCardChoose(card));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onPopularCardChoose(card);
+        }
+      });
+    });
   }
 
   function openBookingPanel(city, bookingType = '') {
@@ -367,9 +386,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   popularGrid?.addEventListener('click', (e) => {
-    const card = e.target.closest('.card');
+    const card = e.target.closest('.popular-place-card');
     if (!card) return;
-    openBookingChoice(card.dataset.name || '');
+    onPopularCardChoose(card);
   });
 
   bookingChoiceCancel?.addEventListener('click', closeBookingChoice);
@@ -385,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
       openBookingPanel(selectedPopularCity, bookingType);
     });
   });
+
   /* ============================
      SUGGESTED TRIPS
      ============================ */
