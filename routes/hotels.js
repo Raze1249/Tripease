@@ -8,11 +8,11 @@ const HOTEL_KEY = process.env.TRIP_HOTEL_API_KEY;
 const HOTEL_KEY_PARAM = process.env.TRIP_HOTEL_API_KEY_PARAM_NAME || ''; // e.g. 'api_key'
 const CACHE_TTL = Number(process.env.HOTEL_CACHE_TTL_MS || (1000 * 60 * 60)); // 1h default
 const FALLBACK_HOTELS = [
-  { id: 'demo-hotel-1', name: 'Seaside Bliss Resort', city: 'Goa', country: 'India', price: 6500, currency: 'INR', rating: 4.5, imageUrl: 'https://source.unsplash.com/800x600/?resort,beach', description: 'Beachfront stay with pool and breakfast.', amenities: ['WiFi', 'Pool', 'Breakfast'] },
-  { id: 'demo-hotel-2', name: 'Royal Heritage Haveli', city: 'Jaipur', country: 'India', price: 5200, currency: 'INR', rating: 4.3, imageUrl: 'https://source.unsplash.com/800x600/?heritage,hotel', description: 'Heritage-style rooms in the old city.', amenities: ['WiFi', 'Parking', 'Restaurant'] },
- { id: 'demo-hotel-3', name: 'Urban Nest Hotel', city: 'Bengaluru', country: 'India', price: 4300, currency: 'INR', rating: 4.1, imageUrl: 'https://source.unsplash.com/800x600/?city,hotel', description: 'Modern business hotel near tech parks.', amenities: ['WiFi', 'Gym', 'Airport Shuttle'] },
-  { id: 'demo-hotel-4', name: 'Pink City Palace Stay', city: 'Jaipur', country: 'India', price: 6100, currency: 'INR', rating: 4.6, imageUrl: 'https://source.unsplash.com/800x600/?jaipur,hotel', description: 'Boutique palace-style hotel near Hawa Mahal.', amenities: ['WiFi', 'Breakfast', 'Airport Transfer'] },
-  { id: 'demo-hotel-5', name: 'Amber Fort View Residency', city: 'Jaipur', country: 'India', price: 4700, currency: 'INR', rating: 4.2, imageUrl: 'https://source.unsplash.com/800x600/?rajasthan,hotel', description: 'Comfort stay with rooftop dining and city tours.', amenities: ['WiFi', 'Restaurant', 'Tour Desk'] }
+   { id: 'demo-hotel-1', name: 'Seaside Bliss Resort', city: 'Goa', country: 'India', price: 6500, currency: 'INR', rating: 4.5, imageUrl: 'https://picsum.photos/seed/demo-hotel-1/800/600', description: 'Beachfront stay with pool and breakfast.', amenities: ['WiFi', 'Pool', 'Breakfast'] },
+  { id: 'demo-hotel-2', name: 'Royal Heritage Haveli', city: 'Jaipur', country: 'India', price: 5200, currency: 'INR', rating: 4.3, imageUrl: 'https://picsum.photos/seed/demo-hotel-2/800/600', description: 'Heritage-style rooms in the old city.', amenities: ['WiFi', 'Parking', 'Restaurant'] },
+ { id: 'demo-hotel-3', name: 'Urban Nest Hotel', city: 'Bengaluru', country: 'India', price: 4300, currency: 'INR', rating: 4.1, imageUrl: 'https://picsum.photos/seed/demo-hotel-3/800/600', description: 'Modern business hotel near tech parks.', amenities: ['WiFi', 'Gym', 'Airport Shuttle'] },
+  { id: 'demo-hotel-4', name: 'Pink City Palace Stay', city: 'Jaipur', country: 'India', price: 6100, currency: 'INR', rating: 4.6, imageUrl: 'https://picsum.photos/seed/demo-hotel-4/800/600', description: 'Boutique palace-style hotel near Hawa Mahal.', amenities: ['WiFi', 'Breakfast', 'Airport Transfer'] },
+  { id: 'demo-hotel-5', name: 'Amber Fort View Residency', city: 'Jaipur', country: 'India', price: 4700, currency: 'INR', rating: 4.2, imageUrl: 'https://picsum.photos/seed/demo-hotel-5/800/600', description: 'Comfort stay with rooftop dining and city tours.', amenities: ['WiFi', 'Restaurant', 'Tour Desk'] }
 ];
 if (!HOTEL_BASE || !HOTEL_KEY) {
   console.warn('routes/hotels: HOTEL_BASE or HOTEL_KEY not set. Add TRIP_HOTEL_API_URL and TRIP_HOTEL_API_KEY to .env.');
@@ -52,7 +52,7 @@ function normalizeHotel(raw) {
   const currency = raw.currency || (raw.price && raw.price.currency) || 'USD';
   const rating = raw.rating || raw.stars || raw.review_score || null;
   // images: provider might have array raw.images[0].url etc.
-  const imageUrl = raw.image || raw.images?.[0] || raw.photos?.[0]?.url || `https://source.unsplash.com/800x600/?hotel,${encodeURIComponent(name)}`;
+   const imageUrl = raw.image || raw.images?.[0] || raw.photos?.[0]?.url || `https://picsum.photos/seed/hotel-${encodeURIComponent(name)}/800/600`;
   const description = raw.description || raw.summary || raw.short_description || '';
   const amenities = raw.amenities || raw.facilities || [];
 
