@@ -10,7 +10,9 @@ const CACHE_TTL = Number(process.env.HOTEL_CACHE_TTL_MS || (1000 * 60 * 60)); //
 const FALLBACK_HOTELS = [
   { id: 'demo-hotel-1', name: 'Seaside Bliss Resort', city: 'Goa', country: 'India', price: 6500, currency: 'INR', rating: 4.5, imageUrl: 'https://source.unsplash.com/800x600/?resort,beach', description: 'Beachfront stay with pool and breakfast.', amenities: ['WiFi', 'Pool', 'Breakfast'] },
   { id: 'demo-hotel-2', name: 'Royal Heritage Haveli', city: 'Jaipur', country: 'India', price: 5200, currency: 'INR', rating: 4.3, imageUrl: 'https://source.unsplash.com/800x600/?heritage,hotel', description: 'Heritage-style rooms in the old city.', amenities: ['WiFi', 'Parking', 'Restaurant'] },
-  { id: 'demo-hotel-3', name: 'Urban Nest Hotel', city: 'Bengaluru', country: 'India', price: 4300, currency: 'INR', rating: 4.1, imageUrl: 'https://source.unsplash.com/800x600/?city,hotel', description: 'Modern business hotel near tech parks.', amenities: ['WiFi', 'Gym', 'Airport Shuttle'] }
+ { id: 'demo-hotel-3', name: 'Urban Nest Hotel', city: 'Bengaluru', country: 'India', price: 4300, currency: 'INR', rating: 4.1, imageUrl: 'https://source.unsplash.com/800x600/?city,hotel', description: 'Modern business hotel near tech parks.', amenities: ['WiFi', 'Gym', 'Airport Shuttle'] },
+  { id: 'demo-hotel-4', name: 'Pink City Palace Stay', city: 'Jaipur', country: 'India', price: 6100, currency: 'INR', rating: 4.6, imageUrl: 'https://source.unsplash.com/800x600/?jaipur,hotel', description: 'Boutique palace-style hotel near Hawa Mahal.', amenities: ['WiFi', 'Breakfast', 'Airport Transfer'] },
+  { id: 'demo-hotel-5', name: 'Amber Fort View Residency', city: 'Jaipur', country: 'India', price: 4700, currency: 'INR', rating: 4.2, imageUrl: 'https://source.unsplash.com/800x600/?rajasthan,hotel', description: 'Comfort stay with rooftop dining and city tours.', amenities: ['WiFi', 'Restaurant', 'Tour Desk'] }
 ];
 if (!HOTEL_BASE || !HOTEL_KEY) {
   console.warn('routes/hotels: HOTEL_BASE or HOTEL_KEY not set. Add TRIP_HOTEL_API_URL and TRIP_HOTEL_API_KEY to .env.');
@@ -60,10 +62,20 @@ function normalizeHotel(raw) {
 function getDemoHotels({ location = '', limit = 20 } = {}) {
   const lim = Number(limit) || 20;
   const q = String(location || '').trim().toLowerCase();
+   const requestedCity = String(location || '').split(',')[0].trim();
+  const terms = q.split(/[,\s]+/).filter(Boolean);
   const filtered = q
-    ? FALLBACK_HOTELS.filter((h) => `${h.name} ${h.city} ${h.country}`.toLowerCase().includes(q))
+     ? FALLBACK_HOTELS.filter((h) => {
+      const haystack = `${h.name} ${h.city} ${h.country}`.toLowerCase();
+      return terms.every((term) => haystack.includes(term));
+    })
     : FALLBACK_HOTELS;
-  return filtered.slice(0, lim);
+ const list = filtered.length ? filtered : FALLBACK_HOTELS.map((h, i) => ({
+    ...h,
+    id: `${h.id}-${requestedCity || 'demo'}-${i + 1}`,
+    city: requestedCity || h.city
+  }));
+  return list.slice(0, lim);
 }
 
 // GET /api/hotels?location=goa&checkin=2025-12-01&checkout=2025-12-05&guests=2&limit=10
