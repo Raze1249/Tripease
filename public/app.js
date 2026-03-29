@@ -859,45 +859,57 @@ async function runSearch() {
      HOTELS
      ============================ */
   function hotelCard(h) {
+      const hotelName = h.name || h.hotelName || 'Hotel';
+    const hotelCity = h.city || h.location?.city || '';
+    const hotelCountry = h.country || h.location?.country || '';
+    const hotelId = h.id || h._id || hotelName;
+    const hotelPrice =
+      h.price ??
+      h.pricePerNight ??
+      h.rate ??
+      null;
+    const hotelCurrency = h.currency || 'USD';
+    const hotelRating = h.rating || h.stars || null;
+    const hotelDescription = h.description || h.summary || '';
     return `
       <div class="card" style="background:#fff;color:#000;border-radius:12px;overflow:hidden">
         <img src="${
           h.imageUrl ||
           `https://source.unsplash.com/800x600/?hotel,${encodeURIComponent(
-            h.name || 'hotel'
+               hotelName
           )}`
-        }" alt="${h.name}" style="width:100%;height:160px;object-fit:cover"
+         }" alt="${hotelName}" style="width:100%;height:160px;object-fit:cover"
         onerror="this.onerror=null;this.src='https://source.unsplash.com/800x600/?hotel'">
         <div style="padding:12px">
-          <h3 style="margin:0 0 6px">${h.name}</h3>
-          <p style="margin:0;font-size:13px;color:#444">${h.city || ''}${
-      h.country ? ', ' + h.country : ''
+            <h3 style="margin:0 0 6px">${hotelName}</h3>
+          <p style="margin:0;font-size:13px;color:#444">${hotelCity || ''}${
+      hotelCountry ? ', ' + hotelCountry : ''
     }</p>
-          <p style="margin:6px 0;font-size:14px;color:#333">${(h.description || '').slice(
+         <p style="margin:6px 0;font-size:14px;color:#333">${hotelDescription.slice(
             0,
             120
           )}</p>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
             <div>
               ${
-                h.rating
+               hotelRating
                   ? `<span style="color:gold">${'★'.repeat(
-                      Math.round(h.rating || 4)
+                      Math.round(hotelRating || 4)
                     )}</span>`
                   : ''
               }
             </div>
             <div style="text-align:right">
               ${
-                h.price
-                  ? `<div style="font-weight:700">${h.currency || 'USD'} ${
-                      h.price
+               hotelPrice
+                  ? `<div style="font-weight:700">${hotelCurrency} ${
+                      hotelPrice
                     }</div>`
                   : ''
               }
               <button class="btn book-hotel-btn" data-id="${
-                h.id
-              }" data-name="${h.name}" style="margin-top:8px">
+             hotelId
+              }" data-name="${hotelName}" style="margin-top:8px">
                 Book
               </button>
             </div>
@@ -924,14 +936,12 @@ async function runSearch() {
       const params = { location, checkin, checkout, guests, limit: 12 };
       const res = await fetch(buildUrl(API.hotels, params));
       const json = await res.json().catch(() => null);
-console.log("🔥 HOTEL RESPONSE:", json);
-
-const list =
-  Array.isArray(json?.data) ? json.data :
-  Array.isArray(json) ? json :
-  [];
-
-console.log("FINAL LIST:", list);
+ const list =
+        Array.isArray(json?.data) ? json.data :
+        Array.isArray(json?.results) ? json.results :
+        Array.isArray(json?.hotels) ? json.hotels :
+        Array.isArray(json) ? json :
+        [];
       if (!hotelsResults) {
         toast('Hotels container missing');
         return;
@@ -962,20 +972,26 @@ console.log("FINAL LIST:", list);
      BUSES
      ============================ */
   function busCard(b) {
+    const operator = b.operator || b.name || b.company || 'Bus Operator';
+    const source = b.source || b.from || b.fromCity || '';
+    const destination = b.destination || b.to || b.toCity || '';
+    const busId = b.id || b._id || `${operator}-${source}-${destination}`;
+    const busPrice = b.price ?? b.fare ?? null;
+    const currency = b.currency || 'INR';
     return `
       <div class="card" style="background:#fff;color:#000;border-radius:12px;overflow:hidden">
         <img src="${
           b.imageUrl ||
           `https://source.unsplash.com/800x600/?bus,${encodeURIComponent(
-            b.destination || 'bus'
+            destination || 'bus'
           )}`
         }"
-             alt="${b.operator}" style="width:100%;height:150px;object-fit:cover"
+             alt="${operator}" style="width:100%;height:150px;object-fit:cover"
              onerror="this.onerror=null;this.src='https://source.unsplash.com/800x600/?bus'">
         <div style="padding:12px">
-          <h3 style="margin:0 0 6px">${b.operator}</h3>
-          <p style="margin:0;font-size:13px;color:#444">${b.source} → ${
-      b.destination
+           <h3 style="margin:0 0 6px">${operator}</h3>
+          <p style="margin:0;font-size:13px;color:#444">${source} → ${
+      destination
     }</p>
           <p style="margin:6px 0;font-size:13px;color:#555">
             Depart: ${b.departureTime || '-'} • Arrive: ${b.arrivalTime || '-'}
@@ -987,13 +1003,13 @@ console.log("FINAL LIST:", list);
           </p>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
             <div>${
-              b.price
-                ? `<strong>${b.currency || 'INR'} ${b.price}</strong>`
+                  busPrice
+                ? `<strong>${currency} ${busPrice}</strong>`
                 : ''
             }</div>
-            <button class="btn book-bus-btn" data-id="${b.id}" data-operator="${
-      b.operator
-    }" data-route="${b.source}→${b.destination}">
+            <button class="btn book-bus-btn" data-id="${busId}" data-operator="${
+      operator
+    }" data-route="${source}→${destination}">
               Book
             </button>
           </div>
@@ -1017,7 +1033,12 @@ console.log("FINAL LIST:", list);
       const params = { source: from, destination: to, date, passengers, limit: 12 };
       const res = await fetch(buildUrl(API.buses, params));
       const json = await res.json().catch(() => null);
-      const list = Array.isArray(json?.data) ? json.data : [];
+      const list =
+        Array.isArray(json?.data) ? json.data :
+        Array.isArray(json?.results) ? json.results :
+        Array.isArray(json?.buses) ? json.buses :
+        Array.isArray(json) ? json :
+        [];
       if (!busResults) return;
       if (!list.length) {
         busResults.innerHTML = `<p>No buses found for ${from} → ${to}.</p>`;
