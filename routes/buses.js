@@ -70,7 +70,6 @@ function getDemoBuses({ source = '', destination = '', limit = 20 } = {}) {
   }));
   return list.slice(0, lim);
 }
-}
 
 // GET /api/buses?source=jaipur&destination=delhi&date=2025-12-01&limit=10
 router.get('/', async (req, res) => {
