@@ -87,7 +87,7 @@ mongoose.connect(process.env.MONGO_URI)
         city: "Delhi",
         price: 8000,
         rating: 5,
-        imageUrl: "https://source.unsplash.com/featured/?hotel",
+        imageUrl: "https://picsum.photos/seed/seed-hotel/800/600",
         description: "Luxury hotel in the heart of Delhi"
       }
     ]);
