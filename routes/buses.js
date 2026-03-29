@@ -6,7 +6,11 @@ const BUS_BASE = process.env.TRIP_BUS_API_URL;              // e.g. https://...
 const BUS_KEY = process.env.TRIP_BUS_API_KEY;
 const BUS_KEY_PARAM = process.env.TRIP_BUS_API_KEY_PARAM_NAME || '';
 const BUS_CACHE_TTL = Number(process.env.BUS_CACHE_TTL_MS || (1000 * 60 * 60)); // 1h default
-
+const FALLBACK_BUSES = [
+  { id: 'demo-bus-1', operator: 'Orange Travels', source: 'Jaipur', destination: 'Delhi', departureTime: '07:00', arrivalTime: '13:30', duration: '6h 30m', price: 899, currency: 'INR', seatsAvailable: 12, imageUrl: 'https://source.unsplash.com/800x600/?bus,roadtrip' },
+  { id: 'demo-bus-2', operator: 'GreenLine Express', source: 'Mumbai', destination: 'Pune', departureTime: '09:15', arrivalTime: '12:45', duration: '3h 30m', price: 599, currency: 'INR', seatsAvailable: 18, imageUrl: 'https://source.unsplash.com/800x600/?coach,bus' },
+  { id: 'demo-bus-3', operator: 'Night Rider', source: 'Bengaluru', destination: 'Chennai', departureTime: '22:00', arrivalTime: '05:30', duration: '7h 30m', price: 1099, currency: 'INR', seatsAvailable: 7, imageUrl: 'https://source.unsplash.com/800x600/?sleeper,bus' }
+];
 if (!BUS_BASE || !BUS_KEY) {
   console.warn('routes/buses: TRIP_BUS_API_URL or TRIP_BUS_API_KEY not set.');
 }
@@ -45,6 +49,18 @@ function normalizeBus(raw) {
   return { id, operator, source, destination, departureTime, arrivalTime, duration, price, currency, seatsAvailable, imageUrl, raw };
 }
 
+unction getDemoBuses({ source = '', destination = '', limit = 20 } = {}) {
+  const lim = Number(limit) || 20;
+  const srcQ = String(source || '').trim().toLowerCase();
+  const dstQ = String(destination || '').trim().toLowerCase();
+  const filtered = FALLBACK_BUSES.filter((b) => {
+    const sourceOk = !srcQ || b.source.toLowerCase().includes(srcQ);
+    const destOk = !dstQ || b.destination.toLowerCase().includes(dstQ);
+    return sourceOk && destOk;
+  });
+  return filtered.slice(0, lim);
+}
+
 // GET /api/buses?source=jaipur&destination=delhi&date=2025-12-01&limit=10
 router.get('/', async (req, res) => {
   try {
@@ -55,7 +71,10 @@ router.get('/', async (req, res) => {
       if (source) where.fromCity = new RegExp(`^${source}$`, 'i');
       if (destination) where.toCity = new RegExp(`^${destination}$`, 'i');
       const localBuses = await Trip.find(where).select('-__v').limit(Number(req.query.limit || 20));
-      return res.json({ data: localBuses, source: 'database', live: false });
+     if (localBuses.length) {
+        return res.json({ data: localBuses, source: 'database', live: false });
+      }
+      return res.json({ data: getDemoBuses({ source, destination, limit: req.query.limit }), source: 'demo', live: false, demo: true });
     }
 
     const qs = new URLSearchParams(req.query).toString();
@@ -95,7 +114,9 @@ router.get('/', async (req, res) => {
     res.json({ data: normalized, cached: false });
   } catch (err) {
     console.error('routes/buses error:', err && err.stack ? err.stack : String(err));
-    res.status(500).json({ message: 'Failed to fetch buses', error: String(err.message || err) });
+    const source = req.query.source || req.query.from || '';
+    const destination = req.query.destination || req.query.to || '';
+    res.json({ data: getDemoBuses({ source, destination, limit: req.query.limit }), source: 'demo', live: false, demo: true });
   }
 });
 
