@@ -709,6 +709,24 @@ section {
   <!-- Toast (for messages from app.js) -->
   <div id="toast"></div>
 
+      <div id="booking-choice-modal" class="booking-choice-modal" aria-hidden="true">
+    <div class="booking-choice-box">
+      <h3 id="booking-choice-title">Choose what you want to book</h3>
+      <p style="margin-top:6px;color:#555;font-size:14px;">
+        Select booking type for <strong id="booking-choice-city">this place</strong>.
+      </p>
+      <div class="booking-choice-grid">
+        <button type="button" class="booking-choice-option" data-booking-type="train">🚆 Train</button>
+        <button type="button" class="booking-choice-option" data-booking-type="bus">🚌 Bus</button>
+        <button type="button" class="booking-choice-option" data-booking-type="flight">✈️ Flight</button>
+        <button type="button" class="booking-choice-option" data-booking-type="hotel">🏨 Hotel</button>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+        <button type="button" class="btn" id="booking-choice-cancel" style="background:#666">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Overlay -->
   <div id="auth-overlay" class="auth-overlay" style="display:none;"></div>
 
