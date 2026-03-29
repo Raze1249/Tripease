@@ -359,6 +359,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+   function handleBookingDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    const deepLinkedCity = (params.get('bookingCity') || '').trim();
+    if (!deepLinkedCity) return;
+    openBookingChoice(deepLinkedCity);
+
+    params.delete('bookingCity');
+    const nextQuery = params.toString();
+    const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash || ''}`;
+    window.history.replaceState({}, '', nextUrl);
+  }
+
+
  function focusBookingTypePanel(city, bookingType = '') {
     if (!city || !bookingType) return;
 
@@ -412,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+    handleBookingDeepLink();
   /* ============================
      SUGGESTED TRIPS
      ============================ */
