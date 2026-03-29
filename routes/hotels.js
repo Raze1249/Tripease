@@ -1,7 +1,7 @@
 // routes/hotels.js
 const router = require('express').Router();
 const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
-
+const Trip = require('../models/Trip');
 // env
 const HOTEL_BASE = process.env.TRIP_HOTEL_API_URL; // e.g. https://api.example-hotels.com/v1/search
 const HOTEL_KEY = process.env.TRIP_HOTEL_API_KEY;
@@ -56,6 +56,14 @@ function normalizeHotel(raw) {
 // GET /api/hotels?location=goa&checkin=2025-12-01&checkout=2025-12-05&guests=2&limit=10
 router.get('/', async (req, res) => {
   try {
+    if (!HOTEL_BASE || !HOTEL_KEY) {
+      const location = req.query.location || req.query.city || '';
+      const where = { type: 'hotel' };
+      if (location) where.city = new RegExp(`^${location}$`, 'i');
+      const localHotels = await Trip.find(where).select('-__v').limit(Number(req.query.limit || 20));
+      return res.json({ data: localHotels, source: 'database', live: false });
+    }
+
     // Build a cache key using querystring
     const qs = new URLSearchParams(req.query).toString();
     const cacheKey = `hotels:${qs}`;
