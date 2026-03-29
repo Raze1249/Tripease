@@ -1,7 +1,7 @@
 // routes/buses.js
 const router = require('express').Router();
 const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
-
+const Trip = require('../models/Trip');
 const BUS_BASE = process.env.TRIP_BUS_API_URL;              // e.g. https://...
 const BUS_KEY = process.env.TRIP_BUS_API_KEY;
 const BUS_KEY_PARAM = process.env.TRIP_BUS_API_KEY_PARAM_NAME || '';
@@ -48,6 +48,16 @@ function normalizeBus(raw) {
 // GET /api/buses?source=jaipur&destination=delhi&date=2025-12-01&limit=10
 router.get('/', async (req, res) => {
   try {
+     if (!BUS_BASE || !BUS_KEY) {
+      const source = req.query.source || req.query.from || '';
+      const destination = req.query.destination || req.query.to || '';
+      const where = { type: 'bus' };
+      if (source) where.fromCity = new RegExp(`^${source}$`, 'i');
+      if (destination) where.toCity = new RegExp(`^${destination}$`, 'i');
+      const localBuses = await Trip.find(where).select('-__v').limit(Number(req.query.limit || 20));
+      return res.json({ data: localBuses, source: 'database', live: false });
+    }
+
     const qs = new URLSearchParams(req.query).toString();
     const cacheKey = `buses:${qs}`;
     const cached = cacheGet(cacheKey);
