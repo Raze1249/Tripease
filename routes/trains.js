@@ -9,7 +9,9 @@ const TRAIN_CACHE_TTL = Number(process.env.TRAIN_CACHE_TTL_MS || (1000 * 60 * 30
 const FALLBACK_TRAINS = [
   { id: 'demo-train-1', name: 'Shatabdi Express', number: '12001', source: 'Delhi', destination: 'Jaipur', departureTime: '06:05', arrivalTime: '10:40', duration: '4h 35m', classType: 'Chair Car', price: 1250, currency: 'INR', seatsAvailable: 23, imageUrl: 'https://source.unsplash.com/800x600/?train,station' },
   { id: 'demo-train-2', name: 'Intercity Express', number: '12679', source: 'Bengaluru', destination: 'Chennai', departureTime: '07:00', arrivalTime: '12:10', duration: '5h 10m', classType: '2S', price: 680, currency: 'INR', seatsAvailable: 40, imageUrl: 'https://source.unsplash.com/800x600/?indian,train' },
-  { id: 'demo-train-3', name: 'Deccan Queen', number: '12123', source: 'Mumbai', destination: 'Pune', departureTime: '17:10', arrivalTime: '20:25', duration: '3h 15m', classType: 'CC', price: 550, currency: 'INR', seatsAvailable: 32, imageUrl: 'https://source.unsplash.com/800x600/?railway,journey' }
+ { id: 'demo-train-3', name: 'Deccan Queen', number: '12123', source: 'Mumbai', destination: 'Pune', departureTime: '17:10', arrivalTime: '20:25', duration: '3h 15m', classType: 'CC', price: 550, currency: 'INR', seatsAvailable: 32, imageUrl: 'https://source.unsplash.com/800x600/?railway,journey' },
+  { id: 'demo-train-4', name: 'Pink City Intercity', number: '12985', source: 'Jaipur', destination: 'Delhi', departureTime: '08:15', arrivalTime: '12:50', duration: '4h 35m', classType: 'CC', price: 990, currency: 'INR', seatsAvailable: 29, imageUrl: 'https://source.unsplash.com/800x600/?jaipur,train' },
+  { id: 'demo-train-5', name: 'Marudhar Express', number: '14853', source: 'Jaipur', destination: 'Jodhpur', departureTime: '14:20', arrivalTime: '20:10', duration: '5h 50m', classType: 'SL', price: 430, currency: 'INR', seatsAvailable: 56, imageUrl: 'https://source.unsplash.com/800x600/?india,railway' }
 ];
 
 if (!TRAIN_BASE || !TRAIN_KEY) {
@@ -57,14 +59,21 @@ function getDemoTrains({ source = '', destination = '', classType = '', limit = 
   const srcQ = String(source || '').trim().toLowerCase();
   const dstQ = String(destination || '').trim().toLowerCase();
   const clsQ = String(classType || '').trim().toLowerCase();
-
+  const sourceCity = String(source || '').trim();
+  const destinationCity = String(destination || '').trim();
   const filtered = FALLBACK_TRAINS.filter((t) => {
     const sourceOk = !srcQ || t.source.toLowerCase().includes(srcQ);
     const destOk = !dstQ || t.destination.toLowerCase().includes(dstQ);
     const classOk = !clsQ || t.classType.toLowerCase().includes(clsQ);
     return sourceOk && destOk && classOk;
   });
-  return filtered.slice(0, lim);
+   const list = filtered.length ? filtered : FALLBACK_TRAINS.map((t, i) => ({
+    ...t,
+    id: `${t.id}-${sourceCity || 'from'}-${destinationCity || 'to'}-${i + 1}`,
+    source: sourceCity || t.source,
+    destination: destinationCity || t.destination
+  }));
+  return list.slice(0, lim);
 }
 
 router.get('/', async (req, res) => {
