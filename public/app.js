@@ -269,6 +269,125 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
+    const SCENIC_PLACE_GROUPS = {
+    Desert: [
+      {
+        name: 'Jaisalmer, Rajasthan',
+        imageUrl:
+          'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Golden dunes and desert camps',
+        cityDescription:
+          'Explore Sam Sand Dunes, camel safaris, and historic forts in the Thar desert.',
+        rating: 5
+      },
+      {
+        name: 'Dubai Desert, UAE',
+        imageUrl:
+          'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Dune bashing & luxury camps',
+        cityDescription:
+          'Experience evening safaris, traditional food, and desert sunsets near Dubai.',
+        rating: 5
+      },
+      {
+        name: 'Sahara, Morocco',
+        imageUrl:
+          'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Epic dunes in Merzouga',
+        cityDescription:
+          'Ride through Erg Chebbi dunes and stay in Berber-style camps under starry skies.',
+        rating: 5
+      }
+    ],
+    Mountain: [
+      {
+        name: 'Manali, Himachal',
+        imageUrl:
+          'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Snowy peaks & valleys',
+        cityDescription:
+          'Perfect for mountain views, adventure sports, and scenic road trips.',
+        rating: 5
+      },
+      {
+        name: 'Interlaken, Switzerland',
+        imageUrl:
+          'https://images.unsplash.com/photo-1601758125946-6ec2ef64daf8?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Alpine lakes and hiking',
+        cityDescription:
+          'A gateway to the Swiss Alps with train rides, trekking, and panoramic viewpoints.',
+        rating: 5
+      },
+      {
+        name: 'Banff, Canada',
+        imageUrl:
+          'https://images.unsplash.com/photo-1508264165352-258a6f82d0ef?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Rocky Mountain escape',
+        cityDescription:
+          'Discover glacier-fed lakes, wildlife, and beautiful mountain trails.',
+        rating: 5
+      }
+    ],
+    Beach: [
+      {
+        name: 'Goa, India',
+        imageUrl:
+          'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Beaches, cafes, nightlife',
+        cityDescription:
+          'Relax by the sea, enjoy water sports, and explore vibrant beach markets.',
+        rating: 5
+      },
+      {
+        name: 'Bali, Indonesia',
+        imageUrl:
+          'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Tropical paradise',
+        cityDescription:
+          'Enjoy serene beaches, island temples, and iconic sunset coastlines.',
+        rating: 5
+      },
+      {
+        name: 'Maldives',
+        imageUrl:
+          'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Crystal clear lagoons',
+        cityDescription:
+          'A luxury island destination with overwater villas and coral reefs.',
+        rating: 5
+      }
+    ],
+    Lakes: [
+      {
+        name: 'Nainital, India',
+        imageUrl:
+          'https://images.unsplash.com/photo-1589802829985-817e51171b92?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Lake town in the hills',
+        cityDescription:
+          'Boating, hill viewpoints, and cool weather make it ideal for peaceful trips.',
+        rating: 5
+      },
+      {
+        name: 'Lake Como, Italy',
+        imageUrl:
+          'https://images.unsplash.com/photo-1533319417894-6fbb331e5513?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Elegant lakeside escapes',
+        cityDescription:
+          'Known for scenic villas, ferry rides, and mountain-backed lake views.',
+        rating: 5
+      },
+      {
+        name: 'Lake Louise, Canada',
+        imageUrl:
+          'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=900&q=80',
+        blurb: 'Turquoise alpine beauty',
+        cityDescription:
+          'Visit for postcard-perfect water, hiking trails, and stunning glacier scenery.',
+        rating: 5
+      }
+    ]
+  };
+
   const popularCard = (p) => `
   <div class="card popular-place-card" data-name="${p.name}" style="width:260px; cursor:pointer" role="button" tabindex="0" aria-label="Book ${p.name}">
     <img src="${p.imageUrl || FALLBACK_IMG}" alt="${p.name}"
@@ -1230,18 +1349,22 @@ console.log("FINAL LIST:", list);
     if (clickedInsideKnownContainers) return;
     handleTripBookClick(bookTrip);
   });
-   document.querySelectorAll(".image-strip img").forEach(img => {
-  img.addEventListener("click", () => {
-    const city = img.dataset.name;
+  document.querySelectorAll('.image-strip img').forEach((img) => {
+    img.addEventListener('click', () => {
+      const theme = (img.dataset.name || '').trim();
+      if (!theme || !popularGrid || !popularPanel) return;
 
-    // open booking panel
-    openBookingPanel(city);
+      const themedPlaces = SCENIC_PLACE_GROUPS[theme];
+      if (!themedPlaces?.length) return;
 
-    // optional scroll
-    document.getElementById("booking-panel")
-      ?.scrollIntoView({ behavior: "smooth" });
+      popularGrid.innerHTML = themedPlaces.map(popularCard).join('');
+      attachPopularCardHandlers();
+      popularPanel.querySelector('h2').textContent = `${theme} Places`;
+      popularPanel.style.display = 'block';
+      popularPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      toast(`Showing ${theme.toLowerCase()} places`);
+    });
   });
-});
 
   /* ============================
      Boot
