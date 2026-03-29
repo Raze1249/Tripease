@@ -7,11 +7,11 @@ const BUS_KEY = process.env.TRIP_BUS_API_KEY;
 const BUS_KEY_PARAM = process.env.TRIP_BUS_API_KEY_PARAM_NAME || '';
 const BUS_CACHE_TTL = Number(process.env.BUS_CACHE_TTL_MS || (1000 * 60 * 60)); // 1h default
 const FALLBACK_BUSES = [
-  { id: 'demo-bus-1', operator: 'Orange Travels', source: 'Jaipur', destination: 'Delhi', departureTime: '07:00', arrivalTime: '13:30', duration: '6h 30m', price: 899, currency: 'INR', seatsAvailable: 12, imageUrl: 'https://source.unsplash.com/800x600/?bus,roadtrip' },
-  { id: 'demo-bus-2', operator: 'GreenLine Express', source: 'Mumbai', destination: 'Pune', departureTime: '09:15', arrivalTime: '12:45', duration: '3h 30m', price: 599, currency: 'INR', seatsAvailable: 18, imageUrl: 'https://source.unsplash.com/800x600/?coach,bus' },
-  { id: 'demo-bus-3', operator: 'Night Rider', source: 'Bengaluru', destination: 'Chennai', departureTime: '22:00', arrivalTime: '05:30', duration: '7h 30m', price: 1099, currency: 'INR', seatsAvailable: 7, imageUrl: 'https://source.unsplash.com/800x600/?sleeper,bus' },
-  { id: 'demo-bus-4', operator: 'Pink City Travels', source: 'Jaipur', destination: 'Udaipur', departureTime: '06:45', arrivalTime: '14:00', duration: '7h 15m', price: 799, currency: 'INR', seatsAvailable: 16, imageUrl: 'https://source.unsplash.com/800x600/?jaipur,bus' },
-  { id: 'demo-bus-5', operator: 'Royal Rajasthan Coach', source: 'Delhi', destination: 'Jaipur', departureTime: '23:00', arrivalTime: '04:30', duration: '5h 30m', price: 949, currency: 'INR', seatsAvailable: 10, imageUrl: 'https://source.unsplash.com/800x600/?rajasthan,bus' }
+  { id: 'demo-bus-1', operator: 'Orange Travels', source: 'Jaipur', destination: 'Delhi', departureTime: '07:00', arrivalTime: '13:30', duration: '6h 30m', price: 899, currency: 'INR', seatsAvailable: 12, imageUrl: 'https://tse1.mm.bing.net/th/id/OIP.e05uXOvKNW_RV0OnTsUCyAHaEK?pid=Api&P=0&h=180' },
+  { id: 'demo-bus-2', operator: 'GreenLine Express', source: 'Mumbai', destination: 'Pune', departureTime: '09:15', arrivalTime: '12:45', duration: '3h 30m', price: 599, currency: 'INR', seatsAvailable: 18, imageUrl: 'https://tse4.mm.bing.net/th/id/OIP.ihOA028iE-u58rUifgwV8AHaE8?pid=Api&P=0&h=180' },
+  { id: 'demo-bus-3', operator: 'Night Rider', source: 'Bengaluru', destination: 'Chennai', departureTime: '22:00', arrivalTime: '05:30', duration: '7h 30m', price: 1099, currency: 'INR', seatsAvailable: 7, imageUrl: 'https://tse1.mm.bing.net/th/id/OIP.hRWSEU0KVnONwmiwC8MNGgHaEr?pid=Api&P=0&h=180' },
+  { id: 'demo-bus-4', operator: 'Pink City Travels', source: 'Jaipur', destination: 'Udaipur', departureTime: '06:45', arrivalTime: '14:00', duration: '7h 15m', price: 799, currency: 'INR', seatsAvailable: 16, imageUrl: 'https://tse2.mm.bing.net/th/id/OIP.LxrJr-C4YDC-DVoWmFTnvAHaD-?pid=Api&P=0&h=180' },
+  { id: 'demo-bus-5', operator: 'Royal Rajasthan Coach', source: 'Delhi', destination: 'Jaipur', departureTime: '23:00', arrivalTime: '04:30', duration: '5h 30m', price: 949, currency: 'INR', seatsAvailable: 10, imageUrl: 'https://tse3.mm.bing.net/th/id/OIP.RN99MwuNKkFg1ngwD4s6jQHaD4?pid=Api&P=0&h=180' }
 ];
 if (!BUS_BASE || !BUS_KEY) {
   console.warn('routes/buses: TRIP_BUS_API_URL or TRIP_BUS_API_KEY not set.');
