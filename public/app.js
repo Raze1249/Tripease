@@ -359,29 +359,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function openBookingPanel(city, bookingType = '') {
-    const panel = document.getElementById('booking-panel');
+ function focusBookingTypePanel(city, bookingType = '') {
+    if (!city || !bookingType) return;
 
-    if (panel) {
-      panel.style.display = 'block';
-      panel.scrollIntoView({ behavior: 'smooth' });
-      panel.classList.add('highlight');
+    const flashPanel = (panelEl) => {
+      if (!panelEl) return;
+      panelEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      panelEl.classList.add('highlight');
+      setTimeout(() => panelEl.classList.remove('highlight'), 1500);
+    };
 
-      setTimeout(() => {
-        panel.classList.remove('highlight');
-      }, 1500);
+ if (bookingType === 'flight') {
+      if (ff.dst) ff.dst.value = city;
+      flashPanel(ff.src?.closest('.panel'));
+      return;
     }
 
-    const route = document.getElementById('bk-flight-route');
-    if (route && city) route.value = `${city} → Your Destination`;
+    if (bookingType === 'hotel') {
+      if (hotelLocationInput) hotelLocationInput.value = city;
+      flashPanel(hotelLocationInput?.closest('.panel'));
+      return;
+    }
+     if (bookingType === 'bus') {
+      if (busToInput) busToInput.value = city;
+      flashPanel(busToInput?.closest('.panel'));
+      return;
+    }
 
-    const tripId = document.getElementById('bk-tripId');
-    if (tripId) tripId.value = bookingType ? `${bookingType}:${city}` : city;
-
-    if (bk.notes) {
-      bk.notes.value = bookingType
-        ? `${bookingType[0].toUpperCase()}${bookingType.slice(1)} booking for ${city}`
-        : `Booking for ${city}`;
+     if (bookingType === 'train') {
+      if (trainToInput) trainToInput.value = city;
+      flashPanel(trainToInput?.closest('.panel'));
     }
   }
 
@@ -401,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const bookingType = btn.dataset.bookingType || '';
       if (!selectedPopularCity) return;
       closeBookingChoice();
-      openBookingPanel(selectedPopularCity, bookingType);
+     focusBookingTypePanel(selectedPopularCity, bookingType);
     });
   });
 
