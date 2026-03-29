@@ -244,13 +244,18 @@ document.addEventListener('DOMContentLoaded', () => {
       imageUrl:
         'https://images.unsplash.com/photo-1704253411612-e4deb715dcd8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YmFsaSUyMGluZG9uZXNpYXxlbnwwfHwwfHx8MA%3D%3D',
       blurb: 'Beaches & temples',
+       cityDescription:
+        'Bali is known for tropical coastlines, scenic rice terraces, and vibrant Balinese culture.',
       rating: 5
+      
     },
     {
       name: 'Swiss Alps',
       imageUrl:
         'https://images.unsplash.com/photo-1586752488885-6ce47fdfd874?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8c3dpc3MlMjBhbHBzfGVufDB8fDB8fHww',
       blurb: 'Snowy peaks',
+        cityDescription:
+        'The Swiss Alps offer mountain villages, panoramic train routes, and year-round adventure sports.',
       rating: 5
     },
     {
@@ -258,6 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
       imageUrl:
         'https://images.unsplash.com/photo-1580502304784-8985b7eb7260?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8U2FudG9yaW5pfGVufDB8fDB8fHww',
       blurb: 'Aegean views',
+       cityDescription:
+        'Santorini features whitewashed cliffside towns, sunset viewpoints, and iconic volcanic beaches.',
       rating: 5
     }
   ];
@@ -273,6 +280,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <p style="font-size:14px;color:#444;margin-top:6px;">
         ${p.blurb || ''}
       </p>
+      <p style="font-size:13px;color:#555;margin-top:6px;line-height:1.45;">
+        ${p.cityDescription || p.description || ''}
+      </p>
     </div>
   </div>
 `;
@@ -286,6 +296,9 @@ document.addEventListener('DOMContentLoaded', () => {
         name: d.name || d.title || 'Unknown',
         imageUrl: d.imageUrl || FALLBACK_IMG,
         blurb: d.description || d.region || '',
+          cityDescription: d.address?.countryName
+          ? `${d.name || 'This city'} is in ${d.address.countryName}. Explore local highlights, food, and culture.`
+          : `Discover ${d.name || 'this destination'} with local attractions and memorable stays.`,
         rating: d.rating || 5,
         id: d.id || d.name,
         raw: d.raw || null
@@ -307,14 +320,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('popularBtn')?.addEventListener('click', renderPopular);
 
-   popularGrid?.addEventListener('click', (e) => {
-  const card = e.target.closest('.card');
-  if (!card) return;
+    const bookingChoiceModal = $('booking-choice-modal');
+  const bookingChoiceCityLabel = $('booking-choice-city');
+  const bookingChoiceCancel = $('booking-choice-cancel');
+  let selectedPopularCity = '';
 
-  const city = card.dataset.name;
-  openBookingPanel(city);
-});
+  function openBookingChoice(city) {
+    selectedPopularCity = city || '';
+    if (bookingChoiceCityLabel) bookingChoiceCityLabel.textContent = selectedPopularCity || 'this place';
+    if (bookingChoiceModal) {
+      bookingChoiceModal.classList.add('open');
+      bookingChoiceModal.setAttribute('aria-hidden', 'false');
+    }
+  }
 
+  function closeBookingChoice() {
+    if (!bookingChoiceModal) return;
+    bookingChoiceModal.classList.remove('open');
+    bookingChoiceModal.setAttribute('aria-hidden', 'true');
+  }
+
+  function openBookingPanel(city, bookingType = '') {
+    const panel = document.getElementById('booking-panel');
+
+    if (panel) {
+      panel.style.display = 'block';
+      panel.scrollIntoView({ behavior: 'smooth' });
+      panel.classList.add('highlight');
+
+      setTimeout(() => {
+        panel.classList.remove('highlight');
+      }, 1500);
+    }
+
+    const route = document.getElementById('bk-flight-route');
+    if (route && city) route.value = `${city} → Your Destination`;
+
+    const tripId = document.getElementById('bk-tripId');
+    if (tripId) tripId.value = bookingType ? `${bookingType}:${city}` : city;
+
+    if (bk.notes) {
+      bk.notes.value = bookingType
+        ? `${bookingType[0].toUpperCase()}${bookingType.slice(1)} booking for ${city}`
+        : `Booking for ${city}`;
+    }
+  }
+
+  popularGrid?.addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    openBookingChoice(card.dataset.name || '');
+  });
+
+  bookingChoiceCancel?.addEventListener('click', closeBookingChoice);
+  bookingChoiceModal?.addEventListener('click', (e) => {
+    if (e.target === bookingChoiceModal) closeBookingChoice();
+  });
+
+  document.querySelectorAll('.booking-choice-option').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const bookingType = btn.dataset.bookingType || '';
+      if (!selectedPopularCity) return;
+      closeBookingChoice();
+      openBookingPanel(selectedPopularCity, bookingType);
+    });
+  });
   /* ============================
      SUGGESTED TRIPS
      ============================ */
@@ -533,28 +603,7 @@ async function runSearch() {
     }
   }
 }
-  function openBookingPanel(city) {
-  const panel = document.getElementById("booking-panel");
-
-  if (panel) {
-    panel.style.display = "block";
-    panel.scrollIntoView({ behavior: "smooth" });
-
-    // ✅ highlight inside function
-    panel.classList.add("highlight");
-
-    setTimeout(() => {
-      panel.classList.remove("highlight");
-    }, 1500);
-  }
-
-  const route = document.getElementById("bk-flight-route");
-  if (route) route.value = `${city} → Your Destination`;
-
-  const tripId = document.getElementById("bk-tripId");
-  if (tripId) tripId.value = city;
-}
-
+  
   qBtn?.addEventListener('click', runSearch);
   qIn?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
