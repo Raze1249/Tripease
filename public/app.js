@@ -1025,6 +1025,39 @@ console.log("FINAL LIST:", list);
     if (bk.price) bk.price.value = '';
   };
 
+    function getSelectedCityFromButton(buttonEl) {
+    if (!buttonEl) return '';
+    const fromData = (buttonEl.dataset.name || '').trim();
+    if (fromData) return fromData;
+    const fromCardTitle = (
+      buttonEl.closest('.trip-card, .item, .card')?.querySelector('h3, h4')?.textContent || ''
+    ).trim();
+    if (fromCardTitle) return fromCardTitle;
+    return (qIn?.value || '').trim();
+  }
+
+  function handleTripBookClick(buttonEl) {
+    if (!buttonEl) return;
+    const selectedCity = getSelectedCityFromButton(buttonEl);
+    if (selectedCity) {
+      closeBk();
+      openBookingChoice(selectedCity);
+      return;
+    }
+    closeBk();
+    if (bk.tripId) bk.tripId.value = buttonEl.dataset.id;
+    openBk();
+  }
+
+  function handleFlightsShortcutClick(buttonEl) {
+    if (!buttonEl || !ff.dst) return;
+    ff.dst.value = buttonEl.dataset.name || '';
+    window.scrollTo({
+      top: ff.dst.getBoundingClientRect().top + scrollY - 100,
+      behavior: 'smooth'
+    });
+  }
+
    function getSelectedCityFromButton(buttonEl) {
     if (!buttonEl) return '';
     const fromData = (buttonEl.dataset.name || '').trim();
