@@ -154,6 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const open = (el) => el && (el.style.display = 'block');
   const close = (el) => el && (el.style.display = 'none');
+   const hideAuthOverlay = () => {
+    const overlay = $('auth-overlay');
+    if (overlay) overlay.style.display = 'none';
+  };
 
   /* ============================
      AUTH
@@ -193,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       await post(API.auth.login, { email, password }, true);
       close(A.mLogin);
+       hideAuthOverlay();
       toast('Logged in');
       me();
     } catch (e) {
@@ -211,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       await post(API.auth.register, { name, email, password }, true);
       close(A.mRegister);
-       document.getElementById("auth-overlay").style.display = "none";
+      hideAuthOverlay();
       toast('Account created');
       me();
     } catch (e) {
