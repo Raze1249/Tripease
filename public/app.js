@@ -871,15 +871,18 @@ async function runSearch() {
     const hotelCurrency = h.currency || 'USD';
     const hotelRating = h.rating || h.stars || null;
     const hotelDescription = h.description || h.summary || '';
+      const defaultImage = `https://picsum.photos/seed/hotel-${encodeURIComponent(
+      hotelName
+    )}/800/600`;
+    const fallbackImage = 'https://picsum.photos/seed/hotel-fallback/800/600';
+     
     return `
       <div class="card" style="background:#fff;color:#000;border-radius:12px;overflow:hidden">
         <img src="${
           h.imageUrl ||
-          `https://source.unsplash.com/800x600/?hotel,${encodeURIComponent(
-               hotelName
-          )}`
+          defaultImage
          }" alt="${hotelName}" style="width:100%;height:160px;object-fit:cover"
-        onerror="this.onerror=null;this.src='https://source.unsplash.com/800x600/?hotel'">
+         onerror="this.onerror=null;this.src='${fallbackImage}'">
         <div style="padding:12px">
             <h3 style="margin:0 0 6px">${hotelName}</h3>
           <p style="margin:0;font-size:13px;color:#444">${hotelCity || ''}${
