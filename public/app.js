@@ -463,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
 
-  function renderTripsGrid(list, targetId = "cardsContainer") {
+ function renderTripsGrid(list, targetId = "cardsContainer") {
   const container = document.getElementById(targetId);
     container.classList.remove('trip-list');
     container.classList.add('places');
@@ -472,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <img src="${trip.imageUrl}" />
     <h3>${trip.name}</h3>
 
-    <button class="btn book-trip-btn" data-id="${trip._id}">
+    <button class="btn book-trip-btn" data-id="${trip._id}" data-name="${trip.name || ''}">
       Book Trip
     </button>
   </div>
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="actions">
           <button class="btn flight-btn" data-name="${t.name}">Flights</button>
-          <button class="btn book-trip-btn" data-id="${t._id}">Book</button>
+ <button class="btn book-trip-btn" data-id="${t._id}" data-name="${t.name || ''}">Book</button>
         </div>
       </div>
     `;
@@ -1030,6 +1030,12 @@ console.log("FINAL LIST:", list);
     const tBtn = e.target.closest('.book-trip-btn');
     const fBtn = e.target.closest('.flight-btn');
     if (tBtn) {
+        const selectedCity = (tBtn.dataset.name || '').trim();
+      if (selectedCity) {
+        closeBk();
+        openBookingChoice(selectedCity);
+        return;
+      }
       closeBk();
       if (bk.tripId) bk.tripId.value = tBtn.dataset.id;
       openBk();
