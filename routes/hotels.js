@@ -6,6 +6,8 @@ const Trip = require('../models/Trip');
 const HOTEL_BASE = process.env.TRIP_HOTEL_API_URL; // e.g. https://api.example-hotels.com/v1/search
 const HOTEL_KEY = process.env.TRIP_HOTEL_API_KEY;
 const HOTEL_KEY_PARAM = process.env.TRIP_HOTEL_API_KEY_PARAM_NAME || ''; // e.g. 'api_key'
+const HOTEL_AFFILIATE_BASE_URL = process.env.TRIP_HOTEL_AFFILIATE_BASE_URL || '';
+const HOTEL_AFFILIATE_ID = process.env.TRIP_HOTEL_AFFILIATE_ID || '';
 const CACHE_TTL = Number(process.env.HOTEL_CACHE_TTL_MS || (1000 * 60 * 60)); // 1h default
 const FALLBACK_HOTELS = [
    { id: 'demo-hotel-1', name: 'Seaside Bliss Resort', city: 'Goa', country: 'India', price: 6500, currency: 'INR', rating: 4.5, imageUrl: 'https://picsum.photos/seed/demo-hotel-1/800/600', description: 'Beachfront stay with pool and breakfast.', amenities: ['WiFi', 'Pool', 'Breakfast'] },
@@ -56,7 +58,30 @@ function normalizeHotel(raw) {
   const description = raw.description || raw.summary || raw.short_description || '';
   const amenities = raw.amenities || raw.facilities || [];
 
-  return { id, name, address, city, country, price, currency, rating, imageUrl, description, amenities, raw };
+ return {
+    id,
+    name,
+    address,
+    city,
+    country,
+    price,
+    currency,
+    rating,
+    imageUrl,
+    description,
+    amenities,
+    affiliateLink: buildHotelAffiliateLink({ city, hotelName: name }),
+    raw
+  };
+}
+
+function buildHotelAffiliateLink({ city = '', hotelName = '' } = {}) {
+  if (!HOTEL_AFFILIATE_BASE_URL || !HOTEL_AFFILIATE_ID) return '';
+  const url = new URL(HOTEL_AFFILIATE_BASE_URL);
+  url.searchParams.set('aid', HOTEL_AFFILIATE_ID);
+  if (city) url.searchParams.set('city', city);
+  if (hotelName) url.searchParams.set('hotel', hotelName);
+  return url.toString();
 }
 
 function getDemoHotels({ location = '', limit = 20 } = {}) {
@@ -75,7 +100,10 @@ function getDemoHotels({ location = '', limit = 20 } = {}) {
     id: `${h.id}-${requestedCity || 'demo'}-${i + 1}`,
     city: requestedCity || h.city
   }));
-  return list.slice(0, lim);
+  return list.slice(0, lim).map((hotel) => ({
+    ...hotel,
+    affiliateLink: buildHotelAffiliateLink({ city: hotel.city, hotelName: hotel.name })
+  }));
 }
 
 // GET /api/hotels?location=goa&checkin=2025-12-01&checkout=2025-12-05&guests=2&limit=10
