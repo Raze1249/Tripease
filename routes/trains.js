@@ -5,6 +5,8 @@ const Trip = require('../models/Trip');
 const TRAIN_BASE = process.env.TRIP_TRAIN_API_URL;
 const TRAIN_KEY = process.env.TRIP_TRAIN_API_KEY;
 const TRAIN_KEY_PARAM = process.env.TRIP_TRAIN_API_KEY_PARAM_NAME || '';
+const TRAIN_AFFILIATE_BASE_URL = process.env.TRIP_TRAIN_AFFILIATE_BASE_URL || '';
+const TRAIN_AFFILIATE_ID = process.env.TRIP_TRAIN_AFFILIATE_ID || '';
 const TRAIN_CACHE_TTL = Number(process.env.TRAIN_CACHE_TTL_MS || (1000 * 60 * 30));
 const FALLBACK_TRAINS = [
   { id: 'demo-train-1', name: 'Shatabdi Express', number: '12001', source: 'Delhi', destination: 'Jaipur', departureTime: '06:05', arrivalTime: '10:40', duration: '4h 35m', classType: 'Chair Car', price: 1250, currency: 'INR', seatsAvailable: 23, imageUrl: 'https://tse4.mm.bing.net/th/id/OIP.1NiQO9fL6Vzx4gZNP5VE6AHaFc?pid=Api&P=0&h=180' },
@@ -51,8 +53,22 @@ function normalizeTrain(raw, fallback = {}) {
     currency: raw.currency || (raw.price && raw.price.currency) || 'INR',
     seatsAvailable: raw.seatsAvailable || raw.availableSeats || raw.seats || null,
     imageUrl: raw.imageUrl || `https://source.unsplash.com/800x600/?train,${encodeURIComponent(fallback.destination || 'travel')}`,
+     affiliateLink: buildTrainAffiliateLink({
+      source: raw.source || raw.from || fallback.source,
+      destination: raw.destination || raw.to || fallback.destination,
+      train: raw.name || raw.trainName
+    }),
     raw
   };
+}
+function buildTrainAffiliateLink({ source = '', destination = '', train = '' } = {}) {
+  if (!TRAIN_AFFILIATE_BASE_URL || !TRAIN_AFFILIATE_ID) return '';
+  const url = new URL(TRAIN_AFFILIATE_BASE_URL);
+  url.searchParams.set('aid', TRAIN_AFFILIATE_ID);
+  if (source) url.searchParams.set('source', source);
+  if (destination) url.searchParams.set('destination', destination);
+  if (train) url.searchParams.set('train', train);
+  return url.toString();
 }
 function getDemoTrains({ source = '', destination = '', classType = '', limit = 20 } = {}) {
   const lim = Number(limit) || 20;
@@ -73,7 +89,14 @@ function getDemoTrains({ source = '', destination = '', classType = '', limit = 
     source: sourceCity || t.source,
     destination: destinationCity || t.destination
   }));
-  return list.slice(0, lim);
+  return list.slice(0, lim).map((train) => ({
+    ...train,
+    affiliateLink: buildTrainAffiliateLink({
+      source: train.source,
+      destination: train.destination,
+      train: train.name
+    })
+  }));
 }
 
 router.get('/', async (req, res) => {
