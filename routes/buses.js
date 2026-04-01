@@ -5,6 +5,8 @@ const Trip = require('../models/Trip');
 const BUS_BASE = process.env.TRIP_BUS_API_URL;              // e.g. https://...
 const BUS_KEY = process.env.TRIP_BUS_API_KEY;
 const BUS_KEY_PARAM = process.env.TRIP_BUS_API_KEY_PARAM_NAME || '';
+const BUS_AFFILIATE_BASE_URL = process.env.TRIP_BUS_AFFILIATE_BASE_URL || '';
+const BUS_AFFILIATE_ID = process.env.TRIP_BUS_AFFILIATE_ID || '';
 const BUS_CACHE_TTL = Number(process.env.BUS_CACHE_TTL_MS || (1000 * 60 * 60)); // 1h default
 const FALLBACK_BUSES = [
   { id: 'demo-bus-1', operator: 'Orange Travels', source: 'Jaipur', destination: 'Delhi', departureTime: '07:00', arrivalTime: '13:30', duration: '6h 30m', price: 899, currency: 'INR', seatsAvailable: 12, imageUrl: 'https://tse1.mm.bing.net/th/id/OIP.e05uXOvKNW_RV0OnTsUCyAHaEK?pid=Api&P=0&h=180' },
@@ -48,7 +50,31 @@ function normalizeBus(raw) {
   const seatsAvailable = raw.availableSeats || raw.seats || null;
   const imageUrl = raw.imageUrl || `https://source.unsplash.com/800x600/?bus,${encodeURIComponent(destination || 'travel')}`;
 
-  return { id, operator, source, destination, departureTime, arrivalTime, duration, price, currency, seatsAvailable, imageUrl, raw };
+return {
+    id,
+    operator,
+    source,
+    destination,
+    departureTime,
+    arrivalTime,
+    duration,
+    price,
+    currency,
+    seatsAvailable,
+    imageUrl,
+    affiliateLink: buildBusAffiliateLink({ source, destination, operator }),
+    raw
+  };
+}
+
+function buildBusAffiliateLink({ source = '', destination = '', operator = '' } = {}) {
+  if (!BUS_AFFILIATE_BASE_URL || !BUS_AFFILIATE_ID) return '';
+  const url = new URL(BUS_AFFILIATE_BASE_URL);
+  url.searchParams.set('aid', BUS_AFFILIATE_ID);
+  if (source) url.searchParams.set('source', source);
+  if (destination) url.searchParams.set('destination', destination);
+  if (operator) url.searchParams.set('operator', operator);
+  return url.toString();
 }
 
 function getDemoBuses({ source = '', destination = '', limit = 20 } = {}) {
@@ -68,7 +94,14 @@ function getDemoBuses({ source = '', destination = '', limit = 20 } = {}) {
     source: sourceCity || b.source,
     destination: destinationCity || b.destination
   }));
-  return list.slice(0, lim);
+   return list.slice(0, lim).map((bus) => ({
+    ...bus,
+    affiliateLink: buildBusAffiliateLink({
+      source: bus.source,
+      destination: bus.destination,
+      operator: bus.operator
+    })
+  }));
 }
 
 // GET /api/buses?source=jaipur&destination=delhi&date=2025-12-01&limit=10
