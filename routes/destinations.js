@@ -9,6 +9,13 @@ const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80';
 
 const DEMO_DESTINATIONS = [
+   {
+    name: 'Jaipur',
+    region: 'India',
+    imageUrl:
+      'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1200&q=80'
+  },
+  
   {
     name: 'Bali',
     region: 'Indonesia',
