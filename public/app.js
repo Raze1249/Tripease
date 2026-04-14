@@ -151,7 +151,16 @@ document.addEventListener('DOMContentLoaded', () => {
     price: $('bk-flight-price'),
     cancel: $('bk-cancel')
   };
-
+const studentPlanner = {
+    from: $('student-from-city'),
+    to: $('student-to-city'),
+    minBudget: $('student-budget-min'),
+    maxBudget: $('student-budget-max'),
+    days: $('student-trip-days'),
+    suggestBtn: $('student-ai-plan-btn'),
+    result: $('student-ai-result')
+  };
+   
   const open = (el) => el && (el.style.display = 'block');
   const close = (el) => el && (el.style.display = 'none');
    const hideAuthOverlay = () => {
@@ -491,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
- function focusBookingTypePanel(city, bookingType = '') {
+  function focusBookingTypePanel(city, bookingType = '') {
     if (!city || !bookingType) return;
 
     const flashPanel = (panelEl) => {
@@ -523,6 +532,74 @@ document.addEventListener('DOMContentLoaded', () => {
       flashPanel(trainToInput?.closest('.panel'));
     }
   }
+   
+     function suggestTransportByBudget(maxBudget) {
+    if (maxBudget <= 1500) return 'train';
+    if (maxBudget <= 3000) return 'bus';
+    return 'flight';
+  }
+
+  function buildStudentTripPlan({ fromCity, toCity, minBudget, maxBudget, days }) {
+    const safeMin = Number.isFinite(minBudget) ? minBudget : 0;
+    const safeMax = Number.isFinite(maxBudget) ? maxBudget : 0;
+    const transport = suggestTransportByBudget(safeMax);
+    const stayBudget = Math.max(0, Math.round(safeMax * 0.45));
+    const foodBudget = Math.max(0, Math.round(safeMax * 0.25));
+    const travelBudget = Math.max(0, safeMax - stayBudget - foodBudget);
+
+    return {
+      fromCity,
+      toCity,
+      days,
+      minBudget: safeMin,
+      maxBudget: safeMax,
+      transport,
+      suggestion:
+        transport === 'train'
+          ? `Best value pick: Train travel keeps total cost student-friendly for ${days} days.`
+          : transport === 'bus'
+            ? `Balanced pick: Bus travel gives a good budget/comfort mix for ${days} days.`
+            : `Fast pick: Flight is suitable when your budget can support quicker travel.`,
+      budgetSplit: {
+        travel: travelBudget,
+        stay: stayBudget,
+        food: foodBudget
+      }
+    };
+  }
+
+  function renderStudentTripPlan(plan) {
+    if (!studentPlanner.result) return;
+    const transportEmoji =
+      plan.transport === 'train' ? '🚆' : plan.transport === 'bus' ? '🚌' : '✈️';
+    studentPlanner.result.classList.add('open');
+    studentPlanner.result.innerHTML = `
+      <h3 style="margin:0 0 6px;">AI Student Plan for ${plan.toCity}</h3>
+      <p style="margin:0 0 8px;">${plan.suggestion}</p>
+      <p style="margin:0 0 8px;">
+        <strong>Budget:</strong> ₹${plan.minBudget.toLocaleString()} - ₹${plan.maxBudget.toLocaleString()}
+        • <strong>Duration:</strong> ${plan.days} days
+      </p>
+      <p style="margin:0 0 8px;">
+        <strong>Suggested transport:</strong> ${transportEmoji} ${plan.transport.toUpperCase()}
+      </p>
+      <p style="margin:0 0 10px;color:#444;">
+        Suggested split → Travel: ₹${plan.budgetSplit.travel.toLocaleString()},
+        Stay: ₹${plan.budgetSplit.stay.toLocaleString()},
+        Food & local: ₹${plan.budgetSplit.food.toLocaleString()}
+      </p>
+      <button
+        type="button"
+        class="btn"
+        id="student-proceed-booking"
+        data-transport="${plan.transport}"
+        data-from="${plan.fromCity}"
+        data-to="${plan.toCity}">
+        Continue to ${plan.transport} booking
+      </button>
+    `;
+  }
+
 
   popularGrid?.addEventListener('click', (e) => {
     const card = e.target.closest('.popular-place-card');
@@ -545,6 +622,47 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
     handleBookingDeepLink();
+
+    studentPlanner.suggestBtn?.addEventListener('click', () => {
+    const fromCity = (studentPlanner.from?.value || '').trim();
+    const toCity = (studentPlanner.to?.value || '').trim();
+    const minBudget = Number(studentPlanner.minBudget?.value || 0);
+    const maxBudget = Number(studentPlanner.maxBudget?.value || 0);
+    const days = Number(studentPlanner.days?.value || 3);
+
+    if (!toCity) return toast('Please enter destination city');
+    if (!maxBudget || maxBudget <= 0) return toast('Please enter a valid max budget');
+    if (minBudget < 0 || maxBudget < minBudget) return toast('Check budget range');
+
+    const plan = buildStudentTripPlan({ fromCity, toCity, minBudget, maxBudget, days });
+    renderStudentTripPlan(plan);
+    toast('AI student plan generated');
+  });
+
+  studentPlanner.result?.addEventListener('click', (e) => {
+    const btn = e.target.closest('#student-proceed-booking');
+    if (!btn) return;
+
+    const bookingType = btn.dataset.transport || '';
+    const fromCity = (btn.dataset.from || '').trim();
+    const toCity = (btn.dataset.to || '').trim();
+    if (!bookingType || !toCity) return;
+
+    if (bookingType === 'flight') {
+      if (ff.src && fromCity) ff.src.value = fromCity;
+      if (ff.dst) ff.dst.value = toCity;
+    }
+    if (bookingType === 'bus') {
+      if (busFromInput && fromCity) busFromInput.value = fromCity;
+      if (busToInput) busToInput.value = toCity;
+    }
+    if (bookingType === 'train') {
+      if (trainFromInput && fromCity) trainFromInput.value = fromCity;
+      if (trainToInput) trainToInput.value = toCity;
+    }
+    focusBookingTypePanel(toCity, bookingType);
+    toast(`Redirected to ${bookingType} booking panel`);
+  });
   /* ============================
      SUGGESTED TRIPS
      ============================ */
