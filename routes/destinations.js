@@ -83,8 +83,19 @@ async function getToken() {
   return accessToken;
 }
 
-function getDemoDestinations(limit = 8) {
-  return DEMO_DESTINATIONS.slice(0, Number(limit) || 8);
+function getDemoDestinations(limit = 8, keyword = '') {
+  const safeLimit = Number(limit) || 8;
+  const q = (keyword || '').trim().toLowerCase();
+
+  if (!q) return DEMO_DESTINATIONS.slice(0, safeLimit);
+
+  const filtered = DEMO_DESTINATIONS.filter((destination) => {
+    const name = destination.name?.toLowerCase() || '';
+    const region = destination.region?.toLowerCase() || '';
+    return name.includes(q) || region.includes(q);
+  });
+
+  return filtered.slice(0, safeLimit);
 }
 // 🌍 GET /api/destinations
 router.get('/', async (req, res) => {
@@ -98,7 +109,7 @@ router.get('/', async (req, res) => {
 
     const token = await getToken();
      if (!token) {
-      return res.json({ data: getDemoDestinations(limit), demo: true });
+     return res.json({ data: getDemoDestinations(limit, keyword), demo: true });
     }
     // 🌍 Amadeus API
     const amadeusRes = await axios.get(
@@ -149,7 +160,7 @@ router.get('/', async (req, res) => {
 
   } catch (err) {
     console.error('DEST ERROR:', err.response?.data || err.message);
-    res.json({ data: getDemoDestinations(req.query.limit), demo: true });
+   res.json({ data: getDemoDestinations(req.query.limit, req.query.keyword), demo: true });
   }
 });
 
