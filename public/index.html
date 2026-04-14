@@ -580,6 +580,32 @@ section {
     .booking-choice-option:hover {
       background: #e0fafa;
     }
+     .student-planner {
+      border: 1px solid #c9f3f3;
+      background: linear-gradient(180deg, #f3ffff, #ffffff);
+    }
+    .student-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .student-grid input,
+    .student-grid select {
+      width: 100%;
+    }
+    .ai-trip-result {
+      margin-top: 14px;
+      background: #ffffff;
+      border: 1px solid #cde9e9;
+      border-radius: 12px;
+      padding: 12px;
+      color: #222;
+      display: none;
+    }
+    .ai-trip-result.open {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -594,6 +620,7 @@ section {
       <a href="index.html" class="active">🏠 Home</a>
       <a href="about.html">ℹ️ About</a>
       <a href="explore.html">🌍 Explore</a>
+      <a href="#student-trip-section">🎓 Student Trip</a>
       <a href="contact.html">📞 Contact</a>
     </nav>
   </div>
@@ -639,6 +666,29 @@ section {
   <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGJlYWNofGVufDB8fDB8fHww" data-name="Beach" alt="Beach destinations">
   <img src="https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=600&auto=format&fit=crop&q=60" data-name="Lakes" alt="Lake destinations">
 </section>
+
+    <!-- Student Trip Planner -->
+  <section class="panel student-planner" id="student-trip-section">
+    <h2>🎓 Student Trip Planner (AI)</h2>
+    <p style="margin-top:6px;color:#1f5555;font-size:14px">
+      Add destination + budget, and get a budget-friendly student travel suggestion with the best transport option.
+    </p>
+    <div class="student-grid">
+      <input id="student-from-city" type="text" placeholder="From city (e.g. Delhi)" />
+      <input id="student-to-city" type="text" placeholder="Destination city (e.g. Jaipur)" />
+      <input id="student-budget-min" type="number" min="0" placeholder="Min budget (₹)" />
+      <input id="student-budget-max" type="number" min="0" placeholder="Max budget (₹)" />
+      <select id="student-trip-days">
+        <option value="2">2 days</option>
+        <option value="3" selected>3 days</option>
+        <option value="4">4 days</option>
+        <option value="5">5 days</option>
+      </select>
+      <button id="student-ai-plan-btn" class="btn">Suggest Student Plan</button>
+    </div>
+    <div id="student-ai-result" class="ai-trip-result" aria-live="polite"></div>
+  </section>
+  
   
   <!-- Hotels -->
   <section class="panel" id="hotels-panel">
