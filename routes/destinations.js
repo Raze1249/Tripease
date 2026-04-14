@@ -104,30 +104,47 @@ function getDemoDestinations(limit = 8, keyword = '') {
 
   return filtered.slice(0, safeLimit);
 }
+function normalizeLimit(value, fallback = 8) {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(Math.max(parsed, 1), 20);
+}
+
+async function fetchAmadeusCities({ token, keyword, limit }) {
+  const params = {
+    keyword,
+    max: limit,
+    'include[]': 'AIRPORTS'
+  };
+
+  const cityRes = await axios.get(
+    'https://test.api.amadeus.com/v1/reference-data/locations/cities',
+    {
+      params,
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+
+  return cityRes.data?.data || [];
+}
+
 // 🌍 GET /api/destinations
 router.get('/', async (req, res) => {
   try {
-    let { keyword = 'DEL', subType = 'CITY', limit = 8 } = req.query;
+      let { keyword = 'DEL', limit = 8 } = req.query;
 
-    // ✅ FIX: keyword length
-    keyword = keyword.trim();
+  keyword = String(keyword || '').trim();
     if (keyword.length < 2) keyword = 'DEL';
     if (keyword.length > 10) keyword = keyword.slice(0, 10);
+    limit = normalizeLimit(limit);
 
     const token = await getToken();
-     if (!token) {
-     return res.json({ data: getDemoDestinations(limit, keyword), demo: true });
+    if (!token) {
+      return res.json({ data: getDemoDestinations(limit, keyword), demo: true });
     }
-    // 🌍 Amadeus API
-    const amadeusRes = await axios.get(
-      'https://test.api.amadeus.com/v1/reference-data/locations',
-      {
-        params: { keyword, subType },
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-
-    const data = amadeusRes.data.data || [];
+     // Use the city-specific endpoint to improve city search accuracy.
+    const data = await fetchAmadeusCities({ token, keyword, limit });
+   
 
     // 🖼️ Attach Unsplash images
     const results = await Promise.all(
@@ -157,7 +174,9 @@ router.get('/', async (req, res) => {
 
         return {
           name: item.name,
-          region: item.address?.countryName,
+         region:
+            item.address?.countryName || item.address?.countryCode || 'Unknown',
+          subType: 'CITY',
           imageUrl
         };
       })
